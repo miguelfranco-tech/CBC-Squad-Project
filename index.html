@@ -7,7 +7,7 @@
 <style>
 body{
   font-family: Arial;
-  background:#f5f7fb;
+  background:#f4f6fb;
   margin:0;
 }
 
@@ -15,6 +15,7 @@ body{
   background:#1e293b;
   color:white;
   padding:20px;
+  text-align:center;
 }
 
 .container{
@@ -42,7 +43,7 @@ button{
   border:none;
   border-radius:10px;
   cursor:pointer;
-  background:#3b82f6;
+  background:#2563eb;
   color:white;
 }
 
@@ -76,10 +77,21 @@ button{
 
 .card{
   flex:1;
-  padding:10px;
-  border-radius:10px;
+  padding:15px;
+  border-radius:12px;
   text-align:center;
   background:#eef2ff;
+}
+
+.card button{
+  background:#3b82f6;
+}
+
+.dicas{
+  margin-top:20px;
+  padding:15px;
+  background:#fff8e1;
+  border-radius:12px;
 }
 </style>
 </head>
@@ -88,14 +100,15 @@ button{
 
 <div class="header">
 <h1>🛡️ Escudo Digital</h1>
+<p>Proteção simples contra golpes digitais</p>
 </div>
 
 <div class="container">
 
-<h3>Cole a mensagem:</h3>
-<textarea id="mensagem"></textarea>
+<h3>1. Cole a mensagem que você recebeu:</h3>
+<textarea id="mensagem" placeholder="Cole aqui..."></textarea>
 
-<button onclick="analisar()">🔍 Analisar</button>
+<button onclick="analisar()">🔍 Analisar mensagem</button>
 
 <div class="barra">
 <div id="barra" class="progresso"></div>
@@ -103,11 +116,46 @@ button{
 
 <div id="resultado" class="resultado"></div>
 
-<h3>Exemplos</h3>
+<h3>Não sabe como funciona um golpe? Veja abaixo 👇</h3>
+
 <div class="exemplos">
-<div class="card"><button onclick="ex('premio')">🎁 Prêmio</button></div>
-<div class="card"><button onclick="ex('banco')">🏦 Banco</button></div>
-<div class="card"><button onclick="ex('fake')">📢 Fake</button></div>
+
+<div class="card">
+<h4>🎁 Golpe de Premiação</h4>
+<p>Prometem prêmios para roubar seus dados.</p>
+<button onclick="ex('premio')">Ver exemplo</button>
+</div>
+
+<div class="card">
+<h4>🏦 Golpe Bancário</h4>
+<p>Dizem que sua conta está em risco.</p>
+<button onclick="ex('banco')">Ver exemplo</button>
+</div>
+
+<div class="card">
+<h4>📢 Fake News</h4>
+<p>Tentam manipular você para compartilhar.</p>
+<button onclick="ex('fake')">Ver exemplo</button>
+</div>
+
+</div>
+
+<div class="dicas">
+<h3>🛡️ Dicas de segurança</h3>
+
+<button onclick="mostrarDicas()" style="background:#f59e0b;">
+Ver dicas de segurança
+</button>
+
+<div id="listaDicas" style="display:none; margin-top:10px;">
+<ul>
+<li>❌ Nunca envie CPF, senha ou código</li>
+<li>❌ Não clique em links desconhecidos</li>
+<li>⚠️ Desconfie de urgência</li>
+<li>🏦 Fale direto com o banco oficial</li>
+<li>👨‍👩‍👧 Peça ajuda a alguém de confiança</li>
+</ul>
+</div>
 </div>
 
 </div>
@@ -120,47 +168,45 @@ let texto = document.getElementById("mensagem").value.toLowerCase();
 texto = texto.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
 
 let score = 0;
-let explicacao = [];
 let tipo = "Mensagem comum";
 let estrategia = [];
 
-// FUNÇÃO INTELIGENTE
-function detectar(lista, pontos, nome){
+// DETECTAR
+function detectar(lista, pontos){
   lista.forEach(p=>{
     if(texto.includes(p)){
       score += pontos;
-      explicacao.push(nome + ": " + p);
     }
   });
 }
 
-// 🟢 NORMAL (REDUZ ERRO)
+// BAIXO RISCO (reduz)
 detectar([
 "reunião online","link da reunião","arquivo anexo","encaminhamento",
 "atualização do sistema","status do pedido","confirmação de presença",
-"horário marcado","envio realizado","suporte técnico",
-"atendimento ao cliente","contato realizado","retorno solicitado",
-"informação adicional","acompanhamento do processo"
-], -2, "Normal");
+"horário marcado","envio realizado","suporte técnico","atendimento ao cliente",
+"contato realizado","retorno solicitado","informação adicional",
+"acompanhamento do processo"
+], -2);
 
-// 🟠 LEVE
+// LEVE
 detectar([
 "promoção especial","oferta exclusiva hoje","desconto imperdível",
 "novidade pra você","veja agora","acesso liberado","confira já",
 "só hoje","recomendado pra você","conteúdo exclusivo","você pode gostar",
 "oportunidade limitada","vantagem especial","oferta personalizada","não perca"
-], 1, "Marketing");
+], 1);
 
-// 🟡 MÉDIO
+// MÉDIO
 detectar([
 "ação imediata necessária","sua conta será afetada","acesso temporário liberado",
 "confirmação urgente","sistema detectou atividade","tentativa de login",
 "atualização de segurança","revisão obrigatória","validação pendente",
 "acesso restrito","notificação importante","sua conta precisa de atenção",
 "processo de verificação","autenticação pendente","alerta automático"
-], 3, "Suspeito");
+], 3);
 
-// 🔴 ALTO
+// ALTO
 detectar([
 "pix urgente","chave pix inválida","pagamento pendente pix",
 "transferência via pix","envie o pix agora","código do whatsapp",
@@ -168,14 +214,14 @@ detectar([
 "redefina sua senha agora","dados do cartão","cvv do cartão",
 "banco solicitando confirmação","acesso suspeito detectado",
 "sua conta foi invadida"
-], 6, "Golpe forte");
+], 6);
 
-// BASE ANTIGA (MANTIDA)
-detectar(["urgente","agora","imediato"],2,"Urgência");
-detectar(["cpf","senha","codigo","cartao"],5,"Dados sensíveis");
-detectar(["link","clique","acesse"],3,"Link");
+// BASE ANTIGA
+detectar(["urgente","agora","imediato"],2);
+detectar(["cpf","senha","codigo","cartao"],5);
+detectar(["link","clique","acesse"],3);
 
-// 🧠 COMBINAÇÕES (MUITO IMPORTANTE)
+// COMBINAÇÕES
 if(texto.includes("pix") && texto.includes("urgente")){
 score += 8;
 tipo = "Golpe via Pix";
@@ -196,17 +242,15 @@ score += 5;
 tipo = "Fake news";
 }
 
-// 🎭 ESTRATÉGIA
+// ESTRATÉGIA
 if(texto.includes("urgente")) estrategia.push("Pressão");
 if(texto.includes("ganhe") || texto.includes("premio")) estrategia.push("Recompensa");
 if(texto.includes("invadida") || texto.includes("bloqueada")) estrategia.push("Medo");
 
-// LIMITES
 if(score < 0) score = 0;
 
 let risco = Math.min(score * 4, 100);
 
-// CLASSIFICAÇÃO CLARA
 let nivel = "";
 let cor = "";
 
@@ -231,18 +275,19 @@ cor = "green";
 document.getElementById("barra").style.width = risco+"%";
 document.getElementById("barra").style.background = cor;
 
-// RESULTADO SIMPLES (IDOSOS)
+// RESULTADO
 document.getElementById("resultado").innerHTML =
 "<b style='font-size:20px'>"+nivel+"</b><br><br>"+
 "Risco: "+risco+"%<br><br>"+
 "Tipo: "+tipo+"<br>"+
 "Estratégia: "+(estrategia.join(", ")||"Nenhuma")+"<br><br>"+
-"💡 Dica: Não envie dados e não clique em links desconhecidos.";
+"💡 Não envie dados nem clique em links.";
 
 }
 
 // EXEMPLOS
 function ex(t){
+
 let lista = [];
 
 if(t=="premio"){
@@ -272,6 +317,18 @@ lista=[
 let msg = lista[Math.floor(Math.random()*lista.length)];
 document.getElementById("mensagem").value = msg;
 analisar();
+
+}
+
+// DICAS
+function mostrarDicas(){
+let d = document.getElementById("listaDicas");
+
+if(d.style.display === "none"){
+d.style.display = "block";
+}else{
+d.style.display = "none";
+}
 }
 
 </script>
