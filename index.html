@@ -2,57 +2,62 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Escudo Digital</title>
+<title>🛡️ Escudo Digital</title>
 
 <style>
-body {
-  font-family: Arial;
-  text-align: center;
-  background: #121212;
-  color: white;
-  padding: 20px;
+body{
+  font-family: Arial, sans-serif;
+  background:#0f172a;
+  color:#e5e7eb;
+  text-align:center;
+  padding:20px;
+}
+h1{color:#38bdf8}
+textarea{
+  width:85%;
+  height:120px;
+  border-radius:10px;
+  padding:10px;
+}
+button{
+  padding:10px 15px;
+  margin:5px;
+  border-radius:8px;
+  border:none;
+  cursor:pointer;
+  background:#1f2937;
+  color:white;
+}
+button:hover{background:#334155}
+
+#resultado{
+  margin-top:20px;
+  font-size:17px;
+  background:#111827;
+  padding:15px;
+  border-radius:10px;
 }
 
-textarea {
-  width: 80%;
-  height: 120px;
-  border-radius: 10px;
-  padding: 10px;
+.barra{
+  width:80%;
+  height:18px;
+  background:#1f2937;
+  margin:10px auto;
+  border-radius:10px;
+}
+.progresso{
+  height:100%;
+  width:0%;
+  border-radius:10px;
 }
 
-button {
-  padding: 10px 15px;
-  margin: 5px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
+.divisor{
+  margin:30px 0;
+  border-top:1px solid #334155;
 }
 
-#resultado {
-  margin-top: 20px;
-  font-size: 18px;
-}
-
-.barra {
-  width: 80%;
-  height: 20px;
-  background: #333;
-  margin: 10px auto;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.progresso {
-  height: 100%;
-  width: 0%;
-}
-
-.divisor {
-  margin: 30px 0;
-  border-top: 1px solid #444;
-}
+h3{color:#22c55e}
 </style>
-
 </head>
 
 <body>
@@ -61,7 +66,7 @@ button {
 
 <textarea id="mensagem" placeholder="Cole a mensagem aqui..."></textarea><br>
 
-<button onclick="analisar()">Analisar</button>
+<button onclick="analisar()">🔍 Analisar</button>
 
 <div class="barra">
   <div id="barra" class="progresso"></div>
@@ -71,97 +76,142 @@ button {
 
 <div class="divisor"></div>
 
-<!-- FRASE NOVA -->
 <h3>💡 Não sabe como funciona um golpe? Veja na prática abaixo:</h3>
 
-<!-- BOTÕES DE DEMO -->
 <button onclick="demo1()">🎁 Golpe de prêmio</button>
 <button onclick="demo2()">⚠️ Urgência bancária</button>
 <button onclick="demo3()">🌐 Fake news</button>
+<button onclick="gerarGolpe()">🎲 Gerar golpe automático</button>
+
+<div id="historico"></div>
 
 <script>
 
-function analisar() {
+let historico = [];
+
+function analisar(){
 
 let texto = document.getElementById("mensagem").value.toLowerCase();
-texto = texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+texto = texto.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
 
 let score = 0;
 let explicacao = [];
+let tipo = "Indefinido";
+let estrategia = "";
 
-function detectar(palavras, pontos, nome) {
-  palavras.forEach(p => {
-    if (texto.includes(p)) {
-      score += pontos;
-      explicacao.push(nome + " → " + p);
+// função inteligente
+function detectar(palavras,pontos,nome){
+  palavras.forEach(p=>{
+    if(texto.includes(p)){
+      score+=pontos;
+      explicacao.push(nome+" → "+p);
     }
   });
 }
 
-detectar(["urgente","agora","imediato","rapido"],2,"Urgência");
-detectar(["ganhe","lucro","rico","dinheiro"],3,"Promessa");
-detectar(["premio","oferta","brinde"],2,"Oferta");
-detectar(["cpf","senha","codigo","cartao"],5,"Dados sensíveis");
-detectar(["segredo","ajuda","desesperado"],2,"Emoção");
+// DETECÇÕES MAIS PRECISAS
+detectar(["urgente","imediato","agora","rapido"],2,"Urgência");
+detectar(["ganhe","lucro","dinheiro","rico"],3,"Promessa");
+detectar(["premio","brinde","oferta"],2,"Oferta");
+detectar(["cpf","senha","codigo","cartao","pix"],5,"Dados sensíveis");
+detectar(["segredo","desesperado","ajuda"],2,"Emoção");
 detectar(["midia","censurado","escondem"],3,"Fake news");
 detectar(["clique","link","acesse"],3,"Link");
 
-// COMBINAÇÕES
-if (texto.includes("urgente") && texto.includes("cpf")) {
-  score += 6;
-  explicacao.push("Combinação perigosa: urgência + dados");
+// COMBINAÇÕES (AUMENTA PRECISÃO)
+if(texto.includes("cpf") && texto.includes("link")){
+  score+=6;
+  tipo="Phishing bancário";
+}
+if(texto.includes("ganhe") && texto.includes("premio")){
+  score+=5;
+  tipo="Golpe de prêmio";
+}
+if(texto.includes("midia") && texto.includes("compartilhe")){
+  score+=5;
+  tipo="Fake news";
+}
+if(texto.includes("urgente") && texto.includes("dados")){
+  score+=6;
+  tipo="Engenharia social";
 }
 
-if (texto.includes("ganhe") && texto.includes("rapido")) {
-  score += 5;
-  explicacao.push("Promessa irreal reforçada");
-}
+// PERFIL DO GOLPISTA
+if(texto.includes("urgente")) estrategia="Pressão";
+if(texto.includes("ganhe")) estrategia+=" + Recompensa";
 
 // CLASSIFICAÇÃO
-let nivel = "";
-let cor = "";
+let nivel="";
+let cor="";
+let risco=Math.min(score*8,100);
 
-if (score >= 12) {
-  nivel = "🔴 Alto risco";
-  cor = "red";
-} else if (score >= 6) {
-  nivel = "🟡 Médio risco";
-  cor = "yellow";
-} else if (score > 0) {
-  nivel = "🟠 Baixo risco";
-  cor = "orange";
-} else {
-  nivel = "🟢 Seguro";
-  cor = "green";
-}
+if(score>=12){nivel="🔴 Alto risco"; cor="red";}
+else if(score>=6){nivel="🟡 Médio risco"; cor="yellow";}
+else if(score>0){nivel="🟠 Baixo risco"; cor="orange";}
+else{nivel="🟢 Seguro"; cor="green";}
 
 // BARRA
-let porcentagem = Math.min(score * 8, 100);
-document.getElementById("barra").style.width = porcentagem + "%";
-document.getElementById("barra").style.background = cor;
+document.getElementById("barra").style.width=risco+"%";
+document.getElementById("barra").style.background=cor;
 
-// RESULTADO
-document.getElementById("resultado").innerHTML =
-"<b>" + nivel + "</b><br><br>" +
-"📊 Pontuação: " + score + "<br><br>" +
-"🔎 Detecção:<br>" + explicacao.join("<br>");
-
+// DICAS INTELIGENTES
+let dicas="";
+if(score>=12){
+dicas="❌ Não clique em links<br>❌ Não envie dados<br>✔ Procure canais oficiais";
+}
+else if(score>=6){
+dicas="⚠️ Verifique a fonte antes de agir";
+}
+else{
+dicas="✔ Nenhum risco relevante identificado";
 }
 
-// DEMOS
-function demo1() {
-document.getElementById("mensagem").value =
+// RESULTADO FINAL
+let resultadoHTML=
+"<b>"+nivel+"</b><br><br>"+
+"📊 Risco estimado: "+risco+"%<br><br>"+
+"🕵️ Tipo identificado: "+tipo+"<br>"+
+"🎭 Estratégia: "+(estrategia||"Não definida")+"<br><br>"+
+"🔎 Detecção:<br>"+explicacao.join("<br>")+"<br><br>"+
+"💡 Essa mensagem apresenta padrões comuns de manipulação digital.<br><br>"+
+"📌 Dicas:<br>"+dicas;
+
+document.getElementById("resultado").innerHTML=resultadoHTML;
+
+// HISTÓRICO
+historico.push(nivel+" ("+risco+"%)");
+document.getElementById("historico").innerHTML=
+"<br><b>🕘 Histórico:</b><br>"+historico.slice(-5).join("<br>");
+}
+
+// DEMOS (AGORA ANALISAM AUTOMÁTICO)
+function demo1(){
+document.getElementById("mensagem").value=
 "Parabéns! Você ganhou um prêmio exclusivo, clique no link agora e informe seu CPF!";
+analisar();
 }
-
-function demo2() {
-document.getElementById("mensagem").value =
+function demo2(){
+document.getElementById("mensagem").value=
 "URGENTE! Sua conta será bloqueada, confirme seus dados bancários agora!";
+analisar();
+}
+function demo3(){
+document.getElementById("mensagem").value=
+"A mídia não mostra isso! Compartilhe antes que apaguem essa verdade chocante!";
+analisar();
 }
 
-function demo3() {
-document.getElementById("mensagem").value =
-"A mídia não mostra isso! Compartilhe antes que apaguem essa verdade chocante!";
+// GERADOR DE GOLPE
+function gerarGolpe(){
+let exemplos=[
+"URGENTE! Confirme seu CPF agora para evitar bloqueio!",
+"Parabéns! Você ganhou dinheiro fácil, clique no link!",
+"A mídia não mostra isso, compartilhe antes que apaguem!",
+"Ganhe lucro garantido sem esforço, acesse agora!"
+];
+let sorteio=exemplos[Math.floor(Math.random()*exemplos.length)];
+document.getElementById("mensagem").value=sorteio;
+analisar();
 }
 
 </script>
