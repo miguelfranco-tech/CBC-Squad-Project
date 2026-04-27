@@ -1,68 +1,146 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <title>Detector de Golpes</title>
+
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+    }
+
+    .container {
+      text-align: center;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 450px;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      resize: none;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    #resultado {
+      margin-top: 15px;
+      text-align: left;
+    }
+
+    hr {
+      margin: 10px 0;
+    }
+  </style>
 </head>
+
 <body>
 
-<h2>Detector de Golpes 💻</h2>
+<div class="container">
 
-<textarea id="mensagem" placeholder="Digite a mensagem aqui..." rows="5" cols="40"></textarea><br><br>
+  <h2>Detector de Golpes 💻</h2>
 
-<button onclick="analisar()">Analisar</button>
+  <textarea id="mensagem" placeholder="Digite a mensagem aqui..." rows="5"></textarea><br><br>
 
-<p id="resultado"></p>
+  <button onclick="analisar()">🔍 Analisar mensagem</button>
+
+  <p id="resultado"></p>
+
+</div>
 
 <script>
 function analisar() {
 
-let texto = document.getElementById("mensagem").value.toLowerCase();
-texto = texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  let texto = document.getElementById("mensagem").value.toLowerCase();
+  texto = texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-let score = 0;
-let resultado = "";
- 
-function detectar(regex, pontos, msg) {
-  let match = texto.match(regex);
-  if (match) {
-    score += pontos * match.length;
-    resultado += msg + " (" + match.length + "x)<br>";
+  let score = 0;
+  let resultado = "";
+
+  function detectar(regex, pontos, msg) {
+    let match = texto.match(regex);
+    if (match) {
+      score += pontos * match.length;
+      resultado += msg + " (" + match.length + "x)<br>";
+    }
   }
-}
 
-detectar(/urgente|agora|imediato|rapido/g, 2, "🔴 Urgência");
-detectar(/ganhe|lucro|rico|dinheiro/g, 3, "💰 Promessa");
-detectar(/premio|oferta|brinde/g, 2, "🎁 Oferta");
-detectar(/cpf|senha|codigo|cartao/g, 5, "🔒 Dados sensíveis");
-detectar(/segredo|ajuda|desesperado/g, 2, "🧠 Emoção");
-detectar(/midia|censurado|escondem/g, 2, "🌐 Fake news");
-detectar(/clique|link|acesse/g, 3, "🔗 Link");
+  // 🔍 Detecção principal
+  detectar(/urgente|agora|imediato|rapido/g, 2, "🔴 Urgência");
+  detectar(/ganhe|lucro|rico|dinheiro/g, 3, "💰 Promessa");
+  detectar(/premio|oferta|brinde/g, 2, "🎁 Oferta");
+  detectar(/cpf|senha|codigo|cartao/g, 5, "🔒 Dados sensíveis");
+  detectar(/segredo|ajuda|desesperado/g, 2, "🧠 Emoção");
+  detectar(/midia|censurado|escondem/g, 2, "🌐 Fake news");
+  detectar(/clique|link|acesse/g, 3, "🔗 Link");
 
-function aleatorio(lista) {
-  return lista[Math.floor(Math.random() * lista.length)];
-}
+  // 🚀 Novas palavras-chave (upgrade)
+  detectar(/pix|transferencia|deposito/g, 4, "💸 Pedido de dinheiro");
+  detectar(/verificacao|confirme|atualize/g, 3, "⚠️ Validação suspeita");
+  detectar(/conta bloqueada|suspensa/g, 4, "🚫 Conta em risco");
+  detectar(/parabens|voce ganhou/g, 3, "🎉 Ganho suspeito");
 
-let baixo = ["🟢 Baixa probabilidade de manipulação"];
-let leve = ["🟠 Possíveis indícios leves"];
-let medio = ["🟡 Presença moderada"];
-let alto = ["🔴 Alta probabilidade de golpe"];
+  // 🎲 Frases aleatórias
+  function aleatorio(lista) {
+    return lista[Math.floor(Math.random() * lista.length)];
+  }
 
-let nivel = "";
+  let baixo = ["🟢 Parece seguro, sem sinais claros."];
+  let leve = ["🟠 Possíveis indícios leves."];
+  let medio = ["🟡 Atenção! Há sinais moderados."];
+  let alto = ["🔴 Alto risco de golpe!"];
 
-if (score >= 10) {
-  nivel = aleatorio(alto);
-} else if (score >= 5) {
-  nivel = aleatorio(medio);
-} else if (score > 0) {
-  nivel = aleatorio(leve);
-} else {
-  nivel = aleatorio(baixo);
-}
+  let nivel = "";
 
-document.getElementById("resultado").innerHTML =
-resultado + "<br><b>Pontuação: " + score + "<br>" + nivel + "</b>";
+  if (score >= 10) {
+    nivel = aleatorio(alto);
+  } else if (score >= 5) {
+    nivel = aleatorio(medio);
+  } else if (score > 0) {
+    nivel = aleatorio(leve);
+  } else {
+    nivel = aleatorio(baixo);
+  }
 
+  // 🎨 Cor do resultado
+  let cor = "green";
+  if (score >= 10) cor = "red";
+  else if (score >= 5) cor = "orange";
+  else if (score > 0) cor = "#e6b800";
+
+  // 🧠 Caso não detecte nada
+  if (resultado === "") {
+    resultado = "✅ Nenhum padrão suspeito encontrado.<br>";
+  }
+
+  document.getElementById("resultado").innerHTML =
+    resultado +
+    "<hr>" +
+    "<b style='color:" + cor + "'>Pontuação: " + score + "<br>" + nivel + "</b>";
 }
 </script>
 
