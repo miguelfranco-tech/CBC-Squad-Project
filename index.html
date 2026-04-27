@@ -22,7 +22,7 @@
       border-radius: 12px;
       box-shadow: 0 0 15px rgba(0,0,0,0.1);
       width: 90%;
-      max-width: 450px;
+      max-width: 500px;
     }
 
     textarea {
@@ -81,58 +81,74 @@ function analisar() {
   let score = 0;
   let resultado = "";
 
-  function detectar(regex, pontos, msg) {
-    let match = texto.match(regex);
-    if (match) {
-      score += pontos * match.length;
-      resultado += msg + " (" + match.length + "x)<br>";
+  function detectar(lista, pontos, msg) {
+    let count = 0;
+    lista.forEach(p => {
+      if (texto.includes(p)) count++;
+    });
+
+    if (count > 0) {
+      score += pontos * count;
+      resultado += msg + " (" + count + "x)<br>";
     }
   }
 
-  // 🔍 Detecção principal
-  detectar(/urgente|agora|imediato|rapido/g, 2, "🔴 Urgência");
-  detectar(/ganhe|lucro|rico|dinheiro/g, 3, "💰 Promessa");
-  detectar(/premio|oferta|brinde/g, 2, "🎁 Oferta");
-  detectar(/cpf|senha|codigo|cartao/g, 5, "🔒 Dados sensíveis");
-  detectar(/segredo|ajuda|desesperado/g, 2, "🧠 Emoção");
-  detectar(/midia|censurado|escondem/g, 2, "🌐 Fake news");
-  detectar(/clique|link|acesse/g, 3, "🔗 Link");
+  // 🟢 BAIXO RISCO (diminui score)
+  detectar([
+    "reuniao","relatorio","agenda","confirmacao","horario","envio",
+    "documento","atualizacao","conversa","reuniao marcada",
+    "acompanhamento","atendimento","suporte","informacao","contato"
+  ], -1, "🟢 Linguagem comum");
 
-  // 🚀 Novas palavras-chave (upgrade)
-  detectar(/pix|transferencia|deposito/g, 4, "💸 Pedido de dinheiro");
-  detectar(/verificacao|confirme|atualize/g, 3, "⚠️ Validação suspeita");
-  detectar(/conta bloqueada|suspensa/g, 4, "🚫 Conta em risco");
-  detectar(/parabens|voce ganhou/g, 3, "🎉 Ganho suspeito");
+  // 🟠 RISCO LEVE
+  detectar([
+    "oportunidade","novidade","beneficio","destaque","recomendacao",
+    "sugestao","interessante","exclusivo","vantagem","confira",
+    "veja isso","pode gostar","talvez","vale a pena","oportunidade unica"
+  ], 1, "🟠 Marketing leve");
 
-  // 🎲 Frases aleatórias
+  // 🟡 MÉDIO RISCO
+  detectar([
+    "imperdivel","acesso imediato","ativacao","liberacao",
+    "confirmacao pendente","verificacao necessaria","desbloqueio",
+    "validacao","acao necessaria","solicitacao urgente",
+    "atualizacao obrigatoria","revisao de conta","tentativa de acesso",
+    "alerta de seguranca","sessao expirada"
+  ], 3, "🟡 Alerta suspeito");
+
+  // 🔴 ALTO RISCO
+  detectar([
+    "bloqueio imediato","conta comprometida","invasao detectada",
+    "transferencia suspeita","saque nao autorizado",
+    "codigo de seguranca","token","autenticacao",
+    "redefinir senha","dados bancarios","numero do cartao",
+    "chave pix","verificacao bancaria",
+    "confirmacao de identidade","acesso nao autorizado"
+  ], 5, "🔴 Alto risco");
+
+  // 🎲 frases
   function aleatorio(lista) {
     return lista[Math.floor(Math.random() * lista.length)];
   }
 
-  let baixo = ["🟢 Parece seguro, sem sinais claros."];
-  let leve = ["🟠 Possíveis indícios leves."];
-  let medio = ["🟡 Atenção! Há sinais moderados."];
-  let alto = ["🔴 Alto risco de golpe!"];
+  let baixo = ["🟢 Parece seguro."];
+  let leve = ["🟠 Pequenos sinais de atenção."];
+  let medio = ["🟡 Cuidado! Pode ser golpe."];
+  let alto = ["🔴 ALTO RISCO DE GOLPE!"];
 
   let nivel = "";
 
-  if (score >= 10) {
-    nivel = aleatorio(alto);
-  } else if (score >= 5) {
-    nivel = aleatorio(medio);
-  } else if (score > 0) {
-    nivel = aleatorio(leve);
-  } else {
-    nivel = aleatorio(baixo);
-  }
+  if (score >= 10) nivel = aleatorio(alto);
+  else if (score >= 5) nivel = aleatorio(medio);
+  else if (score > 0) nivel = aleatorio(leve);
+  else nivel = aleatorio(baixo);
 
-  // 🎨 Cor do resultado
+  // 🎨 cor
   let cor = "green";
   if (score >= 10) cor = "red";
   else if (score >= 5) cor = "orange";
   else if (score > 0) cor = "#e6b800";
 
-  // 🧠 Caso não detecte nada
   if (resultado === "") {
     resultado = "✅ Nenhum padrão suspeito encontrado.<br>";
   }
