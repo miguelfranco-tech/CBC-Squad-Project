@@ -2,122 +2,84 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Escudo Digital</title>
+<title>🛡️ Escudo Digital</title>
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f5f7fb;
-  margin: 0;
+body{
+  font-family: Arial;
+  background:#f5f7fb;
+  margin:0;
 }
 
-/* HEADER */
-.header {
-  background: linear-gradient(90deg, #0f172a, #1e293b);
-  color: white;
-  padding: 20px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.header{
+  background:#1e293b;
+  color:white;
+  padding:20px;
 }
 
-.header h1 {
-  margin: 0;
-  font-size: 24px;
+.container{
+  max-width:750px;
+  margin:20px auto;
+  background:white;
+  padding:20px;
+  border-radius:15px;
 }
 
-/* CONTAINER */
-.container {
-  max-width: 750px;
-  margin: 20px auto;
-  background: white;
-  padding: 20px;
-  border-radius: 16px;
+textarea{
+  width:100%;
+  height:120px;
+  padding:10px;
+  border-radius:10px;
+  border:2px solid #ccc;
+  font-size:16px;
 }
 
-/* INPUT */
-textarea {
-  width: 100%;
-  height: 120px;
-  border-radius: 12px;
-  border: 2px solid #d1d5db;
-  padding: 12px;
-  font-size: 16px;
+button{
+  width:100%;
+  padding:15px;
+  margin-top:10px;
+  font-size:18px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  background:#3b82f6;
+  color:white;
 }
 
-/* BOTÃO */
-.btn {
-  width: 100%;
-  margin-top: 15px;
-  padding: 16px;
-  font-size: 18px;
-  background: linear-gradient(90deg, #3b82f6, #2563eb);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
+.resultado{
+  margin-top:20px;
+  padding:20px;
+  border-radius:12px;
+  background:#fff3f3;
+  font-size:18px;
 }
 
-.btn:hover {
-  opacity: 0.9;
+.barra{
+  margin-top:10px;
+  height:20px;
+  background:#ddd;
+  border-radius:10px;
 }
 
-/* RESULTADO */
-.resultado {
-  margin-top: 20px;
-  padding: 15px;
-  border-radius: 12px;
-  background: #fff1f2;
-  border: 2px solid #fecaca;
-  font-size: 16px;
+.progresso{
+  height:100%;
+  width:0%;
+  border-radius:10px;
+  transition:0.5s;
 }
 
-/* EXEMPLOS */
-.exemplos {
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
+.exemplos{
+  display:flex;
+  gap:10px;
+  margin-top:20px;
 }
 
-.card {
-  flex: 1;
-  padding: 15px;
-  border-radius: 12px;
-  text-align: center;
-}
-
-.roxo { background: #f3e8ff; }
-.azul { background: #e0f2fe; }
-.verde { background: #dcfce7; }
-
-.card button {
-  margin-top: 10px;
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-/* DICAS */
-.dicas-btn {
-  margin-top: 20px;
-  background: #22c55e;
-  color: white;
-  border: none;
-  padding: 14px;
-  border-radius: 12px;
-  cursor: pointer;
-  width: 100%;
-  font-size: 16px;
-}
-
-.dicas-box {
-  display: none;
-  margin-top: 10px;
-  background: #ecfdf5;
-  padding: 15px;
-  border-radius: 12px;
+.card{
+  flex:1;
+  padding:10px;
+  border-radius:10px;
+  text-align:center;
+  background:#eef2ff;
 }
 </style>
 </head>
@@ -125,138 +87,193 @@ textarea {
 <body>
 
 <div class="header">
-  <h1>🛡️ Escudo Digital</h1>
+<h1>🛡️ Escudo Digital</h1>
 </div>
 
 <div class="container">
 
-<h2>1. Cole a mensagem que você recebeu</h2>
-<p>Vamos verificar se é segura ou pode ser um golpe.</p>
+<h3>Cole a mensagem:</h3>
+<textarea id="mensagem"></textarea>
 
-<textarea id="mensagem" placeholder="Cole ou digite a mensagem aqui..."></textarea>
+<button onclick="analisar()">🔍 Analisar</button>
 
-<button class="btn" onclick="analisar()">🔍 ANALISAR MENSAGEM</button>
+<div class="barra">
+<div id="barra" class="progresso"></div>
+</div>
 
 <div id="resultado" class="resultado"></div>
 
-<h3>Exemplos de golpes comuns</h3>
-
+<h3>Exemplos</h3>
 <div class="exemplos">
-
-<div class="card roxo">
-<h4>🎁 Prêmio falso</h4>
-<p>Prometem prêmios para pegar seus dados.</p>
-<button onclick="exemplo('premio')">Ver exemplo</button>
-</div>
-
-<div class="card azul">
-<h4>🏦 Urgência bancária</h4>
-<p>Dizem que sua conta será bloqueada.</p>
-<button onclick="exemplo('banco')">Ver exemplo</button>
-</div>
-
-<div class="card verde">
-<h4>📢 Notícia falsa</h4>
-<p>Pedem para compartilhar mentiras.</p>
-<button onclick="exemplo('fake')">Ver exemplo</button>
-</div>
-
-</div>
-
-<button class="dicas-btn" onclick="toggleDicas()">🛡️ Dicas de segurança</button>
-
-<div id="dicas" class="dicas-box">
-<ul>
-<li>Não clique em links desconhecidos</li>
-<li>Não informe CPF, senha ou códigos</li>
-<li>Desconfie de urgência exagerada</li>
-<li>Confirme com a empresa oficial</li>
-<li>Nunca compartilhe dados pessoais</li>
-</ul>
+<div class="card"><button onclick="ex('premio')">🎁 Prêmio</button></div>
+<div class="card"><button onclick="ex('banco')">🏦 Banco</button></div>
+<div class="card"><button onclick="ex('fake')">📢 Fake</button></div>
 </div>
 
 </div>
 
 <script>
-// ANALISADOR
-function analisar() {
+
+function analisar(){
 
 let texto = document.getElementById("mensagem").value.toLowerCase();
+texto = texto.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
 
 let score = 0;
-let resultado = "";
+let explicacao = [];
+let tipo = "Mensagem comum";
+let estrategia = [];
 
-function detectar(regex, pontos, msg) {
-  let match = texto.match(regex);
-  if (match) {
-    score += pontos * match.length;
-    resultado += msg + " (" + match.length + "x)<br>";
-  }
+// FUNÇÃO INTELIGENTE
+function detectar(lista, pontos, nome){
+  lista.forEach(p=>{
+    if(texto.includes(p)){
+      score += pontos;
+      explicacao.push(nome + ": " + p);
+    }
+  });
 }
 
-// MELHORADO
-detectar(/urgente|agora|imediato|rápido/g, 2, "🔴 Urgência");
-detectar(/ganhe|lucro|dinheiro|pix/g, 3, "💰 Promessa");
-detectar(/premio|oferta|brinde/g, 2, "🎁 Oferta");
-detectar(/cpf|senha|codigo|cartao/g, 5, "🔒 Dados sensíveis");
-detectar(/clique|link|acesse/g, 3, "🔗 Link");
-detectar(/compartilhe|repasse|envie/g, 2, "📢 Compartilhamento suspeito");
+// 🟢 NORMAL (REDUZ ERRO)
+detectar([
+"reunião online","link da reunião","arquivo anexo","encaminhamento",
+"atualização do sistema","status do pedido","confirmação de presença",
+"horário marcado","envio realizado","suporte técnico",
+"atendimento ao cliente","contato realizado","retorno solicitado",
+"informação adicional","acompanhamento do processo"
+], -2, "Normal");
 
+// 🟠 LEVE
+detectar([
+"promoção especial","oferta exclusiva hoje","desconto imperdível",
+"novidade pra você","veja agora","acesso liberado","confira já",
+"só hoje","recomendado pra você","conteúdo exclusivo","você pode gostar",
+"oportunidade limitada","vantagem especial","oferta personalizada","não perca"
+], 1, "Marketing");
+
+// 🟡 MÉDIO
+detectar([
+"ação imediata necessária","sua conta será afetada","acesso temporário liberado",
+"confirmação urgente","sistema detectou atividade","tentativa de login",
+"atualização de segurança","revisão obrigatória","validação pendente",
+"acesso restrito","notificação importante","sua conta precisa de atenção",
+"processo de verificação","autenticação pendente","alerta automático"
+], 3, "Suspeito");
+
+// 🔴 ALTO
+detectar([
+"pix urgente","chave pix inválida","pagamento pendente pix",
+"transferência via pix","envie o pix agora","código do whatsapp",
+"código de verificação","token de acesso","confirme seu login",
+"redefina sua senha agora","dados do cartão","cvv do cartão",
+"banco solicitando confirmação","acesso suspeito detectado",
+"sua conta foi invadida"
+], 6, "Golpe forte");
+
+// BASE ANTIGA (MANTIDA)
+detectar(["urgente","agora","imediato"],2,"Urgência");
+detectar(["cpf","senha","codigo","cartao"],5,"Dados sensíveis");
+detectar(["link","clique","acesse"],3,"Link");
+
+// 🧠 COMBINAÇÕES (MUITO IMPORTANTE)
+if(texto.includes("pix") && texto.includes("urgente")){
+score += 8;
+tipo = "Golpe via Pix";
+}
+
+if(texto.includes("cpf") && texto.includes("link")){
+score += 8;
+tipo = "Phishing";
+}
+
+if(texto.includes("senha") && texto.includes("codigo")){
+score += 7;
+tipo = "Roubo de conta";
+}
+
+if(texto.includes("compartilhe") && texto.includes("urgente")){
+score += 5;
+tipo = "Fake news";
+}
+
+// 🎭 ESTRATÉGIA
+if(texto.includes("urgente")) estrategia.push("Pressão");
+if(texto.includes("ganhe") || texto.includes("premio")) estrategia.push("Recompensa");
+if(texto.includes("invadida") || texto.includes("bloqueada")) estrategia.push("Medo");
+
+// LIMITES
+if(score < 0) score = 0;
+
+let risco = Math.min(score * 4, 100);
+
+// CLASSIFICAÇÃO CLARA
 let nivel = "";
+let cor = "";
 
-if (score >= 10) {
-  nivel = "🔴 ALTO RISCO - Pode ser golpe!";
-} else if (score >= 5) {
-  nivel = "🟡 Médio risco - Atenção!";
-} else if (score > 0) {
-  nivel = "🟠 Baixo risco - Fique atento.";
-} else {
-  nivel = "🟢 Seguro.";
+if(risco >= 70){
+nivel = "🔴 CUIDADO! Pode ser golpe";
+cor = "red";
+}
+else if(risco >= 40){
+nivel = "🟡 Atenção! Mensagem suspeita";
+cor = "orange";
+}
+else if(risco > 0){
+nivel = "🟠 Baixo risco";
+cor = "yellow";
+}
+else{
+nivel = "🟢 Mensagem segura";
+cor = "green";
 }
 
+// BARRA
+document.getElementById("barra").style.width = risco+"%";
+document.getElementById("barra").style.background = cor;
+
+// RESULTADO SIMPLES (IDOSOS)
 document.getElementById("resultado").innerHTML =
-resultado + "<br><b>" + nivel + "</b>";
+"<b style='font-size:20px'>"+nivel+"</b><br><br>"+
+"Risco: "+risco+"%<br><br>"+
+"Tipo: "+tipo+"<br>"+
+"Estratégia: "+(estrategia.join(", ")||"Nenhuma")+"<br><br>"+
+"💡 Dica: Não envie dados e não clique em links desconhecidos.";
+
 }
 
-// EXEMPLOS (AGORA MELHORADOS)
-function exemplo(tipo) {
-
+// EXEMPLOS
+function ex(t){
 let lista = [];
 
-if (tipo === "premio") {
-lista = [
+if(t=="premio"){
+lista=[
 "Parabéns! Você ganhou um prêmio, informe seu CPF agora!",
-"Você foi sorteado! Clique aqui e resgate seu brinde!",
-"Ganhe dinheiro fácil agora mesmo! Acesse já!"
+"Ganhe dinheiro fácil, clique no link!",
+"Você foi sorteado, resgate já!"
 ];
 }
 
-if (tipo === "banco") {
-lista = [
-"URGENTE: sua conta será bloqueada, clique no link!",
-"Acesse agora ou perderá seu acesso bancário!",
-"Confirme seus dados imediatamente para evitar bloqueio!"
+if(t=="banco"){
+lista=[
+"URGENTE! Sua conta foi invadida!",
+"Confirme seu login agora ou será bloqueado!",
+"Acesso suspeito detectado!"
 ];
 }
 
-if (tipo === "fake") {
-lista = [
-"Compartilhe antes que apaguem essa informação!",
-"A mídia não quer que você veja isso!",
-"Envie isso para todos imediatamente!"
+if(t=="fake"){
+lista=[
+"Compartilhe antes que apaguem!",
+"A mídia não mostra isso!",
+"Envie isso para todos!"
 ];
 }
 
-let aleatoria = lista[Math.floor(Math.random() * lista.length)];
-
-document.getElementById("mensagem").value = aleatoria;
+let msg = lista[Math.floor(Math.random()*lista.length)];
+document.getElementById("mensagem").value = msg;
+analisar();
 }
 
-// DICAS
-function toggleDicas() {
-let box = document.getElementById("dicas");
-box.style.display = box.style.display === "block" ? "none" : "block";
-}
 </script>
 
 </body>
