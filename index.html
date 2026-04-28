@@ -145,56 +145,70 @@ let motivos=[];
 let explicacao=[];
 let intencao=[];
 
-// 🔍 DETECÇÃO BASE
-if(/pix|cartao|cvv|senha|codigo/.test(texto)){
-score+=6;
-motivos.push("🔒 Pedido de dados sensíveis");
-intencao.push("financeiro/dados");
+// 🔴 FAKE NEWS (SUPER MELHORADO)
+if(/compartilhe|repasse|divulgue/.test(texto)){
+score+=5;
+motivos.push("📢 Incentivo a compartilhamento");
+intencao.push("desinformacao");
 }
 
+if(/antes que apaguem|vai ser apagado|censurado|a midia nao mostra/.test(texto)){
+score+=7;
+motivos.push("🚨 Pressão típica de fake news");
+explicacao.push("Cria sensação de informação escondida");
+}
+
+if(/isso e verdade|nao e mentira|comprovado/.test(texto)){
+score+=4;
+motivos.push("⚠️ Tentativa de convencer sem prova");
+}
+
+// 🔒 DADOS
+if(/pix|senha|codigo|cartao|cvv/.test(texto)){
+score+=6;
+motivos.push("🔒 Pedido de dados sensíveis");
+intencao.push("financeiro");
+}
+
+// ⚠️ URGÊNCIA
 if(/urgente|agora|imediato/.test(texto)){
 score+=4;
 motivos.push("⚠️ Pressão de urgência");
-explicacao.push("Tenta fazer você agir sem pensar");
+explicacao.push("Tenta fazer agir sem pensar");
 }
 
-if(/link|http|www/.test(texto)){
+// 🔗 LINK
+if(/http|www|\.com|\.br/.test(texto)){
 score+=4;
 motivos.push("🔗 Link suspeito");
 }
 
 // 🧠 EMOÇÃO
-if(/perigo|bloqueada|invadida|problema/.test(texto)){
+if(/invadida|bloqueada|perigo|problema/.test(texto)){
 score+=5;
-explicacao.push("Usa medo para pressionar");
+explicacao.push("Usa medo para manipular");
 }
 
+// 💰 PROMESSA
 if(/ganhe|premio|lucro/.test(texto)){
 score+=4;
-explicacao.push("Usa recompensa para atrair");
-}
-
-// ⚠️ PRESSÃO PSICOLÓGICA
-if(/agora mesmo|ultimas horas|nao perca/.test(texto)){
-score+=5;
-explicacao.push("Cria senso de urgência extrema");
+explicacao.push("Usa recompensa para enganar");
 }
 
 // 💥 COMBINAÇÕES
 if(texto.includes("pix") && texto.includes("urgente")){
 score+=10;
-explicacao.push("Combinação clássica de golpe financeiro");
+explicacao.push("Golpe financeiro com urgência");
 }
 
-if(texto.includes("codigo") && texto.includes("whatsapp")){
+if(texto.includes("compartilhe") && texto.includes("apaguem")){
 score+=10;
-explicacao.push("Tentativa de roubo de conta");
+explicacao.push("Padrão clássico de fake news");
 }
 
-// 📊 PORCENTAGEM
-let porcentagem=Math.min(100,score*10);
+// 📊 %
+let porcentagem=Math.max(10, Math.min(100,score*10)); // NUNCA 0 em suspeitos
 
-// 🎨 BARRA
 let barra=document.getElementById("barra");
 barra.style.width=porcentagem+"%";
 
@@ -206,24 +220,20 @@ else barra.style.background="red";
 let nivel="";
 if(porcentagem>=70) nivel="🔴 ALTO RISCO";
 else if(porcentagem>=40) nivel="🟡 MÉDIO RISCO";
-else if(porcentagem>0) nivel="🟠 BAIXO RISCO";
-else nivel="🟢 SEGURO";
-
-// 🧠 INTENSIDADE
-let intensidade = "";
-if(score>15) intensidade="Alta manipulação detectada";
-else if(score>8) intensidade="Manipulação moderada";
-else intensidade="Baixa manipulação";
+else nivel="🟠 BAIXO RISCO";
 
 // RESULTADO
 let res=document.getElementById("resultado");
 
+res.classList.remove("alerta");
+void res.offsetWidth;
+if(porcentagem>=70) res.classList.add("alerta");
+
 res.innerHTML=
 "<b>"+nivel+" ("+porcentagem+"%)</b><br><br>"+
-"<b>🧠 Intensidade:</b> "+intensidade+"<br><br>"+
-"<b>🎯 Possível intenção:</b> "+(intencao.join(", ")||"Não identificada")+"<br><br>"+
+"<b>🎯 Intenção:</b> "+(intencao.join(", ")||"Indefinida")+"<br><br>"+
 "<b>⚠️ Motivos:</b><br>"+motivos.join("<br>")+"<br><br>"+
-"<b>💬 Explicação:</b><br>"+explicacao.join("<br>");
+"<b>💬 Explicação:</b><br>"+(explicacao.join("<br>")||"Mensagem aparentemente normal");
 
 res.classList.add("ativo");
 
@@ -247,7 +257,7 @@ d.style.display=d.style.display==="block"?"none":"block";
 
 // SIMULADOR
 let simulacoes=[
-{msg:"Seu banco pede código urgente", correto:false},
+{msg:"Compartilhe antes que apaguem essa informação!", correto:false},
 {msg:"Reunião amanhã às 10h", correto:true}
 ];
 
@@ -262,7 +272,7 @@ function responder(r){
 if(r==window.simAtual.correto){
 document.getElementById("simRes").innerText="✅ Correto!";
 }else{
-document.getElementById("simRes").innerText="❌ Era golpe!";
+document.getElementById("simRes").innerText="❌ Era suspeito!";
 }
 }
 
