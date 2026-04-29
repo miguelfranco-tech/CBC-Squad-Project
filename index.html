@@ -77,7 +77,7 @@ button:hover{opacity:0.9;}
 <div class="container">
 
 <h1>🛡️ Escudo Digital</h1>
-<p>Detecta golpes, fake news e manipulação digital.</p>
+<p>Detecta golpes, fake news e tentativas de manipulação digital.</p>
 
 <textarea id="mensagem" placeholder="Cole a mensagem aqui..."></textarea>
 
@@ -96,7 +96,7 @@ button:hover{opacity:0.9;}
 <button onclick="exemplo('banco')">🏦 Banco</button>
 <button onclick="exemplo('fake')">📢 Fake News</button>
 
-<h3>🧠 Treinar</h3>
+<h3>🧠 Treinar contra golpes</h3>
 <p id="simMsg"></p>
 <button onclick="responder(true)">✔ Confiar</button>
 <button onclick="responder(false)">❌ Desconfiar</button>
@@ -108,12 +108,12 @@ button:hover{opacity:0.9;}
 
 <script>
 
-// 🔧 normalizar
+// normalizar
 function normalizar(t){
 return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
 }
 
-// 🧠 MEMÓRIA
+// memória IA
 function carregarMemoria(){
 return JSON.parse(localStorage.getItem("memoriaIA") || "[]");
 }
@@ -124,14 +124,12 @@ localStorage.setItem("memoriaIA", JSON.stringify(mem));
 
 function aprender(texto, score){
 let mem = carregarMemoria();
-if(score > 60){
-mem.push(texto);
-}
+if(score > 60) mem.push(texto);
 if(mem.length > 50) mem.shift();
 salvarMemoria(mem);
 }
 
-// 🎯 ANALISAR
+// ANALISAR
 function analisar(){
 
 let original = document.getElementById("mensagem").value;
@@ -143,105 +141,128 @@ alert("Digite algo");
 return;
 }
 
-let score = 0;
-let motivos = [];
-let explicacao = [];
-let palavras = [];
-let intencao = [];
+let score=0;
+let motivos=[];
+let explicacao=[];
+let palavras=[];
 
-// 🔴 PADRÕES
-const padroes = [
-["envie seus dados",25,"🚨 Pedido de dados"],
-["informe seus dados",25,"🚨 Solicitação de dados"],
-["senha",30,"🔒 Senha"],
-["codigo",20,"📱 Código"],
-["cpf",25,"🪪 CPF"],
-["pix",30,"💸 PIX"],
-["urgente",10,"⚠️ Urgência"],
-["agora",10,"⚠️ Pressão"],
-["hackeada",25,"😨 Conta hackeada"],
-["invadida",25,"😨 Conta invadida"],
-["clique aqui",10,"🔗 Link"],
-["compartilhe",15,"📢 Fake news"],
-["midia",15,"📢 Fake news"]
+// padrões básicos
+const padroes=[
+["pix",30],["senha",30],["codigo",20],["cpf",25],
+["urgente",10],["agora",10],
+["hackeada",25],["invadida",25],
+["clique aqui",10],["link",8],
+["compartilhe",15],["midia",15]
 ];
 
 padroes.forEach(p=>{
 if(texto.includes(p[0])){
-score += p[1];
-motivos.push(p[2]);
+score+=p[1];
 palavras.push(p[0]);
 }
 });
 
-// 🧠 CONTEXTO
-if(texto.includes("envie") && (texto.includes("cpf")||texto.includes("senha"))){
-score += 35;
-explicacao.push("🚨 Solicitação de dados sensíveis");
-intencao.push("Roubo de dados");
+// 🚨 dados sensíveis avançado
+if(
+texto.match(/(envie|mande|informe|precisamos|digite|confirme)/) &&
+texto.match(/(cpf|senha|codigo|token|dados|cartao)/)
+){
+score+=45;
+motivos.push("🚨 Pedido de dados sensíveis");
+explicacao.push("A mensagem solicita informações pessoais");
 }
 
-// 🔁 MEMÓRIA IA
+// 🚨 golpe bancário
+if(
+texto.includes("conta") &&
+(texto.includes("hackeada")||texto.includes("invadida")||texto.includes("bloqueada")) &&
+(texto.includes("envie")||texto.includes("confirme"))
+){
+score+=40;
+motivos.push("🚨 Golpe bancário clássico");
+}
+
+// 🔁 memória IA
 memoria.forEach(frase=>{
 let palavrasMem = frase.split(" ");
 let match = palavrasMem.filter(p=>texto.includes(p));
-if(match.length >= 3){
-score += 15;
+let similaridade = match.length / palavrasMem.length;
+
+if(similaridade > 0.4){
+score+=20;
 explicacao.push("🔁 Similar a golpe anterior");
 }
 });
 
-// limite
 if(score<0) score=0;
-let porcentagem = Math.min(100, score);
 
-// 🎨 BARRA
-let barra = document.getElementById("barra");
-barra.style.width = porcentagem+"%";
+let porcentagem=Math.min(100,score);
+
+// barra
+let barra=document.getElementById("barra");
+barra.style.width=porcentagem+"%";
 
 if(porcentagem<30) barra.style.background="green";
 else if(porcentagem<70) barra.style.background="orange";
 else barra.style.background="red";
 
-// 💬 FRASES
-let frase = porcentagem>70 ? "🚨 Isso parece golpe!"
-: porcentagem>40 ? "⚠️ Fique atento"
-: "🙂 Parece seguro";
+// frases
+let frasesAlta=[
+"🚨 Isso está com cara de golpe!",
+"❌ Não confie nessa mensagem.",
+"⚠️ Muito suspeito!"
+];
 
-// 🎨 DESTAQUE
+let frasesMedia=[
+"🤔 Algo não está certo.",
+"⚠️ Fique atento.",
+"🧐 Pode ser golpe."
+];
+
+let frasesBaixa=[
+"🙂 Parece seguro.",
+"✔ Nada suspeito.",
+"👍 Mensagem comum."
+];
+
+let frase=porcentagem>=70?frasesAlta[Math.floor(Math.random()*3)]
+:porcentagem>=40?frasesMedia[Math.floor(Math.random()*3)]
+:frasesBaixa[Math.floor(Math.random()*3)];
+
+// destacar
 function destacar(txt, palavras){
-let r = txt;
+let r=txt;
 palavras.forEach(p=>{
-r = r.replace(new RegExp("("+p+")","gi"),'<span class="destaque">$1</span>');
+r=r.replace(new RegExp("("+p+")","gi"),'<span class="destaque">$1</span>');
 });
 return r;
 }
 
-let textoDestacado = destacar(original, palavras);
+let textoDestacado=destacar(original,palavras);
 
-// 📤 RESULTADO
-let res = document.getElementById("resultado");
+// resultado
+let res=document.getElementById("resultado");
 res.style.display="block";
 
-res.innerHTML =
+res.innerHTML=
 "<b>"+porcentagem+"% de risco</b><br><br>"+
 frase+"<br><br>"+
-"<b>Motivos:</b><br>"+motivos.join("<br>")+"<br><br>"+
+"<b>Motivos:</b><br>"+(motivos.join("<br>")||"Nenhum")+"<br><br>"+
 "<b>Explicação:</b><br>"+(explicacao.join("<br>")||"Nenhuma")+"<br><br>"+
 "<b>Mensagem:</b><br>"+textoDestacado;
 
-// 🧠 aprender
-aprender(texto, score);
+// aprender
+aprender(texto,score);
 }
 
-// ⚡ SIMULAÇÃO
+// simulação
 function simular(){
-document.getElementById("mensagem").value =
-"Envie seu CPF agora ou sua conta será bloqueada";
+document.getElementById("mensagem").value=
+"Envie seu CPF urgente para evitar bloqueio da conta";
 analisar();
 }
 
-// 📌 EXEMPLOS
+// exemplos
 function exemplo(t){
 if(t=="premio") document.getElementById("mensagem").value="Você ganhou um prêmio clique aqui";
 if(t=="banco") document.getElementById("mensagem").value="Sua conta foi hackeada envie CPF";
@@ -249,30 +270,54 @@ if(t=="fake") document.getElementById("mensagem").value="Compartilhe antes que a
 analisar();
 }
 
-// 🧠 TREINO
-let acertos = 0;
+// treino avançado
+let acertos=0;
 
-let simulacoes = [
-{msg:"Envie seu CPF urgente", correto:false},
-{msg:"Reunião amanhã", correto:true},
-{msg:"Clique para ganhar prêmio", correto:false},
-{msg:"Entrega confirmada", correto:true}
+let simulacoes=[
+{msg:"Envie seu CPF urgente para liberar sua conta",correto:false},
+{msg:"Sua conta foi invadida, confirme seus dados agora",correto:false},
+{msg:"Clique aqui para receber seu prêmio exclusivo",correto:false},
+{msg:"Ganhe dinheiro fácil sem sair de casa",correto:false},
+{msg:"Precisamos do seu código de verificação",correto:false},
+{msg:"Transferência pendente, envie o pix agora",correto:false},
+{msg:"Compartilhe isso antes que apaguem",correto:false},
+{msg:"Atualize seus dados para evitar bloqueio",correto:false},
+
+{msg:"Reunião amanhã às 14h",correto:true},
+{msg:"Envio do documento confirmado",correto:true},
+{msg:"Seu pedido foi entregue",correto:true},
+{msg:"Horário marcado para atendimento",correto:true},
+{msg:"Atualização do sistema concluída",correto:true},
+{msg:"Link da reunião enviado",correto:true},
+{msg:"Confirmação de presença recebida",correto:true},
+
+{msg:"Confirme suas informações para manter acesso",correto:false},
+{msg:"Detectamos atividade incomum, revise seus dados",correto:false},
+{msg:"Você pode ter um benefício disponível, acesse",correto:false},
+
+{msg:"Relatório atualizado disponível",correto:true}
 ];
 
 function novaSim(){
-let s = simulacoes[Math.floor(Math.random()*simulacoes.length)];
-window.simAtual = s;
-document.getElementById("simMsg").innerText = s.msg;
+let s=simulacoes[Math.floor(Math.random()*simulacoes.length)];
+window.simAtual=s;
+document.getElementById("simMsg").innerText=s.msg;
 document.getElementById("simRes").innerText="";
 }
 
 function responder(r){
-if(r === window.simAtual.correto){
+let correta=window.simAtual.correto;
+
+if(r===correta){
 acertos++;
-document.getElementById("simRes").innerText="✅ Acertou!";
+document.getElementById("simRes").innerText="✅ Boa! Você acertou.";
 }else{
-document.getElementById("simRes").innerText="❌ Era golpe!";
+document.getElementById("simRes").innerText=
+correta
+? "❌ Era segura, nem tudo é golpe."
+: "🚨 Era golpe! Tinha sinais suspeitos.";
 }
+
 document.getElementById("placar").innerText="Acertos: "+acertos;
 }
 
