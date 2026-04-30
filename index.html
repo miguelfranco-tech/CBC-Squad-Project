@@ -8,59 +8,54 @@
 <style>
 body{
 font-family: Arial;
-background: linear-gradient(135deg,#dbeafe,#f1f5f9);
+background: linear-gradient(135deg,#e3f2fd,#f5f7fa);
 text-align:center;
-margin:0;
 padding:20px;
 }
 
 .container{
-max-width:750px;
+max-width:700px;
 margin:auto;
-background:white;
+background:#fff;
 padding:25px;
 border-radius:15px;
-box-shadow:0 10px 25px rgba(0,0,0,0.1);
+box-shadow:0 10px 30px rgba(0,0,0,0.1);
 }
-
-h1{color:#2563eb;}
 
 textarea{
 width:100%;
-height:130px;
+height:120px;
 resize:none;
-padding:12px;
 border-radius:10px;
-border:1px solid #ccc;
+padding:10px;
 font-size:16px;
-box-sizing:border-box;
 }
 
 button{
-margin:8px;
-padding:10px 18px;
+margin:5px;
+padding:10px 15px;
 border:none;
 border-radius:10px;
-background:#3b82f6;
-color:white;
-font-size:15px;
+background:#2196f3;
+color:#fff;
 cursor:pointer;
-transition:0.2s;
 }
-
-button:hover{transform:scale(1.05);}
 
 .result{
 margin-top:20px;
-padding:18px;
-border-radius:12px;
+padding:15px;
+border-radius:10px;
+animation:fade 0.3s ease;
 }
 
-.baixo{background:#dcfce7;}
-.medio{background:#fef9c3;}
-.alto{background:#fee2e2;}
+.baixo{background:#c8e6c9;}
+.medio{background:#fff9c4;}
+.alto{background:#ffcdd2;}
 
-.small{font-size:14px;opacity:0.8;}
+@keyframes fade{
+from{opacity:0; transform:translateY(10px);}
+to{opacity:1; transform:translateY(0);}
+}
 </style>
 </head>
 
@@ -70,173 +65,236 @@ border-radius:12px;
 
 <h1>🛡️ Escudo Digital</h1>
 
-<p class="small">
-Detecta golpes, fake news e tentativas de manipulação digital,
-analisando mensagens de forma simples para proteger você.
+<p style="font-size:14px;opacity:0.8;">
+Detecta golpes, fake news e mensagens suspeitas de forma simples e clara para sua segurança.
 </p>
 
-<textarea id="msg" placeholder="Cole a mensagem aqui..."></textarea>
+<textarea id="mensagem" placeholder="Digite ou cole a mensagem..."></textarea>
 
 <br>
 
 <button onclick="analisar()">🔎 Analisar mensagem</button>
 <button onclick="simular()">⚡ Simular golpe</button>
 
-<div id="res" class="result"></div>
+<div id="resultado" class="result"></div>
+
+<div style="margin-top:10px;">
+<p><b>Isso está correto?</b></p>
+<button onclick="feedback(true)">✔ É golpe</button>
+<button onclick="feedback(false)">👍 É seguro</button>
+</div>
 
 <hr>
 
 <h3>⚠️ Exemplos de golpes</h3>
-<button onclick="setMsg('Você ganhou um prêmio! Clique aqui')">🎁 Premiação</button>
-<button onclick="setMsg('Sua conta será bloqueada, envie CPF')">🏦 Banco</button>
-<button onclick="setMsg('Compartilhe antes que apaguem isso')">📢 Fake News</button>
+<button onclick="ex1()">🎁 Prêmio</button>
+<button onclick="ex2()">🏦 Banco</button>
+<button onclick="ex3()">📢 Fake News</button>
 
 <hr>
 
 <h3>🧠 Treinamento para não cair em golpes</h3>
-<p id="treino">Clique em nova</p>
+<p id="treinoTexto">Clique em nova</p>
 
-<button onclick="responder(true)">✔ Confiar</button>
-<button onclick="responder(false)">❌ Desconfiar</button>
+<button onclick="resposta(true)">✔ Confiar</button>
+<button onclick="resposta(false)">❌ Golpe</button>
 <br>
 <button onclick="novoTreino()">🔄 Nova</button>
+
+<p id="feedbackTreino"></p>
+<p id="placar">Pontuação: 0 / 0</p>
 
 </div>
 
 <script>
 
-// FRASES HUMANAS
-const baixo = ["Mensagem tranquila.","Parece seguro.","Nada perigoso aqui."];
-const medio = ["Algo estranho aqui.","Melhor ter cuidado.","Não parece confiável."];
-const alto = ["Isso tem cara de golpe.","Muito suspeito!","Não confie nisso."];
+// =====================
+// 🧠 MEMÓRIA IA
+// =====================
+function carregarMemoria(){
+return JSON.parse(localStorage.getItem("memoriaIA")) || [];
+}
 
-// PALAVRAS COM PESO
-const pesos = [
-{p:["cpf","senha","código","dados"],v:40,t:"dados"},
-{p:["pix","transferência","pagamento"],v:40,t:"ganho"},
-{p:["urgente","agora","rápido"],v:25,t:"urgencia"},
-{p:["bloqueado","suspenso","cancelado"],v:35,t:"medo"},
-{p:["clique aqui","link","acessar"],v:25,t:"link"},
-{p:["ganhou","prêmio","promoção"],v:25,t:"ganho"},
-{p:["compartilhe","repasse"],v:20,t:"fake"}
-];
+function salvarMemoria(mem){
+localStorage.setItem("memoriaIA", JSON.stringify(mem));
+}
 
-// TREINAMENTO
-const treinoList = [
-{t:"Reunião amanhã",s:true},
-{t:"Envie seu CPF agora",s:false},
-{t:"Você ganhou dinheiro",s:false},
-{t:"Relatório pronto",s:true},
-{t:"PIX urgente agora",s:false},
-{t:"Confirma presença",s:true}
-];
-
-let atual;
-
-// ANALISAR
+// =====================
+// 🧠 IA PRINCIPAL
+// =====================
 function analisar(){
 
-let texto = document.getElementById("msg").value.toLowerCase();
-let risco=0;
-let motivos=[];
-let intencoes={};
+let input = document.getElementById("mensagem").value;
 
-pesos.forEach(grupo=>{
-grupo.p.forEach(p=>{
-if(texto.includes(p)){
-risco+=grupo.v;
-motivos.push(explicar(p));
-intencoes[grupo.t]=true;
+let texto = input.toLowerCase()
+.normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+.replace(/[@4]/g,"a")
+.replace(/[1!]/g,"i")
+.replace(/[3]/g,"e")
+.replace(/[0]/g,"o")
+.replace(/[^a-z0-9\s]/g," ")
+.replace(/\s+/g," ")
+.trim();
+
+let risco = 0;
+let motivos = [];
+let intencoes = new Set();
+let gatilhos = 0;
+
+// PADRÕES
+const padroes = [
+{r:/cpf|senha|codigo|cartao/,p:30,m:"Pedindo dados pessoais",i:"Roubo de dados"},
+{r:/pix|transferencia|pagamento/,p:30,m:"Pedindo dinheiro",i:"Financeiro"},
+{r:/urgente|agora/,p:20,m:"Pressão para agir rápido",i:"Pressão"},
+{r:/bloqueado|suspenso/,p:25,m:"Tentando assustar",i:"Medo"},
+{r:/clique|link|http/,p:25,m:"Link suspeito",i:"Redirecionamento"},
+{r:/ganhou|premio|gratis/,p:25,m:"Promessa falsa",i:"Isca"}
+];
+
+padroes.forEach(p=>{
+if(p.r.test(texto)){
+risco+=p.p;
+motivos.push(p.m);
+intencoes.add(p.i);
+gatilhos++;
 }
 });
-});
 
-// COMBINAÇÕES PERIGOSAS
+// COMBOS
 if(texto.includes("pix") && texto.includes("urgente")){
 risco+=40;
-motivos.push("pedido urgente de dinheiro");
+motivos.push("PIX + urgência");
 }
 
-if(texto.includes("cpf") && texto.includes("agora")){
+if(texto.includes("cpf") && texto.includes("bloqueado")){
 risco+=40;
-motivos.push("pressão para enviar dados");
+motivos.push("Dados + ameaça");
 }
 
-// LIMITAR
+// =====================
+// 🧠 APRENDIZADO
+// =====================
+let memoria = carregarMemoria();
+
+memoria.forEach(item=>{
+if(texto.includes(item.texto.substring(0,15))){
+if(item.golpe){
+risco+=25;
+motivos.push("Aprendido com uso");
+}else{
+risco-=15;
+}
+}
+});
+
+// LIMITES
+if(risco<0) risco=0;
 if(risco>100) risco=100;
 
-// FRASE
+// FRASES HUMANAS
 let frase;
 let classe;
 
-if(risco<30){frase=random(baixo);classe="baixo";}
-else if(risco<70){frase=random(medio);classe="medio";}
-else{frase=random(alto);classe="alto";}
+if(risco<30){
+frase="Mensagem tranquila.";
+classe="baixo";
+}
+else if(risco<70){
+frase="Algo estranho aqui.";
+classe="medio";
+}
+else{
+frase="Isso parece golpe!";
+classe="alto";
+}
 
 // RESULTADO
-document.getElementById("res").className="result "+classe;
+document.getElementById("resultado").className="result "+classe;
 
-document.getElementById("res").innerHTML=`
+document.getElementById("resultado").innerHTML=`
 <h3>${frase}</h3>
 <p><b>Risco:</b> ${risco}%</p>
-<p><b>O que está acontecendo:</b> ${traduzIntencao(intencoes)}</p>
 <p><b>Motivos:</b> ${motivos.join(", ") || "Nenhum"}</p>
-<p><b>Explicação:</b> ${explicacao(risco,motivos)}</p>
-<p class="small">Se tiver dúvida, peça ajuda para alguém de confiança.</p>
+<p><b>Intenção:</b> ${[...intencoes].join(", ") || "Nenhuma"}</p>
+<p style="font-size:12px;">Se tiver dúvida, peça ajuda a alguém de confiança.</p>
 `;
 
 }
 
-// FUNÇÕES
-function random(arr){return arr[Math.floor(Math.random()*arr.length)];}
+// =====================
+// 🧠 FEEDBACK
+// =====================
+function feedback(eGolpe){
 
-function explicar(p){
-if(p=="cpf") return "pedindo seus dados pessoais";
-if(p=="pix") return "pedido de dinheiro";
-if(p=="urgente") return "te apressando";
-if(p=="bloqueado") return "tentando te assustar";
-if(p=="clique aqui") return "link suspeito";
-return p;
+let texto = document.getElementById("mensagem").value.toLowerCase();
+
+let memoria = carregarMemoria();
+
+memoria.push({texto:texto,golpe:eGolpe});
+
+salvarMemoria(memoria);
+
+document.getElementById("resultado").innerHTML += "<p>✔ IA aprendeu com isso!</p>";
 }
 
-function traduzIntencao(i){
-let txt=[];
-if(i.medo) txt.push("tentando te assustar");
-if(i.urgencia) txt.push("te apressando");
-if(i.dados) txt.push("quer seus dados");
-if(i.ganho) txt.push("promessa de vantagem");
-return txt.join(", ") || "não identificado";
-}
-
-function explicacao(r,m){
-if(r<30) return "Mensagem parece normal.";
-if(r<70) return "Tem sinais estranhos: "+m.join(", ");
-return "Mensagem com sinais claros de golpe: "+m.join(", ");
-}
-
-// EXTRAS
-function setMsg(t){document.getElementById("msg").value=t;}
-
+// =====================
+// ⚡ SIMULAÇÃO
+// =====================
 function simular(){
-let lista=[
-"Envie CPF agora ou será bloqueado",
-"PIX urgente para liberar prêmio",
-"Clique aqui para atualizar conta",
-"Compartilhe isso antes que apaguem"
+let golpes=[
+"Envie seu CPF agora",
+"PIX urgente necessário",
+"Você ganhou prêmio clique aqui",
+"Sua conta será bloqueada"
 ];
-setMsg(random(lista));
+
+document.getElementById("mensagem").value=
+golpes[Math.floor(Math.random()*golpes.length)];
 }
 
-// TREINO
+// =====================
+// 🎮 TREINO
+// =====================
+let pontuacao=0;
+let rodada=0;
+
+const treinos=[
+{texto:"Reunião às 10h",seguro:true},
+{texto:"Envie seu CPF agora",seguro:false},
+{texto:"PIX urgente",seguro:false},
+{texto:"Documento enviado",seguro:true}
+];
+
+let treinoAtual;
+
 function novoTreino(){
-atual=random(treinoList);
-document.getElementById("treino").innerText=atual.t;
+treinoAtual = treinos[Math.floor(Math.random()*treinos.length)];
+document.getElementById("treinoTexto").innerText = treinoAtual.texto;
 }
 
-function responder(r){
-if(!atual){alert("Clique em nova");return;}
-alert(r==atual.s?"✔ Acertou":"❌ Errou");
+function resposta(v){
+
+if(!treinoAtual) return;
+
+rodada++;
+
+if(v==treinoAtual.seguro){
+pontuacao++;
+document.getElementById("feedbackTreino").innerText="✔ Acertou!";
+}else{
+document.getElementById("feedbackTreino").innerText="❌ Errou!";
 }
+
+document.getElementById("placar").innerText=
+"Pontuação: "+pontuacao+" / "+rodada;
+}
+
+// =====================
+// EXEMPLOS
+// =====================
+function ex1(){document.getElementById("mensagem").value="Você ganhou prêmio clique aqui";}
+function ex2(){document.getElementById("mensagem").value="Sua conta será bloqueada envie CPF";}
+function ex3(){document.getElementById("mensagem").value="Compartilhe antes que apaguem";}
 
 </script>
 
