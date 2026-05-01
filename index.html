@@ -7,11 +7,10 @@
 
 <style>
 body{
-  font-family:'Segoe UI', Arial;
-  background:linear-gradient(135deg,#eef5ff,#f9fbff);
+  font-family: Arial;
+  background: linear-gradient(135deg,#eef4ff,#f9fbff);
   text-align:center;
   padding:20px;
-  color:#333;
 }
 
 .container{
@@ -19,8 +18,8 @@ body{
   margin:auto;
   background:white;
   padding:25px;
-  border-radius:15px;
-  box-shadow:0 8px 25px rgba(0,0,0,0.08);
+  border-radius:12px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.08);
 }
 
 h1{
@@ -30,41 +29,57 @@ h1{
 textarea{
   width:100%;
   height:120px;
-  border-radius:12px;
-  padding:12px;
+  border-radius:10px;
+  padding:10px;
   font-size:16px;
   border:1px solid #ccc;
 }
 
-textarea:focus{
-  border-color:#2196f3;
-  box-shadow:0 0 5px rgba(33,150,243,0.3);
-}
-
 button{
-  padding:12px 16px;
+  padding:10px 14px;
   margin:5px;
   border:none;
-  border-radius:10px;
-  background:#2196f3;
-  color:white;
-  font-weight:bold;
+  border-radius:8px;
   cursor:pointer;
+  font-weight:bold;
   transition:0.2s;
 }
 
-button:hover{
+.primary{
   background:#1976d2;
-  transform:scale(1.05);
+  color:white;
+}
+
+.secondary{
+  background:#e3f2fd;
+  color:#1565c0;
+}
+
+button:hover{
+  opacity:0.9;
+  transform:scale(1.03);
 }
 
 .result{
-  background:#f9fbff;
-  padding:18px;
   margin-top:20px;
-  border-radius:12px;
-  border-left:5px solid #2196f3;
+  padding:15px;
+  border-radius:10px;
   text-align:left;
+}
+
+.baixo{
+  background:#e8f5e9;
+  border-left:5px solid #4caf50;
+}
+
+.medio{
+  background:#fffde7;
+  border-left:5px solid #ffb300;
+}
+
+.alto{
+  background:#ffebee;
+  border-left:5px solid #f44336;
 }
 
 #feedbackTreino{
@@ -84,12 +99,12 @@ button:hover{
 <textarea id="mensagem" placeholder="Digite ou cole a mensagem aqui"></textarea>
 
 <br>
-<button onclick="analisar()">🔎 Analisar mensagem</button>
-<button onclick="gerarMensagem()">✨ Gerar mensagem</button>
+<button class="primary" onclick="analisar()">🔎 Analisar mensagem</button>
+<button class="secondary" onclick="gerarMensagem()">✨ Gerar mensagem</button>
 
 <div id="resultado" class="result"></div>
 
-<h3 style="margin-top:25px;">⚠️ Exemplos de golpes</h3>
+<h3 style="margin-top:20px;">⚠️ Exemplos</h3>
 
 <button onclick="exemplo('banco')">🏦 Banco</button>
 <button onclick="exemplo('premio')">🎁 Prêmio</button>
@@ -98,7 +113,7 @@ button:hover{
 
 <h3 style="margin-top:25px;">🧠 Treinamento</h3>
 
-<p id="treinoTexto" style="font-weight:bold;font-size:18px;"></p>
+<p id="treinoTexto" style="font-weight:bold;font-size:17px;"></p>
 
 <button onclick="responder(true)">❌ É golpe</button>
 <button onclick="responder(false)">✔ É seguro</button>
@@ -109,7 +124,7 @@ button:hover{
 <p id="feedbackTreino"></p>
 
 <div style="margin-top:15px;">
-  <div style="background:#ddd;height:20px;border-radius:10px;">
+  <div style="background:#ddd;height:18px;border-radius:10px;">
     <div id="barraProgresso" style="height:100%;width:0%;background:#4caf50;border-radius:10px;"></div>
   </div>
   <p id="textoProgresso">0 de 0</p>
@@ -121,7 +136,7 @@ button:hover{
 
 // ANALISAR
 function analisar(){
-let texto = document.getElementById("mensagem").value.toLowerCase();
+let texto=document.getElementById("mensagem").value.toLowerCase();
 
 if(!texto){
 document.getElementById("resultado").innerHTML="Digite uma mensagem.";
@@ -132,11 +147,11 @@ let risco=0;
 let motivos=[];
 
 const regras=[
-{p:["cpf","senha","dados"],peso:30,m:"Pedido de dados pessoais"},
+{p:["cpf","senha","dados"],peso:30,m:"Pedido de dados"},
 {p:["urgente","agora"],peso:25,m:"Pressão"},
 {p:["clique","link"],peso:20,m:"Link suspeito"},
-{p:["ganhou","prêmio"],peso:25,m:"Promessa de ganho"},
-{p:["pix"],peso:30,m:"Pedido de dinheiro"},
+{p:["ganhou","prêmio"],peso:25,m:"Promessa"},
+{p:["pix"],peso:30,m:"Dinheiro"},
 {p:["bloqueado"],peso:20,m:"Ameaça"}
 ];
 
@@ -151,33 +166,38 @@ motivos.push(r.m);
 
 if(risco>100) risco=100;
 
-let nivel = risco<30 ? "🟢 Seguro" : risco<70 ? "🟡 Atenção" : "🔴 Golpe";
+let nivel= risco<30?"🟢 Seguro":risco<70?"🟡 Atenção":"🔴 Golpe";
+let classe= risco<30?"baixo":risco<70?"medio":"alto";
 
-document.getElementById("resultado").innerHTML=`
+let resultado=document.getElementById("resultado");
+resultado.className="result "+classe;
+
+resultado.innerHTML=`
 <h3>${nivel}</h3>
 <p><b>Risco:</b> ${risco}%</p>
-<p>${motivos.join("<br>") || "Nenhum sinal forte"}</p>
+<p>${motivos.join("<br>")||"Nenhum sinal forte"}</p>
 <p><b>👉 O que fazer:</b><br>
 • Não clique em links<br>
 • Não envie dinheiro<br>
-• Confirme com alguém de confiança</p>
+• Confirme com alguém</p>
 `;
 }
 
-// GERAR MENSAGEM
+// GERAR MENSAGEM (10 PRONTAS)
 function gerarMensagem(){
 const modelos=[
-"Sua conta foi bloqueada. Envie seu CPF agora.",
-"Parabéns! Você ganhou um prêmio.",
-"PIX urgente preciso agora.",
-"Seu cartão foi clonado.",
-"Mãe me manda dinheiro.",
-"Seu pacote chegou veja aqui.",
-"Atualize seus dados agora.",
-"Promoção exclusiva informe dados.",
-"Ação urgente necessária.",
-"Você foi selecionado para benefício."
+"Sua conta foi bloqueada. Envie seu CPF e senha agora.",
+"Parabéns! Você ganhou um prêmio. Clique para receber.",
+"PIX urgente preciso agora, depois te explico.",
+"Seu cartão foi clonado, confirme seus dados imediatamente.",
+"Mãe troquei de número, me manda dinheiro aqui.",
+"Seu pacote chegou, acompanhe pelo link.",
+"Atualize seus dados para evitar bloqueio da conta.",
+"Promoção exclusiva, informe seus dados para participar.",
+"URGENTE: ação necessária agora.",
+"Você foi selecionado para receber benefício."
 ];
+
 document.getElementById("mensagem").value =
 modelos[Math.floor(Math.random()*modelos.length)];
 }
@@ -185,10 +205,10 @@ modelos[Math.floor(Math.random()*modelos.length)];
 // EXEMPLOS
 function exemplo(tipo){
 const exemplos={
-banco:["Conta bloqueada.","Confirme CPF.","Acesso suspenso."],
-premio:["Você ganhou!","Retire prêmio.","Última chance!"],
-fake:["URGENTE bancos fecham!","Nova lei dinheiro.","Alerta geral!"],
-pix:["PIX urgente!","Me manda dinheiro!","Transferência agora!"]
+banco:["Conta bloqueada","Confirme CPF","Acesso suspenso"],
+premio:["Você ganhou","Retire prêmio","Última chance"],
+fake:["URGENTE bancos fecham","Nova lei","Alerta geral"],
+pix:["PIX urgente","Me manda dinheiro","Transferência agora"]
 };
 document.getElementById("mensagem").value =
 exemplos[tipo][Math.floor(Math.random()*3)];
@@ -196,12 +216,12 @@ exemplos[tipo][Math.floor(Math.random()*3)];
 
 // TREINAMENTO
 const perguntas=[
-{t:"PIX urgente preciso agora",g:true,exp:"Golpe comum com urgência."},
+{t:"PIX urgente preciso agora",g:true,exp:"Urgência + dinheiro é golpe."},
 {t:"Reunião amanhã",g:false,exp:"Mensagem normal."},
 {t:"Você ganhou prêmio",g:true,exp:"Promessa suspeita."},
 {t:"Envie CPF",g:true,exp:"Nunca envie dados."},
 {t:"Vamos almoçar?",g:false,exp:"Mensagem segura."},
-{t:"Mãe manda dinheiro",g:true,exp:"Golpe de familiar."},
+{t:"Mãe manda dinheiro",g:true,exp:"Golpe comum."},
 {t:"Cartão clonado confirme",g:true,exp:"Banco não pede isso."},
 {t:"Te ligo depois",g:false,exp:"Sem risco."}
 ];
@@ -227,7 +247,6 @@ f.style.color="red";
 }
 
 let p=Math.round((acertos/total)*100);
-
 document.getElementById("barraProgresso").style.width=p+"%";
 document.getElementById("textoProgresso").innerText=acertos+" de "+total;
 
