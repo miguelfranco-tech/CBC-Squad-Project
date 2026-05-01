@@ -78,10 +78,16 @@ button{
 <button class="secondary" onclick="gerarPorNivel('medio')">🟡 Suspeita</button>
 <button class="secondary" onclick="gerarPorNivel('baixo')">🟢 Normal</button>
 
+<h3 style="margin-top:20px;">⚠️ Exemplos de golpes</h3>
+
+<button class="secondary" onclick="exemplo('banco')">🏦 Banco</button>
+<button class="secondary" onclick="exemplo('premio')">🎁 Prêmio</button>
+<button class="secondary" onclick="exemplo('fake')">📢 Fake News</button>
+
 <div id="resultado" class="result"></div>
 
-<h3>🧠 Treinamento</h3>
-<p id="treinoTexto"></p>
+<h3 style="margin-top:25px;">🧠 Treinamento para não cair em golpes</h3>
+<p id="treinoTexto" style="font-weight:bold;"></p>
 
 <button onclick="responder(true)">❌ É golpe</button>
 <button onclick="responder(false)">✔ É seguro</button>
@@ -99,12 +105,12 @@ button{
 
 <script>
 
-// NORMALIZAR TEXTO
+// NORMALIZAR
 function normalizar(txt){
 return txt.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
 }
 
-// ================= IA AVANÇADA =================
+// ================= IA =================
 function analisar(){
 
 let original = document.getElementById("mensagem").value;
@@ -119,7 +125,7 @@ let texto = normalizar(original);
 let risco = 0;
 let motivos = [];
 
-// BANCO GRANDE (expandido)
+// PADRÕES
 const fortes = [
 /troquei.*numero/,
 /manda.*dinheiro/,
@@ -129,92 +135,69 @@ const fortes = [
 /envie.*cpf/,
 /envie.*senha/,
 /conta.*bloqueada/,
-/acesso.*suspenso/,
 /ganhou.*premio/,
-/retire.*dinheiro/,
 /transferencia.*urgente/,
-/seguranca.*comprometida/,
-/codigo.*seguranca/,
-/envie.*cartao/,
-/liberacao.*dinheiro/
+/seguranca.*comprometida/
 ];
 
 const medios = [
-/urgente/,/agora/,/rapido/,/clique/,/link/,
- /promocao/,/beneficio/,/oferta/,/aviso/,
- /verifique/,/confirme/,/pix/,/dinheiro/,
- /atualize/,/cadastro/
+/urgente/,/agora/,/clique/,/link/,/promocao/,/beneficio/,/pix/,/dinheiro/
 ];
 
-// ANÁLISE
 fortes.forEach(r=>{
-if(r.test(texto)){
-risco += 45;
-motivos.push("Padrão forte de golpe");
-}
+if(r.test(texto)){ risco+=45; motivos.push("Padrão forte de golpe"); }
 });
 
 medios.forEach(r=>{
-if(r.test(texto)){
-risco += 12;
-motivos.push("Sinal suspeito");
-}
+if(r.test(texto)){ risco+=12; motivos.push("Sinal suspeito"); }
 });
 
 // CONTEXTO
 if(texto.includes("urgente") && texto.includes("pix")){
-risco += 40;
-motivos.push("Urgência + dinheiro");
+risco+=40; motivos.push("Urgência + dinheiro");
 }
 
 if(texto.includes("dados") && texto.includes("confirme")){
-risco += 35;
-motivos.push("Pedido de dados");
+risco+=35; motivos.push("Pedido de dados");
 }
 
-// LIMITE
-if(risco > 100) risco = 100;
+if(risco>100) risco=100;
 
 // NÍVEL
-let nivel = risco < 30 ? "🟢 Seguro" :
-risco < 70 ? "🟡 Atenção" :
-"🔴 Golpe";
-
-let classe = risco < 30 ? "baixo" :
-risco < 70 ? "medio" :
-"alto";
+let nivel = risco<30?"🟢 Seguro":risco<70?"🟡 Atenção":"🔴 Golpe";
+let classe = risco<30?"baixo":risco<70?"medio":"alto";
 
 let r = document.getElementById("resultado");
-r.className = "result " + classe;
+r.className="result "+classe;
 
 // TIPO
 let tipo="Indefinido";
 
-if(texto.includes("troquei") || texto.includes("mãe")) tipo="Golpe do familiar";
-else if(texto.includes("cartao") || texto.includes("conta")) tipo="Golpe bancário";
-else if(texto.includes("premio")) tipo="Golpe de prêmio";
-else if(texto.includes("pix")) tipo="Golpe PIX";
-else if(texto.includes("link")) tipo="Golpe de link";
+if(texto.includes("troquei")||texto.includes("mãe")) tipo="Golpe do familiar";
+else if(texto.includes("cartao")||texto.includes("conta")) tipo="Golpe bancário";
+else if(texto.includes("premio")) tipo="Golpe de prêmio falso";
+else if(texto.includes("pix")) tipo="Golpe com PIX";
+else if(texto.includes("link")) tipo="Golpe com link";
 
 // EXPLICAÇÃO
 let explicacao = risco<30
-? "A mensagem parece normal, mas atenção sempre é importante."
+? "Essa mensagem parece normal, mas ainda é importante manter atenção."
 : risco<70
-? "Essa mensagem apresenta sinais suspeitos e pode ser golpe."
+? "Essa mensagem tem sinais suspeitos e pode ser um golpe."
 : "Essa mensagem tem vários sinais claros de golpe.";
 
-// RESULTADO
+// RESPOSTA HUMANA
 r.innerHTML=`
 <h3>${nivel}</h3>
 
-<p><b>📌 Tipo:</b> ${tipo}</p>
+<p><b>📌 Tipo identificado:</b> ${tipo}</p>
 
-<p><b>🔎 Explicação:</b><br>
+<p><b>🔎 Entenda:</b><br>
 ${explicacao}
 </p>
 
-<p><b>⚠️ Sinais:</b><br>
-${motivos.join("<br>") || "Nenhum forte"}
+<p><b>⚠️ Sinais encontrados:</b><br>
+${motivos.join("<br>")||"Nenhum sinal forte"}
 </p>
 
 <p><b>👉 O que fazer:</b><br>
@@ -224,7 +207,6 @@ ${motivos.join("<br>") || "Nenhum forte"}
 • Confirme fora da conversa
 </p>
 `;
-
 }
 
 // ================= GERAR =================
@@ -246,46 +228,36 @@ document.getElementById("mensagem").value = m[Math.floor(Math.random()*m.length)
 
 // GERAR POR NÍVEL
 function gerarPorNivel(n){
-
 const modelos={
-alto:[
-"Troquei de número me manda dinheiro",
-"PIX urgente agora",
-"Conta bloqueada envie dados",
-"Cartão clonado confirme",
-"Envie CPF agora",
-"Transferência urgente",
-"Atualize senha agora",
-"Retire dinheiro urgente",
-"Confirme dados imediatamente"
-],
-medio:[
-"Verifique sua conta",
-"Atualize seus dados",
-"Promoção disponível",
-"Confirme informações",
-"Nova oferta",
-"Atualização necessária",
-"Mensagem importante",
-"Aviso sistema",
-"Revisão cadastro"
-],
-baixo:[
-"Te ligo depois",
-"Reunião amanhã",
-"Cheguei em casa",
-"Tudo certo",
-"Boa noite",
-"Vamos almoçar",
-"Falo depois",
-"Obrigado",
-"Até amanhã"
-]
+alto:["PIX urgente agora","Conta bloqueada envie dados","Cartão clonado confirme"],
+medio:["Verifique sua conta","Atualize seus dados","Promoção disponível"],
+baixo:["Te ligo depois","Reunião amanhã","Tudo certo"]
 };
-
 document.getElementById("mensagem").value =
 modelos[n][Math.floor(Math.random()*modelos[n].length)];
+}
 
+// EXEMPLOS
+function exemplo(tipo){
+const exemplos={
+banco:[
+"Seu banco detectou atividade suspeita, confirme seus dados",
+"Conta bloqueada, envie CPF para desbloquear",
+"Cartão clonado, atualize suas informações agora"
+],
+premio:[
+"Parabéns! Você ganhou um prêmio, clique para receber",
+"Você foi selecionado, informe seus dados para retirar o prêmio",
+"Última chance de resgatar seu prêmio exclusivo"
+],
+fake:[
+"URGENTE: bancos vão fechar amanhã, saque seu dinheiro",
+"Nova lei permite ganhar dinheiro fácil, aproveite",
+"Alerta geral: governo vai bloquear contas hoje"
+]
+};
+document.getElementById("mensagem").value =
+exemplos[tipo][Math.floor(Math.random()*3)];
 }
 
 // TREINO
