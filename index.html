@@ -7,46 +7,41 @@
 
 <style>
 body{
-  font-family: Arial;
-  background: linear-gradient(135deg,#e3f2fd,#f5f7fa);
-  text-align:center;
-  padding:20px;
+font-family: Arial;
+background: linear-gradient(135deg,#e3f2fd,#f5f7fa);
+text-align:center;
+padding:20px;
 }
 
 .container{
-  max-width:600px;
-  margin:auto;
+max-width:600px;
+margin:auto;
 }
 
 textarea{
-  width:100%;
-  height:120px;
-  border-radius:10px;
-  padding:10px;
-  font-size:16px;
+width:100%;
+height:120px;
+border-radius:10px;
+padding:10px;
+font-size:16px;
 }
 
 button{
-  padding:12px 18px;
-  border:none;
-  border-radius:10px;
-  margin:5px;
-  cursor:pointer;
-  background:#2196f3;
-  color:white;
-  font-weight:bold;
+padding:12px;
+margin:5px;
+border:none;
+border-radius:10px;
+background:#2196f3;
+color:white;
+font-weight:bold;
+cursor:pointer;
 }
 
 .result{
-  margin-top:20px;
-  background:white;
-  padding:15px;
-  border-radius:10px;
-}
-
-#feedbackTreino{
-  margin-top:10px;
-  font-weight:bold;
+background:white;
+padding:15px;
+margin-top:20px;
+border-radius:10px;
 }
 </style>
 </head>
@@ -58,24 +53,23 @@ button{
 <h1>🛡️ Escudo Digital</h1>
 <p>Detecta golpes e ajuda você a não cair neles.</p>
 
-<textarea id="mensagem" placeholder="Digite a mensagem aqui"></textarea>
+<textarea id="mensagem" placeholder="Digite ou cole a mensagem aqui"></textarea>
+
 <br>
 <button onclick="analisar()">🔎 Analisar mensagem</button>
 
-<div class="result" id="resultado"></div>
+<div id="resultado" class="result"></div>
 
-<!-- EXEMPLOS -->
-<h3>⚠️ Exemplos de golpes</h3>
+<h3>⚠️ Testar exemplos</h3>
 
 <button onclick="exemplo('banco')">🏦 Banco</button>
 <button onclick="exemplo('premio')">🎁 Prêmio</button>
 <button onclick="exemplo('fake')">📢 Fake News</button>
 <button onclick="exemplo('pix')">💸 PIX</button>
 
-<!-- TREINAMENTO -->
-<h3 style="margin-top:30px;">🧠 Treinamento para não cair em golpes</h3>
+<h3>🧠 Treinamento</h3>
 
-<p id="treinoTexto"></p>
+<p id="treinoTexto" style="font-weight:bold;font-size:18px;"></p>
 
 <button onclick="responder(true)">❌ É golpe</button>
 <button onclick="responder(false)">✔ É seguro</button>
@@ -85,34 +79,24 @@ button{
 
 <p id="feedbackTreino"></p>
 
-<!-- BARRA -->
 <div style="margin-top:15px;">
-  <p><b>Seu progresso:</b></p>
-
-  <div style="background:#ddd; border-radius:10px; height:20px;">
-    <div id="barraProgresso" style="
-      height:100%;
-      width:0%;
-      background:#4caf50;
-      border-radius:10px;
-      transition:0.4s;
-    "></div>
-  </div>
-
-  <p id="textoProgresso">0 acertos</p>
+<div style="background:#ddd;height:20px;border-radius:10px;">
+<div id="barraProgresso" style="height:100%;width:0%;background:#4caf50;border-radius:10px;"></div>
+</div>
+<p id="textoProgresso">0 de 0</p>
 </div>
 
 </div>
 
 <script>
 
-// ================= IA =================
+// ================= ANALISAR =================
 function analisar(){
 
 let texto = document.getElementById("mensagem").value.toLowerCase();
 
 if(!texto){
-document.getElementById("resultado").innerHTML = "Digite uma mensagem primeiro.";
+document.getElementById("resultado").innerHTML = "Digite uma mensagem.";
 return;
 }
 
@@ -121,17 +105,17 @@ let motivos = [];
 
 const regras = [
 {p:["cpf","senha","dados"],peso:30,m:"Pedido de dados pessoais"},
-{p:["urgente","agora"],peso:25,m:"Pressão de urgência"},
+{p:["urgente","agora"],peso:25,m:"Pressão"},
 {p:["clique","link"],peso:20,m:"Link suspeito"},
-{p:["ganhou","prêmio"],peso:25,m:"Promessa de ganho fácil"},
+{p:["ganhou","prêmio"],peso:25,m:"Promessa de ganho"},
 {p:["pix","transferência"],peso:30,m:"Pedido de dinheiro"},
-{p:["bloqueado","suspenso"],peso:20,m:"Ameaça de bloqueio"}
+{p:["bloqueado"],peso:20,m:"Ameaça"}
 ];
 
 regras.forEach(r=>{
 r.p.forEach(p=>{
 if(texto.includes(p)){
-risco += r.peso;
+risco+=r.peso;
 motivos.push(r.m);
 }
 });
@@ -139,35 +123,15 @@ motivos.push(r.m);
 
 if(risco>100) risco=100;
 
-let nivel = "";
-let explicacao = "";
-
-if(risco < 30){
-nivel = "🟢 Parece seguro";
-explicacao = "Não encontramos sinais fortes de golpe.";
-}
-else if(risco < 70){
-nivel = "🟡 Atenção";
-explicacao = "Tem alguns sinais suspeitos.";
-}
-else{
-nivel = "🔴 Isso parece golpe";
-explicacao = "Mensagem com vários sinais de golpe.";
-}
+let nivel = risco<30 ? "🟢 Seguro" : risco<70 ? "🟡 Atenção" : "🔴 Golpe";
 
 document.getElementById("resultado").innerHTML = `
 <h3>${nivel}</h3>
 <p><b>Risco:</b> ${risco}%</p>
 
-<p><b>Motivos:</b><br>
-${motivos.join("<br>") || "Nenhum identificado"}
-</p>
+<p><b>Motivos:</b><br>${motivos.join("<br>") || "Nenhum"}</p>
 
-<p><b>Explicação:</b><br>
-${explicacao}
-</p>
-
-<p><b>👉 O que fazer agora:</b><br>
+<p><b>👉 O que fazer:</b><br>
 • Não clique em links<br>
 • Não envie dinheiro<br>
 • Confirme com alguém de confiança
@@ -180,31 +144,26 @@ ${explicacao}
 function exemplo(tipo){
 
 const exemplos = {
-
 banco:[
-"Sua conta foi bloqueada. Envie seus dados agora.",
+"Conta bloqueada. Envie seus dados.",
 "Confirme seu CPF imediatamente.",
-"Conta suspensa, atualize informações."
+"Acesso suspenso, atualize dados."
 ],
-
 premio:[
-"Você ganhou um prêmio! Clique aqui.",
-"Parabéns! Retire seu dinheiro agora.",
+"Você ganhou prêmio!",
+"Retire seu dinheiro agora!",
 "Última chance de ganhar!"
 ],
-
 fake:[
-"URGENTE: bancos vão fechar amanhã!",
-"Nova lei vai tirar dinheiro das contas.",
-"Alerta geral no país!"
+"URGENTE bancos vão fechar!",
+"Nova lei vai tirar dinheiro.",
+"Alerta geral!"
 ],
-
 pix:[
-"Faz um PIX urgente agora!",
-"Me manda dinheiro rápido por favor.",
-"Transferência necessária imediatamente."
+"PIX urgente agora!",
+"Me manda dinheiro rápido!",
+"Transferência necessária!"
 ]
-
 };
 
 let lista = exemplos[tipo];
@@ -216,53 +175,46 @@ document.getElementById("mensagem").value = texto;
 
 // ================= TREINAMENTO =================
 const perguntas = [
-{t:"PIX urgente preciso agora",g:true},
-{t:"Reunião amanhã às 10h",g:false},
-{t:"Você ganhou um prêmio clique aqui",g:true},
-{t:"Envie seu CPF para confirmar",g:true},
-{t:"Atualização de sistema amanhã",g:false},
-
-{t:"Mãe troquei de número, me manda dinheiro aqui",g:true},
-{t:"Seu cartão foi clonado, confirme seus dados agora",g:true},
-{t:"Oi, você pode falar agora?",g:false},
-{t:"Promoção exclusiva, informe seus dados",g:true},
-{t:"Vamos almoçar amanhã?",g:false},
-{t:"Clique para evitar bloqueio da conta",g:true},
-{t:"Seu pacote chegou, acompanhe aqui",g:true},
-{t:"Te ligo mais tarde",g:false}
+{t:"PIX urgente preciso agora",g:true,exp:"Urgência + dinheiro é golpe comum."},
+{t:"Reunião amanhã",g:false,exp:"Mensagem normal."},
+{t:"Você ganhou prêmio",g:true,exp:"Promessa de ganho fácil."},
+{t:"Envie seu CPF",g:true,exp:"Nunca envie dados pessoais."},
+{t:"Vamos almoçar?",g:false,exp:"Mensagem comum."},
+{t:"Mãe troquei de número manda dinheiro",g:true,exp:"Golpe do familiar."},
+{t:"Seu cartão foi clonado confirme dados",g:true,exp:"Banco não pede isso."},
+{t:"Te ligo depois",g:false,exp:"Sem risco."}
 ];
 
-let atual = 0;
-let acertos = 0;
-let total = 0;
+let atual=0;
+let acertos=0;
+let total=0;
 
 function novaPergunta(){
 atual = Math.floor(Math.random()*perguntas.length);
 document.getElementById("treinoTexto").innerText = perguntas[atual].t;
 }
 
-function responder(resposta){
+function responder(r){
 
-const feedback = document.getElementById("feedbackTreino");
+const f = document.getElementById("feedbackTreino");
 
 total++;
 
-if(resposta === perguntas[atual].g){
+if(r === perguntas[atual].g){
 acertos++;
-feedback.innerHTML = "✅ Acertou!";
-feedback.style.color = "green";
+f.innerHTML = "✅ Acertou! " + perguntas[atual].exp;
+f.style.color="green";
 }else{
-feedback.innerHTML = "❌ Era golpe!";
-feedback.style.color = "red";
+f.innerHTML = "❌ Errou! " + perguntas[atual].exp;
+f.style.color="red";
 }
 
-let porcentagem = Math.round((acertos/total)*100);
+let p = Math.round((acertos/total)*100);
 
-document.getElementById("barraProgresso").style.width = porcentagem + "%";
-document.getElementById("textoProgresso").innerText =
-acertos + " de " + total + " (" + porcentagem + "%)";
+document.getElementById("barraProgresso").style.width = p+"%";
+document.getElementById("textoProgresso").innerText = acertos+" de "+total;
 
-setTimeout(novaPergunta, 1000);
+setTimeout(novaPergunta,1500);
 
 }
 
