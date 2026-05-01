@@ -7,56 +7,51 @@
 
 <style>
 body{
-  font-family: Arial;
-  background: linear-gradient(135deg,#eef4ff,#f9fbff);
-  text-align:center;
-  padding:20px;
+font-family:Arial;
+background:linear-gradient(135deg,#eef4ff,#f9fbff);
+text-align:center;
+padding:20px;
 }
 
 .container{
-  max-width:600px;
-  margin:auto;
-  background:white;
-  padding:25px;
-  border-radius:12px;
-  box-shadow:0 6px 18px rgba(0,0,0,0.08);
+max-width:600px;
+margin:auto;
+background:white;
+padding:25px;
+border-radius:12px;
+box-shadow:0 6px 18px rgba(0,0,0,0.08);
 }
 
-h1{ color:#1565c0; }
-
 textarea{
-  width:100%;
-  height:120px;
-  border-radius:10px;
-  padding:10px;
-  font-size:16px;
-  border:1px solid #ccc;
+width:100%;
+height:120px;
+border-radius:10px;
+padding:10px;
+border:1px solid #ccc;
 }
 
 button{
-  padding:10px 14px;
-  margin:5px;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-  font-weight:bold;
+padding:10px;
+margin:5px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
 }
 
-.primary{ background:#1976d2; color:white; }
-.secondary{ background:#e3f2fd; color:#1565c0; }
+.primary{background:#1976d2;color:white;}
+.secondary{background:#e3f2fd;color:#1565c0;}
 
 .result{
-  margin-top:20px;
-  padding:15px;
-  border-radius:10px;
-  text-align:left;
+margin-top:20px;
+padding:15px;
+border-radius:10px;
+text-align:left;
 }
 
-.baixo{ background:#e8f5e9; border-left:5px solid #4caf50; }
-.medio{ background:#fffde7; border-left:5px solid #ffb300; }
-.alto{ background:#ffebee; border-left:5px solid #f44336; }
-
-#feedbackTreino{ margin-top:10px; font-weight:bold; }
+.baixo{background:#e8f5e9;border-left:5px solid green;}
+.medio{background:#fffde7;border-left:5px solid orange;}
+.alto{background:#ffebee;border-left:5px solid red;}
 </style>
 </head>
 
@@ -65,41 +60,37 @@ button{
 <div class="container">
 
 <h1>🛡️ Escudo Digital</h1>
-<p>Detecta golpes e ajuda você a não cair neles.</p>
 
-<textarea id="mensagem" placeholder="Digite ou cole a mensagem"></textarea>
+<textarea id="mensagem" placeholder="Digite a mensagem"></textarea>
 
 <br>
-<button class="primary" onclick="analisar()">🔎 Analisar mensagem</button>
-<button class="secondary" onclick="gerarMensagem()">✨ Gerar mensagem</button>
+<button class="primary" onclick="analisar()">🔎 Analisar</button>
+<button class="secondary" onclick="gerarMensagem()">✨ Gerar</button>
 
 <br>
 <button class="secondary" onclick="gerarPorNivel('alto')">🔴 Golpe</button>
 <button class="secondary" onclick="gerarPorNivel('medio')">🟡 Suspeita</button>
 <button class="secondary" onclick="gerarPorNivel('baixo')">🟢 Normal</button>
 
-<h3 style="margin-top:20px;">⚠️ Exemplos de golpes</h3>
-
-<button class="secondary" onclick="exemplo('banco')">🏦 Banco</button>
-<button class="secondary" onclick="exemplo('premio')">🎁 Prêmio</button>
-<button class="secondary" onclick="exemplo('fake')">📢 Fake News</button>
+<h3>⚠️ Exemplos</h3>
+<button onclick="exemplo('banco')">🏦 Banco</button>
+<button onclick="exemplo('premio')">🎁 Prêmio</button>
+<button onclick="exemplo('fake')">📢 Fake News</button>
 
 <div id="resultado" class="result"></div>
 
-<h3 style="margin-top:25px;">🧠 Treinamento para não cair em golpes</h3>
-<p id="treinoTexto" style="font-weight:bold;"></p>
+<h3>🧠 Treinamento para não cair em golpes</h3>
+<p id="treinoTexto"></p>
 
-<button onclick="responder(true)">❌ É golpe</button>
-<button onclick="responder(false)">✔ É seguro</button>
+<button onclick="responder(true)">❌ Golpe</button>
+<button onclick="responder(false)">✔ Seguro</button>
 
 <p id="feedbackTreino"></p>
 
-<div>
 <div style="background:#ddd;height:18px;border-radius:10px;">
-<div id="barraProgresso" style="height:100%;width:0%;background:#4caf50;border-radius:10px;"></div>
+<div id="barra" style="height:100%;width:0%;background:green;border-radius:10px;"></div>
 </div>
-<p id="textoProgresso">0 de 0</p>
-</div>
+<p id="progresso">0 de 0</p>
 
 </div>
 
@@ -110,192 +101,173 @@ function normalizar(txt){
 return txt.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
 }
 
+// ================= FRASES (35x3) =================
+const frases = {
+alto: [
+"troquei de numero me manda pix urgente","preciso de dinheiro agora urgente",
+"seu cartao foi clonado confirme dados","conta bloqueada envie cpf",
+"clique para evitar bloqueio","envie sua senha agora","ganhou premio informe dados",
+"retire dinheiro agora","transferencia urgente","deposito pendente",
+"seguranca comprometida","codigo invalido confirme","envie foto cartao",
+"acesso negado envie dados","conta sera bloqueada","confirme cpf agora",
+"atualize senha urgente","pix necessario agora","manda dinheiro rapido",
+"liberacao valor pendente","envie dados bancarios","clique liberar acesso",
+"transferencia falhou confirme","confirme identidade urgente",
+"conta em risco","informe senha","codigo invalido",
+"pagamento urgente","ganhe dinheiro rapido","saque urgente",
+"atualize info","envie comprovante","acao obrigatoria",
+"confirme para evitar perda","dinheiro bloqueado"
+],
+
+medio: [
+"verifique conta","atualize dados","clique detalhes","promocao disponivel",
+"beneficio ativo","confirme info","mensagem importante","aviso sistema",
+"acao necessaria","cadastro revisao","novo acesso","info pendente",
+"atualizacao necessaria","oferta especial","promocao limitada",
+"beneficio disponivel","verificacao recomendada","ajuste conta",
+"confirme cadastro","revisao seguranca","nova notificacao",
+"recebeu oferta","aviso importante","atualize cadastro",
+"confirme login","mensagem automatica","sistema detectou",
+"novo alerta","cheque conta","atualizacao disponivel",
+"verifique agora","nova info","confira detalhes","acesso mudou",
+"notificacao sistema"
+],
+
+baixo: [
+"vamos conversar depois","te ligo mais tarde","reuniao amanha","cheguei casa",
+"tudo certo","boa noite","como voce esta","vamos almocar",
+"me ajuda depois","ja viu isso","te mando depois",
+"estou ocupado","falo depois","obrigado","ate amanha",
+"bom dia","boa tarde","chegando ai","me chama depois",
+"vamos marcar","tudo bem","terminou","pode esperar",
+"me avisa","vou sair","cheguei agora","falamos depois",
+"te vejo","vamos estudar","ja fiz","estou aqui",
+"tudo tranquilo","sem problema","pode deixar","combinado"
+]
+};
+
+// ================= PALAVRAS =================
+const palavras = {
+alto:["urgente","agora","senha","cpf","pix","bloqueado","codigo","confirme","transferencia","imediato"],
+medio:["verifique","atualize","aviso","alerta","importante","oferta","promocao","beneficio","notificacao","acesso"]
+};
+
 // ================= IA =================
 function analisar(){
 
-let original = document.getElementById("mensagem").value;
+let texto = normalizar(document.getElementById("mensagem").value);
 
-if(!original){
-document.getElementById("resultado").innerHTML="Digite uma mensagem.";
+if(!texto){
+document.getElementById("resultado").innerHTML="Digite algo";
 return;
 }
 
-let texto = normalizar(original);
+let risco=0;
+let motivos=[];
 
-let risco = 0;
-let motivos = [];
-
-// PADRÕES
-const fortes = [
-/troquei.*numero/,
-/manda.*dinheiro/,
-/pix.*urgente/,
-/cartao.*clonado/,
-/confirme.*dados/,
-/envie.*cpf/,
-/envie.*senha/,
-/conta.*bloqueada/,
-/ganhou.*premio/,
-/transferencia.*urgente/,
-/seguranca.*comprometida/
-];
-
-const medios = [
-/urgente/,/agora/,/clique/,/link/,/promocao/,/beneficio/,/pix/,/dinheiro/
-];
-
-fortes.forEach(r=>{
-if(r.test(texto)){ risco+=45; motivos.push("Padrão forte de golpe"); }
+// FRASES
+frases.alto.forEach(f=>{
+if(texto.includes(f)){risco+=40;motivos.push("Frase forte");}
+});
+frases.medio.forEach(f=>{
+if(texto.includes(f)){risco+=15;motivos.push("Frase suspeita");}
 });
 
-medios.forEach(r=>{
-if(r.test(texto)){ risco+=12; motivos.push("Sinal suspeito"); }
+// PALAVRAS
+palavras.alto.forEach(p=>{
+if(texto.includes(p)){risco+=15;motivos.push("Palavra forte: "+p);}
 });
-
-// CONTEXTO
-if(texto.includes("urgente") && texto.includes("pix")){
-risco+=40; motivos.push("Urgência + dinheiro");
-}
-
-if(texto.includes("dados") && texto.includes("confirme")){
-risco+=35; motivos.push("Pedido de dados");
-}
+palavras.medio.forEach(p=>{
+if(texto.includes(p)){risco+=6;motivos.push("Palavra suspeita: "+p);}
+});
 
 if(risco>100) risco=100;
+if(risco<10) risco=10;
 
-// NÍVEL
 let nivel = risco<30?"🟢 Seguro":risco<70?"🟡 Atenção":"🔴 Golpe";
 let classe = risco<30?"baixo":risco<70?"medio":"alto";
 
 let r = document.getElementById("resultado");
 r.className="result "+classe;
 
-// TIPO
-let tipo="Indefinido";
-
-if(texto.includes("troquei")||texto.includes("mãe")) tipo="Golpe do familiar";
-else if(texto.includes("cartao")||texto.includes("conta")) tipo="Golpe bancário";
-else if(texto.includes("premio")) tipo="Golpe de prêmio falso";
-else if(texto.includes("pix")) tipo="Golpe com PIX";
-else if(texto.includes("link")) tipo="Golpe com link";
-
-// EXPLICAÇÃO
-let explicacao = risco<30
-? "Essa mensagem parece normal, mas ainda é importante manter atenção."
-: risco<70
-? "Essa mensagem tem sinais suspeitos e pode ser um golpe."
-: "Essa mensagem tem vários sinais claros de golpe.";
-
-// RESPOSTA HUMANA
 r.innerHTML=`
 <h3>${nivel}</h3>
-
-<p><b>📌 Tipo identificado:</b> ${tipo}</p>
-
-<p><b>🔎 Entenda:</b><br>
-${explicacao}
-</p>
-
-<p><b>⚠️ Sinais encontrados:</b><br>
-${motivos.join("<br>")||"Nenhum sinal forte"}
-</p>
-
-<p><b>👉 O que fazer:</b><br>
-• Não clique em links<br>
-• Não envie dinheiro<br>
-• Não informe dados<br>
-• Confirme fora da conversa
-</p>
+<p><b>Risco:</b> ${risco}%</p>
+<p>${motivos.join("<br>")}</p>
+<p><b>O que fazer:</b><br>
+Não clique em links<br>
+Não envie dinheiro<br>
+Confirme fora da conversa</p>
 `;
 }
 
 // ================= GERAR =================
 function gerarMensagem(){
-const m=[
-"Mãe troquei de número me manda dinheiro",
-"PIX urgente preciso agora",
-"Seu cartão foi clonado confirme dados",
-"Promoção exclusiva informe dados",
-"Conta bloqueada envie CPF",
-"Você ganhou prêmio clique aqui",
-"Atualize seus dados agora",
-"Transferência urgente necessária",
-"Ação urgente necessária",
-"Seu pacote chegou clique aqui"
-];
-document.getElementById("mensagem").value = m[Math.floor(Math.random()*m.length)];
-}
-
-// GERAR POR NÍVEL
-function gerarPorNivel(n){
-const modelos={
-alto:["PIX urgente agora","Conta bloqueada envie dados","Cartão clonado confirme"],
-medio:["Verifique sua conta","Atualize seus dados","Promoção disponível"],
-baixo:["Te ligo depois","Reunião amanhã","Tudo certo"]
-};
+let todas=[...frases.alto,...frases.medio,...frases.baixo];
 document.getElementById("mensagem").value =
-modelos[n][Math.floor(Math.random()*modelos[n].length)];
+todas[Math.floor(Math.random()*todas.length)];
 }
 
-// EXEMPLOS
-function exemplo(tipo){
-const exemplos={
+function gerarPorNivel(n){
+let lista=frases[n];
+document.getElementById("mensagem").value =
+lista[Math.floor(Math.random()*lista.length)];
+}
+
+// ================= EXEMPLOS =================
+function exemplo(t){
+const e={
 banco:[
 "Seu banco detectou atividade suspeita, confirme seus dados",
-"Conta bloqueada, envie CPF para desbloquear",
-"Cartão clonado, atualize suas informações agora"
+"Conta bloqueada, envie CPF para desbloquear"
 ],
 premio:[
-"Parabéns! Você ganhou um prêmio, clique para receber",
-"Você foi selecionado, informe seus dados para retirar o prêmio",
-"Última chance de resgatar seu prêmio exclusivo"
+"Você ganhou um prêmio, clique para receber",
+"Informe seus dados para retirar o prêmio"
 ],
 fake:[
-"URGENTE: bancos vão fechar amanhã, saque seu dinheiro",
-"Nova lei permite ganhar dinheiro fácil, aproveite",
-"Alerta geral: governo vai bloquear contas hoje"
+"URGENTE bancos vão fechar amanhã",
+"Nova lei permite ganhar dinheiro fácil"
 ]
 };
+let lista=e[t];
 document.getElementById("mensagem").value =
-exemplos[tipo][Math.floor(Math.random()*3)];
+lista[Math.floor(Math.random()*lista.length)];
 }
 
-// TREINO
-const perguntas=[
-{t:"PIX urgente preciso agora",g:true},
-{t:"Reunião amanhã",g:false},
-{t:"Você ganhou prêmio",g:true},
-{t:"Vamos almoçar?",g:false}
+// ================= TREINO =================
+const treino=[
+{t:"pix urgente agora",g:true},
+{t:"reuniao amanha",g:false},
+{t:"ganhou premio",g:true},
+{t:"vamos almocar",g:false}
 ];
 
-let atual=0,acertos=0,total=0;
+let i=0,a=0,t=0;
 
-function novaPergunta(){
-atual=Math.floor(Math.random()*perguntas.length);
-document.getElementById("treinoTexto").innerText=perguntas[atual].t;
+function nova(){
+i=Math.floor(Math.random()*treino.length);
+document.getElementById("treinoTexto").innerText=treino[i].t;
 }
 
 function responder(r){
-total++;
+t++;
 let f=document.getElementById("feedbackTreino");
 
-if(r===perguntas[atual].g){
-acertos++;
-f.innerHTML="✅ Acertou";
-f.style.color="green";
+if(r===treino[i].g){
+a++;f.innerHTML="✅ Acertou";f.style.color="green";
 }else{
-f.innerHTML="❌ Errou";
-f.style.color="red";
+f.innerHTML="❌ Errou";f.style.color="red";
 }
 
-let p=Math.round((acertos/total)*100);
-document.getElementById("barraProgresso").style.width=p+"%";
-document.getElementById("textoProgresso").innerText=acertos+" de "+total;
+let p=Math.round((a/t)*100);
+document.getElementById("barra").style.width=p+"%";
+document.getElementById("progresso").innerText=a+" de "+t;
 
-setTimeout(novaPergunta,1500);
+setTimeout(nova,1200);
 }
 
-novaPergunta();
+nova();
 
 </script>
 
