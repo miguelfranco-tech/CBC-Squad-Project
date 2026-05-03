@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Escudo Digital IA</title>
+<title>Escudo Digital</title>
 
 <style>
 body{
@@ -14,7 +14,7 @@ text-align:center;
 }
 
 .container{
-max-width:700px;
+max-width:750px;
 margin:auto;
 background:white;
 padding:20px;
@@ -23,9 +23,10 @@ border-radius:12px;
 
 textarea{
 width:100%;
-height:130px;
+height:120px;
 padding:10px;
 border-radius:8px;
+margin-bottom:10px;
 }
 
 button{
@@ -49,6 +50,13 @@ text-align:left;
 .baixo{background:#e8f5e9;}
 .medio{background:#fffde7;}
 .alto{background:#ffebee;}
+
+.treino{
+margin-top:25px;
+background:#f5f5f5;
+padding:15px;
+border-radius:10px;
+}
 </style>
 </head>
 
@@ -58,21 +66,40 @@ text-align:left;
 
 <h2>🛡️ Escudo Digital</h2>
 
-<textarea id="mensagem" placeholder="Digite a mensagem"></textarea><br>
+<textarea id="mensagem" placeholder="Digite a mensagem"></textarea>
+
+<br>
 
 <button class="primary" onclick="analisar()">🔎 Analisar</button>
 <button class="secondary" onclick="gerarMensagem()">✨ Gerar</button>
+
+<br>
+
 <button onclick="exemplo('banco')">🏦 Banco</button>
 <button onclick="exemplo('premio')">🎁 Prêmio</button>
 <button onclick="exemplo('fake')">📰 Fake News</button>
 
 <div id="resultado" class="result"></div>
 
+<!-- ================= TREINAMENTO ================= -->
+<div class="treino">
+
+<h3>🎓 Treinamento para não cair em golpes</h3>
+
+<p id="fraseTreino"></p>
+
+<button onclick="responderTreino(true)">❌ É golpe</button>
+<button onclick="responderTreino(false)">✅ É seguro</button>
+
+<p id="feedback"></p>
+
+</div>
+
 </div>
 
 <script>
 
-// ================= NORMALIZAÇÃO =================
+// ================= NORMALIZAR =================
 function normalizar(txt){
 return txt.toLowerCase()
 .normalize("NFD")
@@ -80,87 +107,64 @@ return txt.toLowerCase()
 .replace(/[^\w\s]/g,"");
 }
 
-// ================= CONTADOR =================
-function contar(grupo, texto){
-return grupo.filter(p => texto.includes(p)).length;
+// ================= CONTAR =================
+function contar(lista,texto){
+return lista.filter(p=>texto.includes(p)).length;
 }
 
-// ================= BASE DE PALAVRAS =================
-const grupos = {
-
-dinheiro:[
-"pix","dinheiro","transferencia","deposito","pagamento","valor","grana","saldo","saque","credito"
-],
-
-dados:[
-"cpf","senha","codigo","cartao","dados","confirmar","login","documento","identidade","validar"
-],
-
-urgencia:[
-"urgente","agora","imediato","rapido","ja","hoje","mesmo","sem demora","na hora","correndo"
-],
-
-premio:[
-"premio","ganhou","beneficio","sorteio","bonus","recompensa","gratuito","oferta","ganhador"
-],
-
-acao:[
-"mande","envie","faca","confirme","clique","acesse","responda","digite","verifique"
-],
-
-banco:[
-"conta","banco","cartao","acesso","bloqueado","suspenso","cancelado","seguranca","app"
-]
-
+// ================= PESOS =================
+const pesos = {
+pix:25, dinheiro:20, transferencia:20,
+cpf:30, senha:35, codigo:30,
+urgente:15, agora:10,
+premio:20, ganhou:20,
+clique:15, envie:20, confirme:20,
+banco:20, conta:20, bloqueado:25
 };
 
-// ================= FRASES DE GOLPE =================
-const frasesAltas = [
-"troquei de numero me manda pix urgente",
+// ================= GRUPOS =================
+const grupos = {
+dinheiro:["pix","dinheiro","transferencia","deposito"],
+dados:["cpf","senha","codigo","cartao"],
+urgencia:["urgente","agora","imediato","ja"],
+acao:["mande","envie","clique","confirme"],
+premio:["premio","ganhou","beneficio"],
+banco:["banco","conta","bloqueado"]
+};
+
+// ================= FRASES REAIS =================
+const frasesGolpe = [
+"me manda pix urgente",
+"conta bloqueada confirme cpf",
 "ganhe dinheiro facil agora",
-"conta bloqueada envie cpf",
-"premio liberado informe dados",
-"clique para receber dinheiro",
-"seu cartao foi clonado confirme dados",
 "envie codigo sms agora",
-"liberacao pendente confirme dados",
-"pix urgente preciso agora",
-"envie dados bancarios imediatamente",
-"pagamento urgente necessario",
-"seguranca comprometida atualize dados",
-"voce foi selecionado envie dados",
-"clique e receba agora",
-"validacao obrigatoria urgente",
-"liberacao de valor agora",
-"conta em risco confirme dados",
-"seu acesso foi bloqueado",
-"beneficio liberado informe cpf",
-"ganhador confirmado clique agora"
+"clique para receber premio",
+"troquei de numero me manda dinheiro"
 ];
 
 // ================= EXEMPLOS =================
 const exemplos = {
 banco:[
-"Conta bloqueada, confirme CPF imediatamente",
-"Acesso suspeito detectado, atualize seus dados"
+"Conta bloqueada, confirme CPF",
+"Acesso suspeito detectado"
 ],
 premio:[
-"Você ganhou um prêmio, informe seus dados",
-"Retire seu prêmio clicando aqui agora"
+"Você ganhou prêmio, informe dados",
+"Retire prêmio agora clicando"
 ],
 fake:[
-"Nova lei libera dinheiro fácil para todos",
-"Bancos vão fechar amanhã, saque tudo"
+"Nova lei libera dinheiro fácil",
+"Governo liberou dinheiro para todos"
 ]
 };
 
 // ================= GERAR =================
 function gerarMensagem(){
 let todas = [
-...frasesAltas,
-"vamos almoçar amanhã",
-"te ligo depois",
-"reunião hoje"
+...frasesGolpe,
+"vamos sair amanhã",
+"bom dia tudo bem",
+"te ligo depois"
 ];
 
 document.getElementById("mensagem").value =
@@ -174,7 +178,7 @@ document.getElementById("mensagem").value =
 lista[Math.floor(Math.random()*lista.length)];
 }
 
-// ================= IA PRINCIPAL =================
+// ================= ANALISAR =================
 function analisar(){
 
 let input = document.getElementById("mensagem").value;
@@ -190,11 +194,10 @@ let risco = 0;
 let motivos = [];
 let tipo = "";
 
-// ================= FRASES =================
-frasesAltas.forEach(f=>{
-if(texto.includes(f)){
-risco += 50;
-motivos.push("🚨 Frase típica de golpe");
+// ================= PESOS =================
+Object.keys(pesos).forEach(p=>{
+if(texto.includes(p)){
+risco += pesos[p];
 }
 });
 
@@ -204,71 +207,62 @@ risco = 95;
 tipo = "Golpe do falso número";
 }
 
-if(/(premio|ganhou|beneficio).*(cpf|dados|senha)/.test(texto)){
+if(/(premio|ganhou).*(cpf|dados|senha)/.test(texto)){
 risco = Math.max(risco,90);
-tipo = "Golpe de prêmio falso";
+tipo = "Golpe de prêmio";
 }
 
-if(/(conta|banco).*(bloqueado|suspenso).*(cpf|confirmar)/.test(texto)){
-risco = Math.max(risco,92);
-tipo = "Golpe bancário";
+// ================= DINHEIRO FÁCIL =================
+if(/dinheiro.*facil|ganhar.*facil/.test(texto)){
+risco = Math.max(risco,85);
+tipo = "Dinheiro fácil";
+motivos.push("Promessa irreal");
 }
 
-// ================= SCORE =================
-let score =
-contar(grupos.dinheiro,texto)*3 +
-contar(grupos.dados,texto)*4 +
-contar(grupos.urgencia,texto)*2 +
-contar(grupos.premio,texto)*3 +
-contar(grupos.acao,texto)*2 +
-contar(grupos.banco,texto)*3;
+// ================= FAKE NEWS =================
+if(/nova lei|governo liberou/.test(texto)){
+risco += 30;
+tipo = "Fake News";
+motivos.push("Informação sensacionalista");
+}
 
-risco += score;
-
-// ================= PEDIDO DIRETO =================
+// ================= COMBO =================
 if(contar(grupos.acao,texto)>=1 &&
-(contar(grupos.dinheiro,texto)>=1 || contar(grupos.dados,texto)>=1)){
+(contar(grupos.dados,texto)>=1 || contar(grupos.dinheiro,texto)>=1)){
 risco = Math.max(risco,90);
-motivos.push("🚨 Pedido direto suspeito");
+motivos.push("Pedido direto");
 }
 
 // ================= URGÊNCIA =================
 if(contar(grupos.urgencia,texto)>=2){
 risco += 20;
-motivos.push("⚠️ Pressão de urgência");
+motivos.push("Urgência");
 }
 
 // ================= EMOÇÃO =================
-const emocao = [
-"me ajuda","por favor","socorro","preciso",
-"urgente","agora","nao posso esperar"
-];
-
-if(contar(emocao,texto)>=2){
+if(contar(["me ajuda","socorro","por favor"],texto)>=2){
 risco += 25;
-motivos.push("⚠️ Tom emocional forte");
-}
-
-// ================= REPETIÇÃO =================
-let repeticoes = (texto.match(/urgente|agora/g)||[]).length;
-if(repeticoes>=3){
-risco += 25;
-motivos.push("🚨 Repetição de urgência");
+motivos.push("Pressão emocional");
 }
 
 // ================= CURTA =================
-let palavras = texto.split(" ").length;
-
-if(palavras<=6 &&
-(texto.includes("pix")||texto.includes("cpf")||texto.includes("dados"))){
+if(texto.split(" ").length <=6 &&
+(texto.includes("pix")||texto.includes("cpf"))){
 risco += 25;
-motivos.push("⚠️ Mensagem curta suspeita");
+motivos.push("Mensagem curta suspeita");
 }
 
-// ================= PROTEÇÃO =================
-if(risco < 30 &&
-(texto.includes("pix")||texto.includes("cpf")||texto.includes("premio"))){
-risco = 40;
+// ================= FRASES =================
+frasesGolpe.forEach(f=>{
+if(texto.includes(f)){
+risco += 40;
+motivos.push("Frase típica de golpe");
+}
+});
+
+// ================= TRAVA =================
+if((texto.includes("pix")||texto.includes("cpf")) && risco<40){
+risco = 50;
 }
 
 // ================= FINAL =================
@@ -283,14 +277,6 @@ let classe =
 risco<30?"baixo":
 risco<70?"medio":"alto";
 
-let explicacao =
-risco>=70
-? "A mensagem apresenta vários sinais típicos de golpe, como urgência, pedido direto ou promessa irreal."
-: risco>=30
-? "A mensagem possui alguns sinais suspeitos. É importante verificar antes de confiar."
-: "A mensagem parece segura, mas mantenha atenção.";
-
-// ================= RESULTADO =================
 let r = document.getElementById("resultado");
 
 r.className="result "+classe;
@@ -298,24 +284,68 @@ r.className="result "+classe;
 r.innerHTML=`
 <h3>${nivel}</h3>
 <p><b>Risco:</b> ${risco}%</p>
-<p><b>Tipo:</b> ${tipo || "Não identificado"}</p>
+<p><b>Tipo:</b> ${tipo||"Não identificado"}</p>
 
-<p><b>Explicação:</b><br>${explicacao}</p>
-
-<p><b>Sinais:</b><br>
-${motivos.join("<br>") || "Nenhum sinal forte"}
+<p><b>Explicação:</b>
+${risco>70 ? "Mensagem com fortes sinais de golpe." :
+risco>30 ? "Mensagem suspeita, tenha cuidado." :
+"Mensagem aparentemente segura."}
 </p>
 
-<p><b>O que fazer agora:</b><br>
+<p><b>Sinais:</b><br>
+${motivos.join("<br>") || "Nenhum forte"}
+</p>
+
+<p><b>O que fazer:</b><br>
 • Não envie dinheiro<br>
-• Não informe dados pessoais<br>
-• Não clique em links suspeitos<br>
+• Não informe dados<br>
 • Confirme com a pessoa real
 </p>
 `;
+
 }
+
+// ================= TREINAMENTO =================
+const treino = [
+"me manda pix urgente",
+"vamos jantar amanhã",
+"ganhe dinheiro fácil agora",
+"bom dia tudo bem",
+"envie código agora",
+"te vejo mais tarde",
+"clique para prêmio",
+"reunião às 14h"
+];
+
+let atual = "";
+
+function novaFrase(){
+atual = treino[Math.floor(Math.random()*treino.length)];
+document.getElementById("fraseTreino").innerText = atual;
+document.getElementById("feedback").innerText = "";
+}
+
+function responderTreino(resp){
+
+let suspeita =
+/pix|cpf|premio|urgente|dados|dinheiro/.test(atual);
+
+if(resp && suspeita){
+document.getElementById("feedback").innerText="✅ Correto!";
+}
+else if(!resp && !suspeita){
+document.getElementById("feedback").innerText="✅ Correto!";
+}
+else{
+document.getElementById("feedback").innerText="❌ Revise os sinais.";
+}
+
+setTimeout(novaFrase,1500);
+}
+
+novaFrase();
 
 </script>
 
 </body>
-</html>
+  </html>
