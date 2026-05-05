@@ -7,15 +7,23 @@
 
 <style>
 
-/* ================= BASE ================= */
+/* ================= RESET ================= */
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+/* ================= BODY ================= */
 body{
 font-family:Arial, sans-serif;
 background:linear-gradient(135deg,#e3f2fd,#ffffff);
-margin:0;
 display:flex;
 justify-content:center;
+min-height:100vh;
 }
 
+/* ================= CONTAINER ================= */
 .container{
 width:90%;
 max-width:900px;
@@ -23,7 +31,12 @@ margin-top:40px;
 text-align:center;
 }
 
-/* ================= INPUT ================= */
+/* ================= TÍTULO ================= */
+h2{
+margin-bottom:15px;
+}
+
+/* ================= TEXTAREA ================= */
 textarea{
 width:100%;
 height:120px;
@@ -42,15 +55,22 @@ border:none;
 border-radius:10px;
 cursor:pointer;
 font-weight:bold;
-transition:0.3s;
+transition:0.2s;
 }
 
 button:hover{
 transform:scale(1.05);
 }
 
-.primary{background:#2196f3;color:white;}
-.secondary{background:#bbdefb;}
+.primary{
+background:#2196f3;
+color:white;
+}
+
+.secondary{
+background:#e3f2fd;
+color:#0d47a1;
+}
 
 /* ================= RESULTADO ================= */
 .resultado-box{
@@ -60,11 +80,11 @@ border-radius:12px;
 margin-top:20px;
 box-shadow:0 5px 15px rgba(0,0,0,0.1);
 text-align:left;
-animation:fade .5s;
+animation:fade .4s ease;
 }
 
 @keyframes fade{
-from{opacity:0;transform:translateY(10px)}
+from{opacity:0; transform:translateY(10px);}
 to{opacity:1;}
 }
 
@@ -81,7 +101,7 @@ overflow:hidden;
 .risk-fill{
 height:100%;
 border-radius:10px;
-transition:width .8s;
+transition:width .6s ease;
 }
 
 /* ================= TREINO ================= */
@@ -112,9 +132,16 @@ box-shadow:0 5px 15px rgba(0,0,0,0.08);
 <button class="primary" onclick="analisar()">🔍 Analisar</button>
 <button class="secondary" onclick="gerar()">✨ Gerar exemplo</button>
 
+<br>
+
+<!-- 🔥 BOTÕES ADICIONADOS -->
+<button class="secondary" onclick="exemplo('banco')">🏦 Golpe Bancário</button>
+<button class="secondary" onclick="exemplo('premio')">🎁 Golpe de Prêmio</button>
+<button class="secondary" onclick="exemplo('fake')">📰 Fake News</button>
+
 <div id="resultado"></div>
 
-<!-- ================= TREINAMENTO ================= -->
+<!-- ================= TREINO ================= -->
 <div class="treino">
 
 <h3>🎓 Treinamento Inteligente</h3>
@@ -134,14 +161,14 @@ box-shadow:0 5px 15px rgba(0,0,0,0.08);
 
 <script>
 
-/* ================= SANITIZAÇÃO ================= */
+/* ================= SANITIZAR ================= */
 function safeHTML(str){
 return str.replace(/[<>&"]/g,function(c){
 return {"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c];
 });
 }
 
-/* ================= NORMALIZAÇÃO ================= */
+/* ================= NORMALIZAR ================= */
 function normalizar(txt){
 return txt.toLowerCase()
 .replace(/0/g,"o")
@@ -155,7 +182,7 @@ return txt.toLowerCase()
 .replace(/[^\w\s]/g," ");
 }
 
-/* ================= IA PRINCIPAL ================= */
+/* ================= IA ================= */
 function analisarMensagem(texto){
 
 texto = normalizar(texto);
@@ -181,7 +208,7 @@ const padroes = [
 
 ];
 
-/* ===== ANALISAR PADRÕES ===== */
+/* ===== ANALISAR ===== */
 padroes.forEach(p=>{
 if(p.r.test(texto)){
 risco += p.p;
@@ -190,21 +217,21 @@ explicacao.push("• "+p.e);
 }
 });
 
-/* ===== COMBINAÇÕES INTELIGENTES ===== */
+/* ===== COMBINAÇÕES ===== */
 if(/\bpix\b|\bdinheiro\b/.test(texto) && /\burgente\b|\bagora\b/.test(texto)){
 risco += 25;
-explicacao.push("• Combinação de dinheiro com urgência (golpe comum).");
+explicacao.push("• Dinheiro + urgência (golpe clássico).");
 }
 
 if(/\bcodigo\b/.test(texto) && /\benvie\b|\bmande\b/.test(texto)){
 risco += 30;
-explicacao.push("• Pedido direto de código de verificação.");
+explicacao.push("• Pedido de código de verificação.");
 }
 
 /* ===== LIMITAR ===== */
 risco = Math.min(risco,100);
 
-/* ===== CLASSIFICAÇÃO ===== */
+/* ===== CLASSIFICAR ===== */
 let nivel =
 risco>=70?"🔴 Alto risco":
 risco>=40?"🟡 Atenção":"🟢 Seguro";
@@ -214,7 +241,7 @@ let prevencao = [
 "Não envie dinheiro sem confirmar",
 "Não compartilhe dados pessoais",
 "Não clique em links desconhecidos",
-"Confirme com a fonte oficial"
+"Confirme com fontes oficiais"
 ];
 
 return {risco,nivel,sinais,explicacao,prevencao};
@@ -254,12 +281,12 @@ document.getElementById("resultado").innerHTML = `
 
 <p><b>Risco:</b> ${res.risco}%</p>
 
-<p><b>Sinais detectados:</b><br>
+<p><b>Sinais:</b><br>
 ${res.sinais.length ? res.sinais.map(s=>"• "+safeHTML(s)).join("<br>") : "Nenhum"}
 </p>
 
 <p><b>Explicação:</b><br>
-${res.explicacao.length ? res.explicacao.map(e=>safeHTML(e)).join("<br>") : "Nenhum sinal forte detectado"}
+${res.explicacao.length ? res.explicacao.map(e=>safeHTML(e)).join("<br>") : "Nenhum sinal forte"}
 </p>
 
 <p><b>Como evitar:</b><br>
@@ -268,83 +295,83 @@ ${res.prevencao.map(p=>"• "+p).join("<br>")}
 
 </div>
 `;
-
 }
 
 /* ================= GERAR ================= */
 function gerar(){
 
-const exemplos = [
-"URGENTE: troquei de número, me manda um pix agora por favor",
-"Você ganhou um prêmio exclusivo, clique no link agora",
-"Envie seu código de verificação imediatamente",
-"Reunião confirmada amanhã às 14h",
-"Nova lei libera dinheiro para todos"
+const lista = [
+"URGENTE: me manda um pix agora",
+"Você ganhou um prêmio, clique no link",
+"Envie seu código imediatamente",
+"Reunião amanhã às 14h",
+"Nova lei libera dinheiro"
 ];
 
 document.getElementById("entrada").value =
-exemplos[Math.floor(Math.random()*exemplos.length)];
+lista[Math.floor(Math.random()*lista.length)];
 
 }
 
-/* ================= TREINAMENTO ================= */
+/* ================= EXEMPLOS ================= */
+function exemplo(tipo){
+
+const exemplos = {
+
+banco:[
+"URGENTE: sua conta foi bloqueada, confirme seu CPF agora",
+"Acesso suspeito detectado, envie seu código de verificação"
+],
+
+premio:[
+"Parabéns! Você ganhou um prêmio, clique no link",
+"Você foi selecionado para um benefício, informe seus dados"
+],
+
+fake:[
+"Nova lei libera dinheiro para todos",
+"Informação vazada: ninguém fala sobre isso"
+]
+
+};
+
+let lista = exemplos[tipo];
+
+document.getElementById("entrada").value =
+lista[Math.floor(Math.random()*lista.length)];
+
+}
+
+/* ================= TREINO ================= */
 let treino = [
 
-{
-t:"URGENTE! Troquei de número e preciso que você me mande um PIX agora.",
-g:true,
-e:"Urgência + dinheiro é padrão clássico de golpe."
-},
-
-{
-t:"Reunião confirmada amanhã às 14h na sala principal.",
-g:false,
-e:"Mensagem comum sem sinais de golpe."
-},
-
-{
-t:"Envie seu código de verificação para evitar bloqueio da conta.",
-g:true,
-e:"Código nunca deve ser compartilhado."
-},
-
-{
-t:"Bom dia, depois te ligo para conversarmos.",
-g:false,
-e:"Mensagem normal."
-},
-
-{
-t:"Você ganhou um prêmio, clique no link para resgatar.",
-g:true,
-e:"Promessa + link = golpe."
-}
+{t:"URGENTE! me manda um PIX agora",g:true,e:"Urgência + dinheiro"},
+{t:"Reunião amanhã às 14h",g:false,e:"Mensagem normal"},
+{t:"Envie seu código agora",g:true,e:"Código nunca deve ser enviado"},
+{t:"Bom dia tudo bem?",g:false,e:"Mensagem comum"}
 
 ];
 
-let atual = 0;
+let atual=0;
 
-/* ===== MOSTRAR TREINO ===== */
 function mostrarTreino(){
 document.getElementById("fraseTreino").innerText = treino[atual].t;
 }
 
 mostrarTreino();
 
-/* ===== RESPONDER ===== */
 function responder(resp){
 
 let correto = treino[atual].g;
 let fb = document.getElementById("feedback");
 
-if(resp === correto){
-fb.innerHTML = `<span class="correct">✅ Correto!</span><br>${treino[atual].e}`;
+if(resp===correto){
+fb.innerHTML=`<span class="correct">✔ Correto!</span> ${treino[atual].e}`;
 }else{
-fb.innerHTML = `<span class="error">❌ Errado!</span><br>${treino[atual].e}`;
+fb.innerHTML=`<span class="error">❌ Errado!</span> ${treino[atual].e}`;
 }
 
-atual++;
-if(atual >= treino.length) atual = 0;
+atual=(atual+1)%treino.length;
 
 setTimeout(()=>{
 fb.innerHTML="";
@@ -353,9 +380,8 @@ mostrarTreino();
 
 }
 
-/* ===== RESET ===== */
 function resetTreino(){
-atual = 0;
+atual=0;
 mostrarTreino();
 document.getElementById("feedback").innerHTML="";
 }
