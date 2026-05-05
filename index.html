@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Escudo Digital IA</title>
+<title>Escudo Digital</title>
 
 <style>
 
@@ -31,7 +31,7 @@ margin-top:40px;
 text-align:center;
 }
 
-/* ================= TÍTULO ================= */
+/* ================= TITULO ================= */
 h2{
 margin-bottom:15px;
 }
@@ -80,11 +80,11 @@ border-radius:12px;
 margin-top:20px;
 box-shadow:0 5px 15px rgba(0,0,0,0.1);
 text-align:left;
-animation:fade .4s ease;
+animation:fade .4s;
 }
 
 @keyframes fade{
-from{opacity:0; transform:translateY(10px);}
+from{opacity:0;transform:translateY(10px);}
 to{opacity:1;}
 }
 
@@ -101,7 +101,7 @@ overflow:hidden;
 .risk-fill{
 height:100%;
 border-radius:10px;
-transition:width .6s ease;
+transition:.6s;
 }
 
 /* ================= TREINO ================= */
@@ -134,14 +134,13 @@ box-shadow:0 5px 15px rgba(0,0,0,0.08);
 
 <br>
 
-<!-- 🔥 BOTÕES ADICIONADOS -->
+<!-- BOTÕES DE EXEMPLOS -->
 <button class="secondary" onclick="exemplo('banco')">🏦 Golpe Bancário</button>
 <button class="secondary" onclick="exemplo('premio')">🎁 Golpe de Prêmio</button>
 <button class="secondary" onclick="exemplo('fake')">📰 Fake News</button>
 
 <div id="resultado"></div>
 
-<!-- ================= TREINO ================= -->
 <div class="treino">
 
 <h3>🎓 Treinamento Inteligente</h3>
@@ -161,14 +160,7 @@ box-shadow:0 5px 15px rgba(0,0,0,0.08);
 
 <script>
 
-/* ================= SANITIZAR ================= */
-function safeHTML(str){
-return str.replace(/[<>&"]/g,function(c){
-return {"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c];
-});
-}
-
-/* ================= NORMALIZAR ================= */
+/* ================= NORMALIZAÇÃO ================= */
 function normalizar(txt){
 return txt.toLowerCase()
 .replace(/0/g,"o")
@@ -191,88 +183,61 @@ let risco = 0;
 let sinais = [];
 let explicacao = [];
 
-/* ===== PADRÕES ===== */
 const padroes = [
 
-{r:/\burgente\b|\bagora\b|\bimediato\b/,p:25,n:"Urgência",e:"Pressão para agir rapidamente."},
-
-{r:/\bganhe dinheiro\b|\brenda extra\b|\blucro facil\b/,p:30,n:"Dinheiro fácil",e:"Promessa irreal de ganho."},
-
-{r:/\bcpf\b|\bsenha\b|\bcodigo\b|\bverificacao\b/,p:40,n:"Dados sensíveis",e:"Solicitação de informações pessoais."},
-
-{r:/\bclique\b|\bacesse\b|\blink\b|http/,p:25,n:"Link suspeito",e:"Possível redirecionamento para site falso."},
-
-{r:/\bbanco\b|\bsuporte\b|\bcentral\b/,p:15,n:"Falsa autoridade",e:"Tentativa de parecer empresa oficial."},
-
-{r:/\bnova lei\b|\bgoverno liberou\b|\bninguem fala\b/,p:30,n:"Fake news",e:"Padrão típico de desinformação viral."}
+{r:/\burgente\b|\bagora\b/,p:25,n:"Urgência",e:"Pressão para agir rápido"},
+{r:/\bcpf\b|\bsenha\b|\bcodigo\b/,p:40,n:"Dados sensíveis",e:"Pedido de informação pessoal"},
+{r:/\blink\b|http/,p:25,n:"Link suspeito",e:"Pode levar a site falso"},
+{r:/\bnova lei\b|\bgoverno liberou\b/,p:30,n:"Fake News",e:"Desinformação comum"},
+{r:/\bganhe dinheiro\b|\blucro facil\b/,p:30,n:"Dinheiro fácil",e:"Promessa irreal"}
 
 ];
 
-/* ===== ANALISAR ===== */
 padroes.forEach(p=>{
 if(p.r.test(texto)){
-risco += p.p;
+risco+=p.p;
 sinais.push(p.n);
 explicacao.push("• "+p.e);
 }
 });
 
-/* ===== COMBINAÇÕES ===== */
-if(/\bpix\b|\bdinheiro\b/.test(texto) && /\burgente\b|\bagora\b/.test(texto)){
-risco += 25;
-explicacao.push("• Dinheiro + urgência (golpe clássico).");
+if(/\bpix\b/.test(texto) && /\burgente\b/.test(texto)){
+risco+=30;
+explicacao.push("• Dinheiro + urgência = golpe clássico");
 }
 
 if(/\bcodigo\b/.test(texto) && /\benvie\b|\bmande\b/.test(texto)){
-risco += 30;
-explicacao.push("• Pedido de código de verificação.");
+risco+=30;
+explicacao.push("• Pedido direto de código");
 }
 
-/* ===== LIMITAR ===== */
-risco = Math.min(risco,100);
+risco=Math.min(risco,100);
 
-/* ===== CLASSIFICAR ===== */
-let nivel =
+let nivel=
 risco>=70?"🔴 Alto risco":
 risco>=40?"🟡 Atenção":"🟢 Seguro";
 
-/* ===== PREVENÇÃO ===== */
-let prevencao = [
-"Não envie dinheiro sem confirmar",
-"Não compartilhe dados pessoais",
-"Não clique em links desconhecidos",
-"Confirme com fontes oficiais"
-];
-
-return {risco,nivel,sinais,explicacao,prevencao};
-
+return {risco,nivel,sinais,explicacao};
 }
 
 /* ================= ANALISAR ================= */
 function analisar(){
 
-let entrada = document.getElementById("entrada").value;
+let entrada=document.getElementById("entrada").value;
 
 if(!entrada){
 alert("Digite uma mensagem!");
 return;
 }
 
-let res = analisarMensagem(entrada);
-mostrar(res);
+let res=analisarMensagem(entrada);
 
-}
-
-/* ================= MOSTRAR ================= */
-function mostrar(res){
-
-let cor =
+let cor=
 res.risco>=70?"#f44336":
 res.risco>=40?"#ff9800":"#4caf50";
 
-document.getElementById("resultado").innerHTML = `
+document.getElementById("resultado").innerHTML=`
 <div class="resultado-box">
-
 <h3>${res.nivel}</h3>
 
 <div class="risk-bar">
@@ -282,93 +247,85 @@ document.getElementById("resultado").innerHTML = `
 <p><b>Risco:</b> ${res.risco}%</p>
 
 <p><b>Sinais:</b><br>
-${res.sinais.length ? res.sinais.map(s=>"• "+safeHTML(s)).join("<br>") : "Nenhum"}
+${res.sinais.map(s=>"• "+s).join("<br>") || "Nenhum"}
 </p>
 
 <p><b>Explicação:</b><br>
-${res.explicacao.length ? res.explicacao.map(e=>safeHTML(e)).join("<br>") : "Nenhum sinal forte"}
+${res.explicacao.join("<br>") || "Nenhum sinal forte"}
 </p>
 
 <p><b>Como evitar:</b><br>
-${res.prevencao.map(p=>"• "+p).join("<br>")}
+• Não envie dinheiro<br>
+• Não compartilhe dados<br>
+• Não clique em links desconhecidos<br>
+• Confirme a informação
 </p>
 
-</div>
-`;
+</div>`;
 }
 
 /* ================= GERAR ================= */
 function gerar(){
-
-const lista = [
-"URGENTE: me manda um pix agora",
-"Você ganhou um prêmio, clique no link",
-"Envie seu código imediatamente",
-"Reunião amanhã às 14h",
-"Nova lei libera dinheiro"
-];
-
-document.getElementById("entrada").value =
-lista[Math.floor(Math.random()*lista.length)];
-
+document.getElementById("entrada").value=
+"URGENTE: me manda um pix agora preciso muito";
 }
 
 /* ================= EXEMPLOS ================= */
 function exemplo(tipo){
 
-const exemplos = {
+const exemplos={
 
 banco:[
 "URGENTE: sua conta foi bloqueada, confirme seu CPF agora",
-"Acesso suspeito detectado, envie seu código de verificação"
+"Acesso suspeito detectado, envie seu código de verificação imediatamente"
 ],
 
 premio:[
-"Parabéns! Você ganhou um prêmio, clique no link",
+"Parabéns! Você ganhou um prêmio exclusivo, clique no link para resgatar agora",
 "Você foi selecionado para um benefício, informe seus dados"
 ],
 
 fake:[
-"Nova lei libera dinheiro para todos",
-"Informação vazada: ninguém fala sobre isso"
+"Nova lei do governo libera dinheiro para toda população",
+"Informação vazada: ninguém está falando disso"
 ]
 
 };
 
-let lista = exemplos[tipo];
+let lista=exemplos[tipo];
 
-document.getElementById("entrada").value =
+document.getElementById("entrada").value=
 lista[Math.floor(Math.random()*lista.length)];
 
 }
 
 /* ================= TREINO ================= */
-let treino = [
+let treino=[
 
-{t:"URGENTE! me manda um PIX agora",g:true,e:"Urgência + dinheiro"},
+{t:"URGENTE! Troquei de número, pode me mandar um PIX agora?",g:true,e:"Urgência + dinheiro = golpe"},
 {t:"Reunião amanhã às 14h",g:false,e:"Mensagem normal"},
-{t:"Envie seu código agora",g:true,e:"Código nunca deve ser enviado"},
-{t:"Bom dia tudo bem?",g:false,e:"Mensagem comum"}
+{t:"Envie seu código agora",g:true,e:"Código não deve ser enviado"},
+{t:"Bom dia tudo bem?",g:false,e:"Mensagem comum"},
+{t:"Você ganhou um prêmio, clique no link",g:true,e:"Prêmio + link = golpe"}
 
 ];
 
 let atual=0;
 
 function mostrarTreino(){
-document.getElementById("fraseTreino").innerText = treino[atual].t;
+document.getElementById("fraseTreino").innerText=treino[atual].t;
 }
 
 mostrarTreino();
 
 function responder(resp){
 
-let correto = treino[atual].g;
-let fb = document.getElementById("feedback");
+let fb=document.getElementById("feedback");
 
-if(resp===correto){
-fb.innerHTML=`<span class="correct">✔ Correto!</span> ${treino[atual].e}`;
+if(resp===treino[atual].g){
+fb.innerHTML="<span class='correct'>✔ Correto!</span><br>"+treino[atual].e;
 }else{
-fb.innerHTML=`<span class="error">❌ Errado!</span> ${treino[atual].e}`;
+fb.innerHTML="<span class='error'>❌ Errado!</span><br>"+treino[atual].e;
 }
 
 atual=(atual+1)%treino.length;
