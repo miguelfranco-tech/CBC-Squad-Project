@@ -99,6 +99,13 @@ border-radius:10px;
 transition:.6s;
 }
 
+/* ================= LOADING ================= */
+.loading{
+margin-top:15px;
+font-style:italic;
+color:#555;
+}
+
 /* ================= TREINO ================= */
 .treino{
 margin-top:30px;
@@ -133,6 +140,7 @@ box-shadow:0 5px 15px rgba(0,0,0,0.08);
 <button class="secondary" onclick="exemplo('premio')">🎁 Golpe de Prêmio</button>
 <button class="secondary" onclick="exemplo('fake')">📰 Fake News</button>
 
+<div id="loading" class="loading"></div>
 <div id="resultado"></div>
 
 <div class="treino">
@@ -154,29 +162,30 @@ box-shadow:0 5px 15px rgba(0,0,0,0.08);
 
 <script>
 
-/* ================= SANITIZAR ================= */
+/* ================= UTIL ================= */
 function esc(str){
 return str.replace(/[<>&"]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c]));
 }
 
-/* ================= NORMALIZAÇÃO AVANÇADA ================= */
+/* ================= NORMALIZAÇÃO ================= */
 function normalizar(txt){
 return txt.toLowerCase()
-.replace(/0/g,"o")
-.replace(/1/g,"i")
-.replace(/3/g,"e")
-.replace(/4/g,"a")
-.replace(/5/g,"s")
-.replace(/7/g,"t")
+.replace(/[0]/g,"o")
+.replace(/[1]/g,"i")
+.replace(/[3]/g,"e")
+.replace(/[4]/g,"a")
+.replace(/[5]/g,"s")
+.replace(/[7]/g,"t")
 .normalize("NFD")
 .replace(/[\u0300-\u036f]/g,"")
 .replace(/[^\w\s]/g," ")
+.replace(/\s+/g," ")
 .replace(/(.)\1{2,}/g,"$1")
 .replace(/\bp[\W_]*[i1l][\W_]*x\b/g,"pix")
 .replace(/\bc[\W_]*0[\W_]*d[\W_]*i[\W_]*g[\W_]*o\b/g,"codigo");
 }
 
-/* ================= IA PRECISÃO MÁXIMA ================= */
+/* ================= IA PRINCIPAL ================= */
 function analisarMensagem(texto){
 
 texto = normalizar(texto);
@@ -185,7 +194,7 @@ let risco = 0;
 let sinais = new Set();
 let explicacao = new Set();
 
-/* ===== BLOCOS ===== */
+/* ===== FLAGS ===== */
 let acao = /\b(envie|mande|clique|acesse|confirme|resgate|transfira|faça)\b/.test(texto);
 let urgencia = /\b(urgente|agora|ja|imediato|rapido)\b/.test(texto);
 let dinheiro = /\b(pix|dinheiro|transferencia|deposito|valor)\b/.test(texto);
@@ -195,67 +204,44 @@ let premio = /\b(premio|ganhou|beneficio|resgate)\b/.test(texto);
 let link = /\b(http|link|acesse)\b/.test(texto);
 let emocional = /\b(me ajuda|por favor|socorro|preciso muito)\b/.test(texto);
 
-/* ===== SCORE BASE ===== */
-if(acao){risco+=15; sinais.add("Ação"); explicacao.add("A mensagem pede que você execute uma ação.");}
-if(urgencia){risco+=20; sinais.add("Urgência"); explicacao.add("Existe pressão para agir rapidamente, reduzindo sua análise crítica.");}
-if(dinheiro){risco+=30; sinais.add("Dinheiro"); explicacao.add("Solicitação envolvendo envio de dinheiro.");}
-if(dados){risco+=40; sinais.add("Dados sensíveis"); explicacao.add("Pedido de informações pessoais ou códigos.");}
-if(autoridade){risco+=15; sinais.add("Autoridade"); explicacao.add("A mensagem tenta se passar por instituição confiável.");}
-if(premio){risco+=25; sinais.add("Prêmio"); explicacao.add("Promessa de benefício fácil ou inesperado.");}
-if(link){risco+=25; sinais.add("Link"); explicacao.add("Pode direcionar para site falso.");}
-if(emocional){risco+=20; sinais.add("Pressão emocional"); explicacao.add("Uso de emoção para acelerar decisão.");}
+/* ===== SCORE ===== */
+if(acao){risco+=15; sinais.add("Ação"); explicacao.add("Solicita ação direta.");}
+if(urgencia){risco+=20; sinais.add("Urgência"); explicacao.add("Pressiona decisão rápida.");}
+if(dinheiro){risco+=30; sinais.add("Dinheiro"); explicacao.add("Pedido financeiro.");}
+if(dados){risco+=40; sinais.add("Dados"); explicacao.add("Solicitação de dados sensíveis.");}
+if(autoridade){risco+=15; sinais.add("Autoridade"); explicacao.add("Finge instituição.");}
+if(premio){risco+=25; sinais.add("Prêmio"); explicacao.add("Promessa suspeita.");}
+if(link){risco+=25; sinais.add("Link"); explicacao.add("Possível redirecionamento falso.");}
+if(emocional){risco+=20; sinais.add("Emocional"); explicacao.add("Pressão emocional.");}
 
-/* ===== FAKE NEWS ===== */
-if(/(governo.*liberou|nova lei.*libera|ninguem fala|segredo)/.test(texto)){
-risco+=40;
-sinais.add("Fake News");
-explicacao.add("Estrutura típica de desinformação viral.");
-}
-
-/* ===== COMBINAÇÕES INTELIGENTES ===== */
+/* ===== COMBINAÇÕES ===== */
 if(dinheiro && urgencia && acao){
 risco = Math.max(risco,97);
-explicacao.add("Combinação crítica: dinheiro + urgência + ação.");
+explicacao.add("Golpe clássico (dinheiro + urgência).");
 }
 
 if(dados && acao){
 risco = Math.max(risco,97);
-explicacao.add("Pedido direto de dados sensíveis com instrução.");
+explicacao.add("Pedido crítico de dados.");
 }
 
 if(autoridade && link){
 risco = Math.max(risco,92);
-explicacao.add("Possível tentativa de phishing.");
+explicacao.add("Possível phishing.");
 }
 
-if(premio && acao){
-risco = Math.max(risco,92);
-explicacao.add("Golpe de prêmio com instruções.");
-}
-
-if(emocional && dinheiro){
-risco = Math.max(risco,90);
-explicacao.add("Manipulação emocional para obter dinheiro.");
-}
-
-/* ===== DETECÇÃO IMPLÍCITA ===== */
+/* ===== IMPLÍCITO ===== */
 if(/troquei.*numero/.test(texto)){
 risco = Math.max(risco,95);
-explicacao.add("Padrão comum do golpe do número trocado.");
-}
-
-if(/me manda.*valor/.test(texto)){
-risco += 30;
-explicacao.add("Pedido indireto de dinheiro.");
+explicacao.add("Golpe número trocado.");
 }
 
 /* ===== AJUSTES ===== */
 if(texto.split(" ").length <= 6 && (dinheiro || dados)){
 risco += 15;
-explicacao.add("Mensagem curta com conteúdo crítico.");
 }
 
-if(/bom dia|boa tarde|reuniao|ate mais/.test(texto)){
+if(/bom dia|boa tarde|reuniao/.test(texto)){
 risco -= 20;
 }
 
@@ -269,26 +255,13 @@ risco>=45?"🟡 Muito suspeito":
 risco>=25?"🟠 Atenção":
 "🟢 Seguro";
 
-/* ===== EXPLICAÇÃO FINAL ===== */
-let resumo = "";
+let resumo =
+risco>=90?"Alta probabilidade de golpe.":
+risco>=60?"Forte suspeita.":
+risco>=30?"Atenção necessária.":
+"Sem risco relevante.";
 
-if(risco>=90){
-resumo = "A mensagem apresenta múltiplos sinais clássicos de golpe e alta probabilidade de fraude.";
-}else if(risco>=60){
-resumo = "Há fortes indícios de golpe, recomenda-se não interagir com a mensagem.";
-}else if(risco>=30){
-resumo = "A mensagem possui sinais suspeitos e deve ser analisada com cautela.";
-}else{
-resumo = "Não foram identificados sinais críticos relevantes.";
-}
-
-return {
-risco,
-nivel,
-sinais:[...sinais],
-explicacao:[...explicacao],
-resumo
-};
+return {risco,nivel,sinais:[...sinais],explicacao:[...explicacao],resumo};
 
 }
 
@@ -302,11 +275,17 @@ alert("Digite uma mensagem!");
 return;
 }
 
+document.getElementById("loading").innerText = "Analisando...";
+
+setTimeout(()=>{
+
 let r = analisarMensagem(entrada);
 
 let cor =
 r.risco>=70?"#f44336":
 r.risco>=40?"#ff9800":"#4caf50";
+
+document.getElementById("loading").innerText = "";
 
 document.getElementById("resultado").innerHTML = `
 <div class="resultado-box">
@@ -321,27 +300,77 @@ document.getElementById("resultado").innerHTML = `
 
 <p><b>Resumo:</b> ${r.resumo}</p>
 
-<p><b>Sinais detectados:</b><br>
-${r.sinais.map(s=>"• "+esc(s)).join("<br>") || "Nenhum"}
-</p>
+<p><b>Sinais:</b><br>${r.sinais.join("<br>")}</p>
 
-<p><b>Por que isso é suspeito:</b><br>
-${r.explicacao.join("<br>")}
-</p>
+<p><b>Explicação:</b><br>${r.explicacao.join("<br>")}</p>
 
 <p><b>Como evitar:</b><br>
 • Não envie dinheiro<br>
 • Não compartilhe dados<br>
-• Confirme diretamente com a pessoa<br>
+• Confirme com a pessoa<br>
 • Desconfie de urgência
 </p>
 
 </div>
 `;
+
+},800);
+
 }
 
-/* ================= RESTO DO CÓDIGO (INALTERADO) ================= */
-// (mantido exatamente como estava: exemplos, treino, gerar...)
+/* ================= RESTANTE ================= */
+function gerar(){
+document.getElementById("entrada").value = "me manda pix urgente";
+}
+
+function exemplo(tipo){
+const ex={
+banco:["confirme cpf agora","acesso suspeito envie codigo"],
+premio:["ganhou premio clique link","resgate beneficio agora"],
+fake:["governo liberou dinheiro","segredo compartilhe"]
+};
+let l=ex[tipo];
+document.getElementById("entrada").value = l[Math.floor(Math.random()*l.length)];
+}
+
+/* ================= TREINO ================= */
+let treino=[
+{t:"URGENTE me manda um PIX agora",g:true,e:"Golpe financeiro com urgência"},
+{t:"Bom dia tudo bem?",g:false,e:"Mensagem normal"},
+{t:"Envie seu código agora",g:true,e:"Código é dado sensível"},
+{t:"Reunião amanhã às 14h",g:false,e:"Sem risco"}
+];
+
+let atual=0;
+
+function mostrarTreino(){
+document.getElementById("fraseTreino").innerText=treino[atual].t;
+}
+
+mostrarTreino();
+
+function responder(resp){
+let fb=document.getElementById("feedback");
+
+if(resp===treino[atual].g){
+fb.innerHTML="<span class='correct'>✔ Correto</span><br>"+treino[atual].e;
+}else{
+fb.innerHTML="<span class='error'>❌ Errado</span><br>"+treino[atual].e;
+}
+
+atual=(atual+1)%treino.length;
+
+setTimeout(()=>{
+fb.innerHTML="";
+mostrarTreino();
+},7000);
+}
+
+function resetTreino(){
+atual=0;
+mostrarTreino();
+document.getElementById("feedback").innerHTML="";
+}
 
 </script>
 
