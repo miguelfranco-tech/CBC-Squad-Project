@@ -3,132 +3,98 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Escudo Digital IA - Finalista</title>
+<title>Escudo Digital IA</title>
 
 <style>
 
 /* ================= BASE ================= */
-
 body{
-font-family: Arial, sans-serif;
-background: linear-gradient(135deg,#eef4ff,#dfe9ff);
+font-family:Arial, sans-serif;
+background:linear-gradient(135deg,#e3f2fd,#ffffff);
 margin:0;
-padding:20px;
-text-align:center;
+display:flex;
+justify-content:center;
 }
 
 .container{
-max-width:800px;
-margin:auto;
-background:white;
-padding:25px;
-border-radius:16px;
-box-shadow:0 10px 30px rgba(0,0,0,0.1);
+width:90%;
+max-width:900px;
+margin-top:40px;
+text-align:center;
 }
 
 /* ================= INPUT ================= */
-
 textarea{
 width:100%;
-height:140px;
+height:120px;
 border-radius:10px;
 padding:12px;
 font-size:16px;
-border:2px solid #d0d8ff;
+border:1px solid #ccc;
 resize:none;
 }
 
 /* ================= BOTÕES ================= */
-
 button{
-padding:10px 16px;
-margin:5px;
+padding:12px 22px;
+margin:8px;
 border:none;
 border-radius:10px;
 cursor:pointer;
-font-size:15px;
+font-weight:bold;
 transition:0.3s;
 }
 
-.primary{
-background:#1976d2;
-color:white;
+button:hover{
+transform:scale(1.05);
 }
 
-.primary:hover{
-background:#1258a8;
-}
+.primary{background:#2196f3;color:white;}
+.secondary{background:#bbdefb;}
 
-.secondary{
-background:#e3f2fd;
-}
-
-.secondary:hover{
-background:#cde7ff;
-}
-
-/* ================= RESULT ================= */
-
-.result{
-margin-top:20px;
-padding:18px;
+/* ================= RESULTADO ================= */
+.resultado-box{
+background:white;
+padding:20px;
 border-radius:12px;
+margin-top:20px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
 text-align:left;
-opacity:0;
-transform:translateY(10px);
-transition:0.5s;
+animation:fade .5s;
 }
 
-.show{
-opacity:1;
-transform:translateY(0);
+@keyframes fade{
+from{opacity:0;transform:translateY(10px)}
+to{opacity:1;}
 }
-
-.baixo{background:#e8f5e9;}
-.medio{background:#fff8e1;}
-.alto{background:#ffebee;}
 
 /* ================= BARRA ================= */
-
 .risk-bar{
 width:100%;
-height:10px;
-background:#ddd;
+height:12px;
+background:#eee;
 border-radius:10px;
-overflow:hidden;
 margin:10px 0;
+overflow:hidden;
 }
 
 .risk-fill{
 height:100%;
-width:0%;
-transition:1s;
+border-radius:10px;
+transition:width .8s;
 }
-
-.low{background:#4caf50;}
-.medium{background:#ff9800;}
-.high{background:#f44336;}
 
 /* ================= TREINO ================= */
-
 .treino{
-margin-top:30px;
-background:#f5f5f5;
+margin-top:40px;
+background:white;
 padding:20px;
 border-radius:12px;
+box-shadow:0 5px 15px rgba(0,0,0,0.08);
 }
 
-#feedback{
-margin-top:10px;
-min-height:50px;
-font-size:14px;
-}
-
-#placar{
-margin-top:15px;
-font-weight:bold;
-}
+.correct{color:green;font-weight:bold;}
+.error{color:red;font-weight:bold;}
 
 </style>
 </head>
@@ -139,32 +105,16 @@ font-weight:bold;
 
 <h2>🛡️ Escudo Digital IA</h2>
 
-<textarea id="mensagem" placeholder="Digite uma mensagem suspeita..."></textarea>
+<textarea id="entrada" placeholder="Digite uma mensagem suspeita..."></textarea>
 
 <br>
 
-<button class="primary" onclick="analisar()">🔎 Analisar</button>
-<button class="secondary" onclick="gerar()">✨ Gerar</button>
+<button class="primary" onclick="analisar()">🔍 Analisar</button>
+<button class="secondary" onclick="gerar()">✨ Gerar exemplo</button>
 
-<br>
+<div id="resultado"></div>
 
-<button onclick="exemplo('banco')">🏦 Banco</button>
-<button onclick="exemplo('premio')">🎁 Prêmio</button>
-<button onclick="exemplo('fake')">📰 Fake News</button>
-
-<div id="resultado" class="result"></div>
-
-<!-- ================= PLACAR ================= -->
-
-<div id="placar">
-🏆 Acertos: <span id="acertos">0</span> |
-❌ Erros: <span id="erros">0</span> |
-📊 Total: <span id="total">0</span> |
-🎯 Precisão: <span id="precisao">0%</span>
-</div>
-
-<!-- ================= TREINO ================= -->
-
+<!-- ================= TREINAMENTO ================= -->
 <div class="treino">
 
 <h3>🎓 Treinamento Inteligente</h3>
@@ -176,7 +126,7 @@ font-weight:bold;
 
 <p id="feedback"></p>
 
-<button onclick="reset()">🔄 Resetar</button>
+<button onclick="resetTreino()">🔄 Resetar treino</button>
 
 </div>
 
@@ -184,236 +134,230 @@ font-weight:bold;
 
 <script>
 
-/* ================= NORMALIZAR ================= */
-
-function norm(t){
-return t.toLowerCase()
-.normalize("NFD")
-.replace(/[\u0300-\u036f]/g,"")
-.replace(/[^\w\s]/g,"");
+/* ================= SANITIZAÇÃO ================= */
+function safeHTML(str){
+return str.replace(/[<>&"]/g,function(c){
+return {"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c];
+});
 }
 
-/* ================= IA DETECÇÃO ================= */
+/* ================= NORMALIZAÇÃO ================= */
+function normalizar(txt){
+return txt.toLowerCase()
+.replace(/0/g,"o")
+.replace(/1/g,"i")
+.replace(/3/g,"e")
+.replace(/4/g,"a")
+.replace(/5/g,"s")
+.replace(/7/g,"t")
+.normalize("NFD")
+.replace(/[\u0300-\u036f]/g,"")
+.replace(/[^\w\s]/g," ");
+}
 
-function analisar(){
+/* ================= IA PRINCIPAL ================= */
+function analisarMensagem(texto){
 
-let input = document.getElementById("mensagem").value;
-if(!input) return;
-
-let t = norm(input);
+texto = normalizar(texto);
 
 let risco = 0;
 let sinais = [];
+let explicacao = [];
 
-/* PIX / DINHEIRO */
-if(/pix|transferencia|dinheiro/.test(t)){
-risco += 30;
-sinais.push("💰 Pedido de dinheiro");
+/* ===== PADRÕES ===== */
+const padroes = [
+
+{r:/\burgente\b|\bagora\b|\bimediato\b/,p:25,n:"Urgência",e:"Pressão para agir rapidamente."},
+
+{r:/\bganhe dinheiro\b|\brenda extra\b|\blucro facil\b/,p:30,n:"Dinheiro fácil",e:"Promessa irreal de ganho."},
+
+{r:/\bcpf\b|\bsenha\b|\bcodigo\b|\bverificacao\b/,p:40,n:"Dados sensíveis",e:"Solicitação de informações pessoais."},
+
+{r:/\bclique\b|\bacesse\b|\blink\b|http/,p:25,n:"Link suspeito",e:"Possível redirecionamento para site falso."},
+
+{r:/\bbanco\b|\bsuporte\b|\bcentral\b/,p:15,n:"Falsa autoridade",e:"Tentativa de parecer empresa oficial."},
+
+{r:/\bnova lei\b|\bgoverno liberou\b|\bninguem fala\b/,p:30,n:"Fake news",e:"Padrão típico de desinformação viral."}
+
+];
+
+/* ===== ANALISAR PADRÕES ===== */
+padroes.forEach(p=>{
+if(p.r.test(texto)){
+risco += p.p;
+sinais.push(p.n);
+explicacao.push("• "+p.e);
 }
+});
 
-/* DADOS */
-if(/cpf|senha|codigo|cartao/.test(t)){
-risco += 35;
-sinais.push("🔒 Pedido de dados");
-}
-
-/* URGÊNCIA */
-if(/urgente|agora|imediato|ja/.test(t)){
-risco += 20;
-sinais.push("⏰ Urgência");
-}
-
-/* AÇÃO */
-if(/clique|envie|confirme|mande/.test(t)){
-risco += 20;
-sinais.push("👉 Pedido de ação");
-}
-
-/* PRÊMIO */
-if(/ganhou|premio|beneficio/.test(t)){
+/* ===== COMBINAÇÕES INTELIGENTES ===== */
+if(/\bpix\b|\bdinheiro\b/.test(texto) && /\burgente\b|\bagora\b/.test(texto)){
 risco += 25;
-sinais.push("🎁 Promessa suspeita");
+explicacao.push("• Combinação de dinheiro com urgência (golpe comum).");
 }
 
-/* COMBO FORTE */
-if(/pix/.test(t) && /urgente/.test(t)){
-risco = 95;
+if(/\bcodigo\b/.test(texto) && /\benvie\b|\bmande\b/.test(texto)){
+risco += 30;
+explicacao.push("• Pedido direto de código de verificação.");
 }
 
-/* FAKE NEWS FORTE */
-if(/governo liberou|nova lei|urgente noticia/.test(t)){
-risco += 40;
-sinais.push("📰 Possível fake news");
+/* ===== LIMITAR ===== */
+risco = Math.min(risco,100);
+
+/* ===== CLASSIFICAÇÃO ===== */
+let nivel =
+risco>=70?"🔴 Alto risco":
+risco>=40?"🟡 Atenção":"🟢 Seguro";
+
+/* ===== PREVENÇÃO ===== */
+let prevencao = [
+"Não envie dinheiro sem confirmar",
+"Não compartilhe dados pessoais",
+"Não clique em links desconhecidos",
+"Confirme com a fonte oficial"
+];
+
+return {risco,nivel,sinais,explicacao,prevencao};
+
 }
 
-/* LIMITE */
-if(risco>100) risco=100;
+/* ================= ANALISAR ================= */
+function analisar(){
 
-/* NIVEL */
-let nivel = risco<30?"🟢 Seguro":
-risco<70?"🟡 Atenção":"🔴 Golpe";
+let entrada = document.getElementById("entrada").value;
 
-let classe = risco<30?"baixo":
-risco<70?"medio":"alto";
+if(!entrada){
+alert("Digite uma mensagem!");
+return;
+}
 
-/* COR BARRA */
-let cor = risco<30?"low":
-risco<70?"medium":"high";
+let res = analisarMensagem(entrada);
+mostrar(res);
 
-/* RESULT HTML */
-let html = `
-<h3>${nivel}</h3>
+}
+
+/* ================= MOSTRAR ================= */
+function mostrar(res){
+
+let cor =
+res.risco>=70?"#f44336":
+res.risco>=40?"#ff9800":"#4caf50";
+
+document.getElementById("resultado").innerHTML = `
+<div class="resultado-box">
+
+<h3>${res.nivel}</h3>
 
 <div class="risk-bar">
-<div class="risk-fill ${cor}" style="width:${risco}%"></div>
+<div class="risk-fill" style="width:${res.risco}%;background:${cor}"></div>
 </div>
 
-<p><b>Risco:</b> ${risco}%</p>
+<p><b>Risco:</b> ${res.risco}%</p>
 
-<p><b>Sinais:</b><br>${sinais.join("<br>") || "Nenhum forte"}</p>
+<p><b>Sinais detectados:</b><br>
+${res.sinais.length ? res.sinais.map(s=>"• "+safeHTML(s)).join("<br>") : "Nenhum"}
+</p>
 
 <p><b>Explicação:</b><br>
-${risco>70?"Mensagem com fortes características de golpe.":
-risco>30?"Mensagem suspeita, cuidado.":
-"Mensagem aparentemente segura."}
+${res.explicacao.length ? res.explicacao.map(e=>safeHTML(e)).join("<br>") : "Nenhum sinal forte detectado"}
 </p>
 
 <p><b>Como evitar:</b><br>
-• Nunca envie dinheiro sob pressão<br>
-• Não compartilhe dados pessoais<br>
-• Confirme a informação por outro canal
+${res.prevencao.map(p=>"• "+p).join("<br>")}
 </p>
+
+</div>
 `;
-
-let box = document.getElementById("resultado");
-box.className="result "+classe;
-box.innerHTML="";
-box.classList.add("show");
-
-/* EFEITO DIGITAÇÃO */
-let i=0;
-let speed=10;
-
-function digitar(){
-if(i < html.length){
-box.innerHTML += html.charAt(i);
-i++;
-setTimeout(digitar,speed);
-}
-}
-
-digitar();
 
 }
 
 /* ================= GERAR ================= */
-
 function gerar(){
-let msgs = [
-"me manda pix urgente preciso agora",
-"vamos sair amanhã tranquilo",
-"você ganhou prêmio clique aqui para resgatar",
-"reunião marcada para amanhã às 14h",
-"governo liberou dinheiro para todos urgente veja",
-"troquei de número me manda dinheiro"
+
+const exemplos = [
+"URGENTE: troquei de número, me manda um pix agora por favor",
+"Você ganhou um prêmio exclusivo, clique no link agora",
+"Envie seu código de verificação imediatamente",
+"Reunião confirmada amanhã às 14h",
+"Nova lei libera dinheiro para todos"
 ];
-document.getElementById("mensagem").value =
-msgs[Math.floor(Math.random()*msgs.length)];
+
+document.getElementById("entrada").value =
+exemplos[Math.floor(Math.random()*exemplos.length)];
+
 }
 
-/* ================= EXEMPLOS ================= */
+/* ================= TREINAMENTO ================= */
+let treino = [
 
-function exemplo(t){
-let banco=[
-"Conta bloqueada confirme seu CPF imediatamente",
-"Acesso suspeito detectado clique para verificar"
-];
+{
+t:"URGENTE! Troquei de número e preciso que você me mande um PIX agora.",
+g:true,
+e:"Urgência + dinheiro é padrão clássico de golpe."
+},
 
-let premio=[
-"Você ganhou prêmio clique aqui para receber agora",
-"Parabéns você foi selecionado informe seus dados"
-];
+{
+t:"Reunião confirmada amanhã às 14h na sala principal.",
+g:false,
+e:"Mensagem comum sem sinais de golpe."
+},
 
-let fake=[
-"Nova lei libera dinheiro para toda população urgente",
-"Governo vai pagar benefício para todos confira agora"
-];
+{
+t:"Envie seu código de verificação para evitar bloqueio da conta.",
+g:true,
+e:"Código nunca deve ser compartilhado."
+},
 
-let map={banco,premio,fake};
+{
+t:"Bom dia, depois te ligo para conversarmos.",
+g:false,
+e:"Mensagem normal."
+},
 
-document.getElementById("mensagem").value =
-map[t][Math.floor(Math.random()*map[t].length)];
+{
+t:"Você ganhou um prêmio, clique no link para resgatar.",
+g:true,
+e:"Promessa + link = golpe."
 }
 
-/* ================= TREINO ================= */
-
-let frases=[
-"me manda pix urgente estou precisando agora",
-"reunião amanhã às 14h na escola",
-"você ganhou prêmio clique aqui para resgatar agora",
-"bom dia tudo bem com você?",
-"governo liberou dinheiro para todos urgente veja",
-"envie seu código de verificação imediatamente"
 ];
 
-let atual="";
+let atual = 0;
 
-/* NOVA FRASE */
-function nova(){
-atual = frases[Math.floor(Math.random()*frases.length)];
-document.getElementById("fraseTreino").innerText = atual;
-document.getElementById("feedback").innerText="";
+/* ===== MOSTRAR TREINO ===== */
+function mostrarTreino(){
+document.getElementById("fraseTreino").innerText = treino[atual].t;
 }
 
-nova();
+mostrarTreino();
 
-/* RESPONDER */
-let acertos=0, erros=0;
-
+/* ===== RESPONDER ===== */
 function responder(resp){
 
-let t = norm(atual);
-
-let suspeito =
-/pix|codigo|cpf|senha|premio|urgente|clique|dinheiro|governo/.test(t);
-
-let correto =
-(resp && suspeito) || (!resp && !suspeito);
-
+let correto = treino[atual].g;
 let fb = document.getElementById("feedback");
 
-/* EXPLICAÇÃO COMPLETA */
-if(correto){
-acertos++;
-fb.innerHTML = "✅ Correto!<br>Essa mensagem foi classificada corretamente porque apresenta ou não sinais claros de golpe.";
+if(resp === correto){
+fb.innerHTML = `<span class="correct">✅ Correto!</span><br>${treino[atual].e}`;
 }else{
-erros++;
-fb.innerHTML = "❌ Errado!<br>Revise os sinais como urgência, pedido de dados ou promessa de dinheiro.";
+fb.innerHTML = `<span class="error">❌ Errado!</span><br>${treino[atual].e}`;
 }
 
-/* ATUALIZA */
-let total = acertos+erros;
-let prec = Math.round((acertos/total)*100);
+atual++;
+if(atual >= treino.length) atual = 0;
 
-document.getElementById("acertos").innerText=acertos;
-document.getElementById("erros").innerText=erros;
-document.getElementById("total").innerText=total;
-document.getElementById("precisao").innerText=prec+"%";
-
-/* ESPERA 7s */
-setTimeout(nova,7000);
+setTimeout(()=>{
+fb.innerHTML="";
+mostrarTreino();
+},7000);
 
 }
 
-/* RESET */
-function reset(){
-acertos=0;
-erros=0;
-document.getElementById("acertos").innerText=0;
-document.getElementById("erros").innerText=0;
-document.getElementById("total").innerText=0;
-document.getElementById("precisao").innerText="0%";
-nova();
+/* ===== RESET ===== */
+function resetTreino(){
+atual = 0;
+mostrarTreino();
+document.getElementById("feedback").innerHTML="";
 }
 
 </script>
