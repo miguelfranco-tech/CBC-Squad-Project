@@ -280,7 +280,40 @@ placeholder="Digite ou cole uma mensagem suspeita aqui..."
 </div>
 
 <div id="resultado"></div>
+<div id="resultado"></div>
 
+<!-- COLE AQUI 👇 -->
+
+<div class="treino">
+
+<h3>📷 Análise de Imagem</h3>
+
+<p>Envie um print para análise.</p>
+
+<br>
+
+<input
+type="file"
+id="imagemInput"
+accept="image/*"
+>
+
+<br><br>
+
+<button
+class="primary"
+onclick="analisarImagem()"
+>
+📷 Analisar Imagem
+</button>
+
+</div>
+
+<!-- COLE AQUI 👆 -->
+
+<!-- ================= TREINAMENTO ================= -->
+
+<div class="treino">
 <!-- ================= TREINAMENTO ================= -->
 
 <div class="treino">
@@ -636,7 +669,48 @@ document.getElementById("entrada").value =
 l[Math.floor(Math.random()*l.length)];
 
 }
+/* ================= OCR ================= */
 
+async function analisarImagem(){
+
+const arquivo =
+document.getElementById("imagemInput").files[0];
+
+if(!arquivo){
+
+alert("Selecione uma imagem.");
+
+return;
+
+}
+
+try{
+
+const resultadoOCR =
+await Tesseract.recognize(
+arquivo,
+"por"
+);
+
+const texto =
+resultadoOCR.data.text;
+
+document.getElementById("entrada").value =
+texto;
+
+analisar();
+
+}catch(erro){
+
+alert("Erro ao analisar a imagem.");
+
+}
+
+}
+
+/* ================= TREINO ================= */
+
+let treino = [
 /* ================= TREINO ================= */
 
 let treino = [
@@ -746,6 +820,6 @@ document.getElementById("feedback").innerHTML = "";
 mostrarTreino();
 
 </script>
-
+<script src="https://unpkg.com/tesseract.js@5/dist/tesseract.min.js"></script>
 </body>
 </html>
