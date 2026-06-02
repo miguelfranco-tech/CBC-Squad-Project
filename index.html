@@ -391,7 +391,143 @@ texto = normalizar(texto);
 let risco = 0;
 
 let sinais = [];
+/* ================= BANCO DE FRASES ================= */
 
+  const frasesGolpe = [
+  
+  /* PIX */
+  
+"me manda um pix",
+"faz um pix",
+"preciso de um pix",
+"me empresta um dinheiro",
+"faz um pagamento para mim",
+"consegue fazer uma transferencia",
+"estou sem acesso ao banco",
+"ultrapassei meu limite",
+"excedeu meu limite diario",
+"depois eu te devolvo",
+"te devolvo ainda hoje",
+"te retorno ainda hoje",
+"preciso urgente",
+"estou com um problema",
+"preciso de um favor",
+
+/* FALSO FILHO */
+
+"mae troquei de numero",
+"pai troquei de numero",
+"salva meu novo numero",
+"esse e meu novo whatsapp",
+"quebrei meu celular",
+"estou usando outro numero",
+"nao consigo acessar o banco",
+"preciso pagar uma conta",
+
+/* BANCO */
+
+"sua conta sera bloqueada",
+"detectamos atividade suspeita",
+"confirme seus dados",
+"confirme seu cpf",
+"confirme sua senha",
+"envie o codigo recebido",
+"validacao de seguranca",
+"atualize seus dados",
+"acesso suspenso",
+"acesso temporariamente bloqueado",
+
+/* SMS */
+
+"codigo recebido por sms",
+"envie o codigo",
+"mande o codigo",
+"informe o codigo",
+"codigo de verificacao",
+"codigo de seguranca",
+
+/* PREMIO */
+
+"voce ganhou",
+"parabens voce foi sorteado",
+"premio exclusivo",
+"premio liberado",
+"resgate seu premio",
+"clique para receber",
+"beneficio aprovado",
+"beneficio liberado",
+"sorteio exclusivo",
+
+/* GOVERNO */
+
+"auxilio liberado",
+"beneficio do governo",
+"cadastro aprovado",
+"valor disponivel para saque",
+"dinheiro esquecido",
+"saque imediato",
+
+/* LINKS */
+
+"clique aqui",
+"acesse agora",
+"link abaixo",
+"abra o link",
+"toque no link",
+"http://",
+"https://",
+
+/* PRESSAO */
+
+"ultima chance",
+"somente hoje",
+"agora mesmo",
+"nao perca",
+"urgente",
+"imediatamente",
+"acao necessaria",
+"responda agora",
+
+/* EMOCIONAL */
+
+"estou desesperado",
+"socorro",
+"me ajuda",
+"nao sei o que fazer",
+"estou sem dinheiro",
+"estou passando necessidade",
+"preciso muito da sua ajuda",
+
+/* COMPRAS */
+
+"pagamento recusado",
+"compra aprovada",
+"compra suspeita",
+"cancelar compra",
+"estorno imediato",
+
+/* CRIPTO */
+
+"ganhos garantidos",
+"lucro garantido",
+"investimento sem risco",
+"retorno imediato",
+"renda facil"
+
+];
+  frasesGolpe.forEach(frase=>{
+
+if(texto.includes(frase)){
+
+risco += 6;
+
+sinais.push(
+"Frase típica de golpe: " + frase
+);
+
+}
+
+});
 /* ================= DETECÇÃO ================= */
 
 if(/\b(urgente|agora|imediatamente|rapido|ja)\b/.test(texto)){
@@ -428,7 +564,36 @@ if(/\b(me ajuda|socorro|mae)\b/.test(texto)){
 risco += 15;
 sinais.push("Pressão emocional");
 }
+if(
+/pix|transferencia|deposito|pagamento/.test(texto) &&
+/favor|ajuda|problema|urgente/.test(texto)
+){
+risco += 35;
+sinais.push("Pedido financeiro suspeito");
+}
 
+if(
+/troquei de numero|novo whatsapp/.test(texto)
+){
+risco += 45;
+sinais.push("Possível golpe do falso familiar");
+}
+
+if(
+/codigo/.test(texto) &&
+/sms|verificacao/.test(texto)
+){
+risco += 50;
+sinais.push("Tentativa de roubo de código");
+}
+
+if(
+/ganhou|premio|sorteado/.test(texto) &&
+/clique|link/.test(texto)
+){
+risco += 50;
+sinais.push("Golpe de prêmio");
+}
 /* ================= COMBINAÇÕES ================= */
 
 if(
