@@ -512,9 +512,217 @@ let sinais = [];
 "lucro garantido",
 "investimento sem risco",
 "retorno imediato",
-"renda facil"
+"renda facil",
+/* DEVOLUÇÃO DE DINHEIRO */
 
+"te devolvo",
+"te devolvo hoje",
+"te devolvo amanha",
+"devolvo amanha",
+"retorno hoje",
+"retorno amanha",
+"pago depois",
+"te pago depois",
+"depois eu te pago",
+"depois eu devolvo",
+"faço o reembolso",
+"faco o reembolso",
+"assim que cair eu te pago",
+
+/* PEDIDO DE AJUDA */
+
+"quebra esse galho",
+"me salva",
+"preciso muito da sua ajuda",
+"preciso de um favor",
+"sera que voce consegue me ajudar",
+"preciso resolver isso urgente",
+
+/* FALSO FILHO */
+
+"troquei de numero",
+"salva meu novo numero",
+"esse e meu novo whatsapp",
+"novo contato",
+"estou usando outro numero",
+"quebrei meu celular",
+"perdi meu chip",
+
+/* JUSTIFICATIVA FINANCEIRA */
+
+"estou apertado",
+"estou sem dinheiro",
+"estou com problema financeiro",
+"preciso pagar uma conta",
+"nao consigo acessar o banco",
+"ultrapassei meu limite",
+"excedeu meu limite diario",
+"meu pix nao esta funcionando",
+"minha conta foi bloqueada",
+"estou sem acesso ao aplicativo",
+"estou sem acesso ao banco",
+"estou com dificuldade financeira",
+"preciso resolver isso hoje",
+"estou numa emergencia",
+"preciso de ajuda urgente",
+
+/* PRESSÃO */
+
+"nao pode esperar",
+"urgente",
+"agora mesmo",
+"imediatamente",
+"somente hoje",
+"ultima chance",
+"responda agora",
+"acao necessaria",
+"o mais rapido possivel",
+"hoje mesmo",
+"prazo final",
+"evite bloqueio",
+"evite cancelamento",
+"nao perca essa oportunidade",
+"resolva agora",
+
+/* FAKE NEWS */
+
+"todos precisam saber",
+"repasse para seus contatos",
+"compartilhe com todos",
+"espalhe essa mensagem",
+"divulgue para todos",
+"isso nao aparece na tv",
+"a midia nao quer divulgar",
+"informacao censurada",
+"estao escondendo isso",
+"verdade que nao querem mostrar",
+
+/* LINKS SUSPEITOS */
+
+"bit.ly",
+"tinyurl",
+"goo.gl",
+"cutt.ly",
+"abre.ai",
+"encurtador",
+"link abaixo",
+"clique aqui",
+"clique no link",
+"acesse agora",
+"acesse o link",
+"abra o link",
+"toque no link",
+"link de confirmacao",
+"link de verificacao",
+"link seguro",
+"confirme aqui",
+"validar cadastro",
+"validar conta",
+"atualizar cadastro",
+"atualizar conta",
+"confirmar identidade",
+"confirmar dados",
+"verifique sua conta",
+"regularize sua conta",
 ];
+  /* ================= PADRÕES AVANÇADOS ================= */
+
+/* DEVOLUÇÃO DE DINHEIRO */
+
+if(
+/devolvo|retorno|reembolso|pago depois|te pago depois|depois eu pago|depois eu devolvo/.test(texto)
+){
+risco += 30;
+sinais.push("Promessa de devolução de dinheiro");
+}
+
+/* PEDIDO DE FAVOR */
+
+if(
+/favor|me ajuda|preciso da sua ajuda|quebra esse galho|preciso de um favor/.test(texto)
+){
+risco += 20;
+sinais.push("Pedido de ajuda suspeito");
+}
+
+/* FALSO FILHO */
+
+if(
+/troquei de numero|novo numero|novo whatsapp|novo contato|quebrei meu celular|perdi meu chip|estou usando outro numero/.test(texto)
+){
+risco += 45;
+sinais.push("Possível golpe do falso familiar");
+}
+
+/* PROBLEMA FINANCEIRO */
+
+if(
+/estou sem dinheiro|estou apertado|estou com problema|nao consigo acessar o banco|limite diario|ultrapassei meu limite|excedeu meu limite/.test(texto)
+){
+risco += 30;
+sinais.push("Justificativa financeira suspeita");
+}
+
+/* PRESSÃO */
+
+if(
+/urgente|agora|imediatamente|hoje mesmo|o mais rapido possivel|nao pode esperar/.test(texto)
+){
+risco += 25;
+sinais.push("Pressão para agir rapidamente");
+}
+
+/* BANCO */
+
+if(
+/atividade suspeita|conta bloqueada|conta suspensa|acesso bloqueado|confirme seus dados|confirme seu cpf|atualize seus dados/.test(texto)
+){
+risco += 40;
+sinais.push("Possível golpe bancário");
+}
+
+/* SMS */
+
+if(
+/codigo de verificacao|codigo recebido|codigo sms|codigo de seguranca|codigo de autenticacao/.test(texto)
+){
+risco += 50;
+sinais.push("Tentativa de roubo de código");
+}
+
+/* PRÊMIO */
+
+if(
+/voce ganhou|foi sorteado|premio liberado|premio exclusivo|resgate seu premio|beneficio aprovado/.test(texto)
+){
+risco += 35;
+sinais.push("Possível golpe de prêmio");
+}
+
+/* FAKE NEWS */
+
+if(
+/compartilhe|repasse|espalhe|divulgue para todos|todos precisam saber/.test(texto)
+){
+risco += 25;
+sinais.push("Compartilhamento em massa");
+}
+
+if(
+/midia nao quer divulgar|isso nao aparece na tv|informacao censurada|estao escondendo isso/.test(texto)
+){
+risco += 40;
+sinais.push("Possível fake news");
+}
+
+/* LINKS */
+
+if(
+/bit\.ly|tinyurl|goo\.gl|cutt\.ly|abre\.ai|encurtador|clique aqui|acesse agora|abra o link|link de verificacao|link de confirmacao/
+){
+risco += 30;
+sinais.push("Link potencialmente suspeito");
+}
   frasesGolpe.forEach(frase=>{
 
 if(texto.includes(frase)){
