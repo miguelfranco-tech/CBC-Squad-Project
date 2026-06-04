@@ -331,6 +331,9 @@ onclick="analisarImagem()"
 </div>
 
 <div class="feedback" id="feedback"></div>
+  <p id="placar">
+🏆 Acertos: 0 | ❌ Erros: 0
+</p>
 
 <br>
 
@@ -718,7 +721,7 @@ sinais.push("Possível fake news");
 /* LINKS */
 
 if(
-/bit\.ly|tinyurl|goo\.gl|cutt\.ly|abre\.ai|encurtador|clique aqui|acesse agora|abra o link|link de verificacao|link de confirmacao/
+/bit\.ly|tinyurl|goo\.gl|cutt\.ly|abre\.ai|encurtador|clique aqui|acesse agora|abra o link|link de verificacao|link de confirmacao/.test(texto)
 ){
 risco += 30;
 sinais.push("Link potencialmente suspeito");
@@ -1079,7 +1082,7 @@ alert("Erro ao analisar a imagem.");
 
 
 /* ================= TREINO ================= */
-
+  
 let treino = [
 
 {
@@ -1091,30 +1094,231 @@ e:"Golpe: pressão + urgência + dinheiro."
 {
 t:"Bom dia, nossa reunião será amanhã às 14h.",
 g:false,
-e:"Mensagem comum sem sinais fortes."
+e:"Mensagem comum."
 },
 
 {
 t:"Envie o código recebido no SMS imediatamente.",
 g:true,
-e:"Códigos de verificação nunca devem ser compartilhados."
+e:"Nunca compartilhe códigos."
 },
 
 {
 t:"Parabéns! Você ganhou um prêmio. Clique no link.",
 g:true,
-e:"Promessas de prêmio com links são muito usadas em golpes."
+e:"Prêmios com links são comuns em golpes."
 },
 
 {
 t:"Tudo bem? Depois me chama quando puder.",
 g:false,
-e:"Mensagem normal e sem sinais suspeitos."
+e:"Mensagem comum."
+},
+
+{
+t:"Mãe, troquei de número. Faz um PIX pra mim.",
+g:true,
+e:"Golpe do falso familiar."
+},
+
+{
+t:"Seu CPF será bloqueado hoje. Confirme seus dados.",
+g:true,
+e:"Tentativa de roubo de dados."
+},
+
+{
+t:"Obrigado pela ajuda de ontem.",
+g:false,
+e:"Mensagem normal."
+},
+
+{
+t:"Sua conta foi bloqueada. Clique no link para desbloquear.",
+g:true,
+e:"Golpe bancário."
+},
+
+{
+t:"Vamos jogar futebol sábado às 15h?",
+g:false,
+e:"Mensagem normal."
+},
+
+{
+t:"Seu pacote está retido. Pague a taxa agora.",
+g:true,
+e:"Golpe de entrega."
+},
+
+{
+t:"Boa noite, cheguei em casa.",
+g:false,
+e:"Mensagem comum."
+},
+
+{
+t:"Você foi sorteado e ganhou um celular novo.",
+g:true,
+e:"Promessa de prêmio."
+},
+
+{
+t:"Seu acesso será cancelado em 24 horas.",
+g:true,
+e:"Pressão para agir rápido."
+},
+
+{
+t:"Qual é a matéria da prova amanhã?",
+g:false,
+e:"Mensagem escolar comum."
+},
+
+{
+t:"Confirme sua senha para evitar bloqueio.",
+g:true,
+e:"Solicitação de informação sensível."
+},
+
+{
+t:"Vamos ao cinema no final de semana?",
+g:false,
+e:"Mensagem normal."
+},
+
+{
+t:"Recebi um PIX errado. Me devolva imediatamente.",
+g:true,
+e:"Golpe comum envolvendo PIX."
+},
+
+{
+t:"A aula começará às 7h30.",
+g:false,
+e:"Aviso comum."
+},
+
+{
+t:"Clique aqui para receber seu benefício liberado.",
+g:true,
+e:"Link suspeito."
+},
+
+{
+t:"Seu banco detectou atividade suspeita.",
+g:true,
+e:"Golpe bancário frequente."
+},
+
+{
+t:"Você viu o jogo ontem?",
+g:false,
+e:"Conversa normal."
+},
+
+{
+t:"Estou sem acesso ao banco. Faz um PIX pra mim.",
+g:true,
+e:"Pedido financeiro suspeito."
+},
+
+{
+t:"Te encontro na praça às 18h.",
+g:false,
+e:"Mensagem comum."
+},
+
+{
+t:"Seu código de verificação é 482913. Me envie.",
+g:true,
+e:"Tentativa de roubo de conta."
+},
+
+{
+t:"Obrigado por participar da reunião.",
+g:false,
+e:"Mensagem profissional comum."
+},
+
+{
+t:"Última chance para resgatar seu prêmio.",
+g:true,
+e:"Pressão psicológica."
+},
+
+{
+t:"A professora mudou a data da entrega.",
+g:false,
+e:"Mensagem normal."
+},
+
+{
+t:"Seu cadastro está desatualizado. Atualize agora.",
+g:true,
+e:"Possível phishing."
+},
+
+{
+t:"Boa tarde! Como você está?",
+g:false,
+e:"Mensagem amigável."
+},
+
+{
+t:"Estamos oferecendo investimento com lucro garantido.",
+g:true,
+e:"Promessa financeira irreal."
+},
+
+{
+t:"Vamos fazer o trabalho em grupo amanhã?",
+g:false,
+e:"Mensagem escolar."
+},
+
+{
+t:"Repasse essa mensagem para todos os seus contatos.",
+g:true,
+e:"Característica comum de fake news."
+},
+
+{
+t:"O treino de vôlei foi cancelado.",
+g:false,
+e:"Aviso normal."
+},
+
+{
+t:"A mídia não quer que você saiba disso.",
+g:true,
+e:"Sinal clássico de fake news."
+},
+
+{
+t:"Cheguei ao mercado. Precisa de alguma coisa?",
+g:false,
+e:"Mensagem comum."
+},
+
+{
+t:"Seu benefício foi aprovado. Clique para liberar.",
+g:true,
+e:"Golpe de benefício."
+},
+
+{
+t:"Parabéns pelo seu aniversário!",
+g:false,
+e:"Mensagem normal."
 }
 
 ];
 
 let atual = 0;
+  
+let acertos = 0;
+let erros = 0;
 
 /* ================= MOSTRAR TREINO ================= */
 
@@ -1126,13 +1330,15 @@ treino[atual].t;
 }
 
 /* ================= RESPOSTA ================= */
-
+  
 function responder(resp){
 
 let fb =
 document.getElementById("feedback");
 
 if(resp === treino[atual].g){
+
+acertos++;
 
 fb.innerHTML = `
 <span class="correct">
@@ -1144,6 +1350,8 @@ ${treino[atual].e}
 
 }else{
 
+erros++;
+
 fb.innerHTML = `
 <span class="error">
 ❌ Resposta incorreta
@@ -1153,6 +1361,9 @@ ${treino[atual].e}
 `;
 
 }
+
+document.getElementById("placar").innerHTML =
+`🏆 Acertos: ${acertos} | ❌ Erros: ${erros}`;
 
 atual++;
 
@@ -1170,17 +1381,25 @@ fb.innerHTML = "";
 
 }
 
-/* ================= RESET ================= */
 
+/* ================= RESET ================= */
+  
 function resetTreino(){
 
 atual = 0;
+
+acertos = 0;
+erros = 0;
 
 mostrarTreino();
 
 document.getElementById("feedback").innerHTML = "";
 
+document.getElementById("placar").innerHTML =
+"🏆 Acertos: 0 | ❌ Erros: 0";
+
 }
+
 
 /* ================= START ================= */
 
