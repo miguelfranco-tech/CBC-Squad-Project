@@ -394,10 +394,19 @@ let tamanho = texto.split(" ").length;
 
 let risco = 0;
 let sinais = [];
+const evidencias = {
+    dinheiro:false,
+    urgencia:false,
+    codigo:false,
+    sms:false,
+    banco:false,
+    confirmacao:false,
+    link:false,
+    familiar:false
+};
+if(tamanho > 100){
 
-if(tamanho > 50){
-
-risco -= 20;
+risco -= 40;
 
 sinais.push(
 "Texto longo e informativo"
@@ -791,6 +800,55 @@ sinais.push(
 }
 
 });
+  /* ================= EVIDÊNCIAS ================= */
+
+if(
+/pix|transferencia|deposito|pagamento|boleto|dinheiro/.test(texto)
+){
+    evidencias.dinheiro = true;
+}
+
+if(
+/urgente|agora|imediatamente|hoje mesmo|nao pode esperar/.test(texto)
+){
+    evidencias.urgencia = true;
+}
+
+if(
+/codigo|token|verificacao|autenticacao/.test(texto)
+){
+    evidencias.codigo = true;
+}
+
+if(
+/sms|mensagem de texto/.test(texto)
+){
+    evidencias.sms = true;
+}
+
+if(
+/banco|conta|itau|nubank|bradesco|caixa|santander/.test(texto)
+){
+    evidencias.banco = true;
+}
+
+if(
+/confirmar|validar|atualizar|verificar/.test(texto)
+){
+    evidencias.confirmacao = true;
+}
+
+if(
+/http|https|clique|acesse|link/.test(texto)
+){
+    evidencias.link = true;
+}
+
+if(
+/mae|pai|filho|filha|troquei de numero/.test(texto)
+){
+    evidencias.familiar = true;
+}
 /* ================= DETECÇÃO ================= */
 
 if(/\b(urgente|agora|imediatamente|rapido|ja)\b/.test(texto)){
@@ -833,12 +891,12 @@ sinais.push("Pressão emocional");
   
 if(
 /(pix|transferencia|deposito|pagamento)/.test(texto) &&
-/favor|ajuda|problema|urgente/.test(texto)
+/(favor|ajuda|problema|urgente)/.test(texto)
 ){
 risco += 35;
 sinais.push("Pedido financeiro suspeito");
 }
-
+  
 if(
 /(troquei de numero|novo whatsapp)/.test(texto)
 ){
@@ -848,18 +906,83 @@ sinais.push("Possível golpe do falso familiar");
 
 if(
 /codigo/.test(texto) &&
-/sms|verificacao/.test(texto)
+/(sms|verificacao)/.test(texto)
 ){
 risco += 50;
-sinais.push("Tentativa de roubo de código");
 }
 
 if(
-/ganhou|premio|sorteado/.test(texto) &&
-/clique|link/.test(texto)
+/(ganhou|premio|sorteado)/.test(texto) &&
+/(clique|link)/.test(texto)
 ){
 risco += 50;
+}
+risco += 50;
 sinais.push("Golpe de prêmio");
+}
+  /* PIX + URGÊNCIA */
+
+if(
+evidencias.dinheiro &&
+evidencias.urgencia
+){
+    risco += 60;
+
+    sinais.push(
+    "Pedido financeiro urgente"
+    );
+}
+
+/* CÓDIGO + SMS */
+
+if(
+evidencias.codigo &&
+evidencias.sms
+){
+    risco += 80;
+
+    sinais.push(
+    "Tentativa de obter código"
+    );
+}
+
+/* BANCO + CONFIRMAÇÃO */
+
+if(
+evidencias.banco &&
+evidencias.confirmacao
+){
+    risco += 70;
+
+    sinais.push(
+    "Solicitação bancária suspeita"
+    );
+}
+
+/* LINK + BANCO */
+
+if(
+evidencias.link &&
+evidencias.banco
+){
+    risco += 60;
+
+    sinais.push(
+    "Link envolvendo instituição financeira"
+    );
+}
+
+/* FALSO FAMILIAR */
+
+if(
+evidencias.familiar &&
+evidencias.dinheiro
+){
+    risco += 90;
+
+    sinais.push(
+    "Possível golpe do falso familiar"
+    );
 }
 /* ================= COMBINAÇÕES ================= */
 
@@ -871,19 +994,46 @@ risco = 95;
 }
 
 if(
-/codigo|senha/.test(texto) &&
-/envie|mande/.test(texto)
+/(codigo|senha)/.test(texto) &&
+/(envie|mande)/.test(texto)
 ){
 risco = 98;
 }
 
 if(
 /premio/.test(texto) &&
-/clique|link/.test(texto)
+/(clique|link)/.test(texto)
 ){
 risco = 90;
 }
+let contextoLegitimo = false;
 
+if(
+/internet|wifi|roteador|fibra|provedor/.test(texto)
+){
+    contextoLegitimo = true;
+}
+
+if(
+/professor|atividade|escola|trabalho|projeto|aula/.test(texto)
+){
+    contextoLegitimo = true;
+}
+
+if(
+/fatura|contrato|cliente|empresa|suporte tecnico/.test(texto)
+){
+    contextoLegitimo = true;
+}
+
+if(contextoLegitimo){
+
+    risco -= 40;
+
+    sinais.push(
+    "Contexto aparentemente legítimo"
+    );
+}
 /* ================= REDUÇÃO ================= */
 
 if(
@@ -924,12 +1074,53 @@ if(
         "Possível contexto educacional"
     );  
 }
+if(
+/canal oficial|conta comercial|verificado/.test(texto)
+){
+    risco -= 35;
+
+    sinais.push(
+    "Perfil aparentemente oficial"
+    );
+}
+
+let totalEvidencias = 0;
+
+if(evidencias.dinheiro) totalEvidencias++;
+if(evidencias.urgencia) totalEvidencias++;
+if(evidencias.codigo) totalEvidencias++;
+if(evidencias.sms) totalEvidencias++;
+if(evidencias.banco) totalEvidencias++;
+if(evidencias.confirmacao) totalEvidencias++;
+if(evidencias.link) totalEvidencias++;
+if(evidencias.familiar) totalEvidencias++;
+
+if(totalEvidencias >= 4){
+
+    risco += 50;
+
+    sinais.push(
+    "Muitos sinais suspeitos combinados"
+    );
+
+}
+
+if(totalEvidencias >= 6){
+
+    risco += 80;
+
+    sinais.push(
+    "Grande quantidade de sinais suspeitos"
+    );
+
+}
+
 if(risco < 0){
-risco = 0;
+    risco = 0;
 }
 
 if(risco > 100){
-risco = 100;
+    risco = 100;
 }
 
 /* ================= NÍVEL ================= */
