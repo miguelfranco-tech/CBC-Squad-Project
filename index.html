@@ -386,17 +386,63 @@ return txt.toLowerCase()
 }
 
 /* ================= IA ================= */
-
+  
 function analisarMensagem(texto){
 
 texto = normalizar(texto);
+let tamanho = texto.split(" ").length;
 
 let risco = 0;
-
 let sinais = [];
-/* ================= BANCO DE FRASES ================= */
 
-  const frasesGolpe = [
+if(tamanho > 50){
+
+risco -= 20;
+
+sinais.push(
+"Texto longo e informativo"
+);
+
+}
+
+/* ================= BANCO DE FRASES ================= */
+const palavrasTecnicas = [
+
+"internet",
+"wifi",
+"roteador",
+"modem",
+"fibra",
+"rede",
+"servidor",
+"dns",
+"ip",
+"provedor",
+"latencia",
+"upload",
+"download",
+"conectividade",
+
+"professor",
+"escola",
+"aula",
+"aluno",
+"atividade",
+"projeto",
+"cronograma",
+"trabalho",
+
+"engenharia",
+"sistema",
+"tecnico",
+"tecnologia",
+"infraestrutura",
+"configuracao",
+"manutencao"
+
+];
+
+const frasesGolpe = [ 
   
   /* PIX */
   
@@ -678,7 +724,13 @@ sinais.push("Pressão para agir rapidamente");
 /* BANCO */
 
 if(
+(
 /atividade suspeita|conta bloqueada|conta suspensa|acesso bloqueado|confirme seus dados|confirme seu cpf|atualize seus dados/.test(texto)
+)
+&&
+!(
+/internet|wifi|roteador|rede|fibra|servidor|dns|ip|provedor/.test(texto)
+)
 ){
 risco += 40;
 sinais.push("Possível golpe bancário");
@@ -747,12 +799,12 @@ sinais.push("Mensagem com urgência");
 }
 
 if(/\b(pix|dinheiro|transferencia|deposito)\b/.test(texto)){
-risco += 25;
+risco += 15;
 sinais.push("Pedido financeiro");
 }
 
 if(/\b(codigo|senha|cpf|dados|confirmacao)\b/.test(texto)){
-risco += 35;
+risco += 25;
 sinais.push("Solicitação de dados");
 }
 
@@ -766,17 +818,21 @@ risco += 20;
 sinais.push("Promessa de prêmio");
 }
 
-if(/\b(banco|central|suporte)\b/.test(texto)){
+if(
+/\b(banco|central|suporte)\b/.test(texto)
+&&
+!(/internet|wifi|roteador|rede|fibra/.test(texto))
+){
 risco += 15;
 sinais.push("Uso de autoridade");
 }
-
 if(/\b(me ajuda|socorro|mae)\b/.test(texto)){
 risco += 15;
 sinais.push("Pressão emocional");
 }
+  
 if(
-/pix|transferencia|deposito|pagamento/.test(texto) &&
+/(pix|transferencia|deposito|pagamento)/.test(texto) &&
 /favor|ajuda|problema|urgente/.test(texto)
 ){
 risco += 35;
@@ -784,7 +840,7 @@ sinais.push("Pedido financeiro suspeito");
 }
 
 if(
-/troquei de numero|novo whatsapp/.test(texto)
+/(troquei de numero|novo whatsapp)/.test(texto)
 ){
 risco += 45;
 sinais.push("Possível golpe do falso familiar");
@@ -835,7 +891,39 @@ if(
 ){
 risco -= 20;
 }
+/* CONTEXTO TÉCNICO */
 
+let tecnicasEncontradas = 0;
+
+palavrasTecnicas.forEach(p => {
+
+if(texto.includes(p)){
+tecnicasEncontradas++;
+}
+
+});
+
+if(tecnicasEncontradas >= 4){
+
+risco -= 50;
+
+sinais.push(
+"Texto técnico identificado"
+);
+
+}
+/* CONTEXTO EDUCACIONAL */
+
+if(
+/professor|atividade|trabalho|projeto|escola|aula/.test(texto)
+){
+
+    risco -= 30;
+
+    sinais.push(
+        "Possível contexto educacional"
+    );  
+}
 if(risco < 0){
 risco = 0;
 }
