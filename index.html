@@ -402,17 +402,14 @@ const evidencias = {
     banco:false,
     confirmacao:false,
     link:false,
-    familiar:false
+    familiar:false,
+
+    ajuda:false,
+    premio:false,
+    autoridade:false,
+    acesso:false,
+    dispositivo:false
 };
-if(tamanho > 100){
-
-risco -= 40;
-
-sinais.push(
-"Texto longo e informativo"
-);
-
-}
 
 /* ================= BANCO DE FRASES ================= */
 const palavrasTecnicas = [
@@ -849,8 +846,45 @@ if(
 ){
     evidencias.familiar = true;
 }
-/* ================= DETECÇÃO ================= */
+  if(
+/favor|ajuda|socorro|quebra esse galho|me ajuda/.test(texto)
+){
+    evidencias.ajuda = true;
+}
 
+if(
+/ganhou|premio|sorteado|beneficio/.test(texto)
+){
+    evidencias.premio = true;
+}
+
+if(
+/banco|itau|nubank|bradesco|caixa|santander|central/.test(texto)
+){
+    evidencias.autoridade = true;
+}
+
+if(
+/tentativa de acesso|novo acesso|atividade suspeita|login/.test(texto)
+){
+    evidencias.acesso = true;
+}
+
+if(
+/iphone|android|dispositivo|local|horario|data/.test(texto)
+){
+    evidencias.dispositivo = true;
+}
+/* ================= DETECÇÃO ================= */
+if(
+/foi voce|reconhece esta atividade|nao reconheca esta atividade|tentativa de acesso/.test(texto)
+){
+    risco += 50;
+
+    sinais.push(
+    "Alerta de acesso suspeito"
+    );
+}
 if(/\b(urgente|agora|imediatamente|rapido|ja)\b/.test(texto)){
 risco += 25;
 sinais.push("Mensagem com urgência");
@@ -883,6 +917,17 @@ if(
 ){
 risco += 15;
 sinais.push("Uso de autoridade");
+}
+  if(
+/data|horario|local|iphone|android|dispositivo/.test(texto)
+&&
+/tentativa de acesso|atividade suspeita|login/.test(texto)
+){
+    risco += 60;
+
+    sinais.push(
+    "Padrão clássico de golpe bancário"
+    );
 }
 if(/\b(me ajuda|socorro|mae)\b/.test(texto)){
 risco += 15;
@@ -982,6 +1027,49 @@ evidencias.dinheiro
     "Possível golpe do falso familiar"
     );
 }
+  if(
+evidencias.dinheiro &&
+evidencias.ajuda
+){
+    risco += 50;
+
+    sinais.push(
+    "Pedido financeiro emocional"
+    );
+}
+
+if(
+evidencias.acesso &&
+evidencias.confirmacao
+){
+    risco += 60;
+
+    sinais.push(
+    "Alerta de acesso suspeito"
+    );
+}
+
+if(
+evidencias.acesso &&
+evidencias.dispositivo
+){
+    risco += 50;
+
+    sinais.push(
+    "Tentativa de gerar credibilidade"
+    );
+}
+
+if(
+evidencias.premio &&
+evidencias.link
+){
+    risco += 80;
+
+    sinais.push(
+    "Golpe de prêmio"
+    );
+}
 /* ================= COMBINAÇÕES ================= */
 
 if(
@@ -1026,7 +1114,7 @@ if(
 
 if(contextoLegitimo){
 
-    risco -= 40;
+    risco -= 10;
 
     sinais.push(
     "Contexto aparentemente legítimo"
@@ -1066,16 +1154,16 @@ if(
 /professor|atividade|trabalho|projeto|escola|aula/.test(texto)
 ){
 
-    risco -= 30;
+    risco -= 5;
 
     sinais.push(
         "Possível contexto educacional"
     );  
 }
 if(
-/canal oficial|conta comercial|verificado/.test(texto)
+/canal oficial|verificado/.test(texto)
 ){
-    risco -= 35;
+    risco -= 5;
 
     sinais.push(
     "Perfil aparentemente oficial"
@@ -1092,7 +1180,11 @@ if(evidencias.banco) totalEvidencias++;
 if(evidencias.confirmacao) totalEvidencias++;
 if(evidencias.link) totalEvidencias++;
 if(evidencias.familiar) totalEvidencias++;
-
+if(evidencias.ajuda) totalEvidencias++;
+if(evidencias.premio) totalEvidencias++;
+if(evidencias.autoridade) totalEvidencias++;
+if(evidencias.acesso) totalEvidencias++;
+if(evidencias.dispositivo) totalEvidencias++;
 if(totalEvidencias >= 4){
 
     risco += 50;
@@ -1112,7 +1204,15 @@ if(totalEvidencias >= 6){
     );
 
 }
+if(totalEvidencias >= 8){
 
+    risco += 100;
+
+    sinais.push(
+    "Padrão extremamente perigoso"
+    );
+
+}
 if(risco < 0){
     risco = 0;
 }
