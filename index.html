@@ -410,7 +410,8 @@ premio:false,
 autoridade:false,
 acesso:false,
 dispositivo:false,
-
+cobranca:false
+  
 tecnico:false,
 educacional:false,
 empresarial:false,
@@ -449,9 +450,19 @@ const palavrasTecnicas = [
 "tecnologia",
 "infraestrutura",
 "configuracao",
-"manutencao"
+"manutencao",
+
+"fatura",
+"boleto",
+"cliente",
+"contrato",
+"atendimento",
+"suporte",
+"allrede",
+"provedora"
 
 ];
+
 const frasesLegitimas = [
 
 "internet caiu",
@@ -465,26 +476,59 @@ const frasesLegitimas = [
 "configuracao do servidor",
 "professor informou",
 "sistema da internet",
-"empresa provedora"
+"empresa provedora",
+
+"fatura segue em anexo",
+"caso ja tenha feito o pagamento",
+"desconsidere esta mensagem",
+"canal oficial",
+"codigo do boleto",
+"codigo pix",
+"vencimento da fatura",
+"pagamento da fatura",
+"cliente",
+"contrato",
+"suporte tecnico",
+"ordem de servico",
+"atendimento",
+"provedor de internet",
+"manutencao programada",
+
+"cobranca referente",
+"mensalidade",
+"segunda via",
+"segunda via da fatura",
+"aguardamos seu pagamento",
+"pagamento identificado",
+"pagamento confirmado",
+"fatura do mes",
+"empresa de internet",
+"instalacao tecnica",
+"visita tecnica",
+"chamado tecnico",
+"suporte ao cliente"
 
 ];
 
-const frasesGolpe = [ 
- 
-  /* PIX */
-  
+const frasesGolpe = [
+
+/* PIX */
+
 "me manda um pix",
 "faz um pix",
 "preciso de um pix",
 "me empresta um dinheiro",
-"faz um pagamento para mim",
+
 "consegue fazer uma transferencia",
+
 "estou sem acesso ao banco",
 "ultrapassei meu limite",
 "excedeu meu limite diario",
+
 "depois eu te devolvo",
 "te devolvo ainda hoje",
 "te retorno ainda hoje",
+
 "preciso urgente",
 "estou com um problema",
 "preciso de um favor",
@@ -831,6 +875,11 @@ sinais.push(
 
 });
   /* ================= EVIDÊNCIAS ================= */
+  if(
+/fatura|boleto|vencimento|desconsidere esta mensagem|canal oficial/.test(texto)
+){
+    evidencias.cobranca = true;
+}
 if(
 /internet|wifi|roteador|fibra|dns|ip|rede|servidor|latencia|upload|download/.test(texto)
 ){
@@ -847,7 +896,7 @@ if(
     evidencias.empresarial = true;
 }
 if(
-/pix|transferencia|deposito|pagamento|boleto|dinheiro/.test(texto)
+/pix|transferencia|deposito|dinheiro/.test(texto)
 ){
     evidencias.dinheiro = true;
 }
@@ -962,9 +1011,14 @@ risco += 15;
 sinais.push("Pedido financeiro");
 }
 
-if(/\b(codigo|senha|cpf|dados|confirmacao)\b/.test(texto)){
-risco += 25;
-sinais.push("Solicitação de dados");
+if(
+/(codigo de verificacao|codigo sms|token|autenticacao|senha|cpf)/.test(texto)
+){
+    risco += 29;
+
+    sinais.push(
+    "Solicitação de informação sensível"
+    );
 }
 
 if(/\b(clique|acesse|link|http)\b/.test(texto)){
@@ -1155,7 +1209,18 @@ evidencias.educacional &&
 !evidencias.codigo
 ){
     risco -= 50;
+if(
+evidencias.cobranca &&
+!evidencias.codigo &&
+!evidencias.familiar &&
+!evidencias.ajuda
+){
+    risco -= 50;
 
+    sinais.push(
+    "Cobrança aparentemente legítima"
+    );
+}
     sinais.push(
     "Contexto educacional legítimo"
     );
@@ -1205,7 +1270,7 @@ if(
 }
 
 if(
-/fatura|contrato|cliente|empresa|suporte tecnico/.test(texto)
+/fatura|contrato|cliente|empresa|suporte tecnico|canal oficial|vencimento|provedora|telecom/.test(texto)
 ){
     contextoLegitimo = true;
 }
@@ -1237,7 +1302,7 @@ tecnicasEncontradas++;
 
 });
 
-if(tecnicasEncontradas >= 4){
+if(tecnicasEncontradas >= 3){
 
 risco -= 50;
 
@@ -1249,14 +1314,15 @@ sinais.push(
 /* CONTEXTO EDUCACIONAL */
 
 if(
-/professor|atividade|trabalho|projeto|escola|aula/.test(texto)
+/professor|atividade|trabalho|projeto|escola|aula|aluno|cronograma/.test(texto)
 ){
 
-    risco -= 5;
+    risco -= 40;
 
     sinais.push(
-        "Possível contexto educacional"
-    );  
+    "Contexto educacional"
+    );
+
 }
 if(
 /canal oficial|verificado/.test(texto)
@@ -1287,7 +1353,7 @@ if(evidencias.acesso) totalEvidencias++;
 if(evidencias.dispositivo) totalEvidencias++;
 if(totalEvidencias >= 4){
 
-    risco += 50;
+    risco += 20;
 
     sinais.push(
     "Muitos sinais suspeitos combinados"
@@ -1297,7 +1363,7 @@ if(totalEvidencias >= 4){
 
 if(totalEvidencias >= 6){
 
-    risco += 80;
+    risco += 35;
 
     sinais.push(
     "Grande quantidade de sinais suspeitos"
@@ -1312,7 +1378,7 @@ totalEvidencias >= 8
 !evidencias.educacional
 ){
 
-    risco += 100;
+    risco += 45;
     sinais.push(
     "Padrão extremamente perigoso"
     );
@@ -1328,6 +1394,28 @@ evidencias.banco &&
     "Menção simples a banco"
     );
 }
+  if(
+/fatura|vencimento|boleto|telecom|provedora|canal oficial/.test(texto)
+&&
+!/codigo de verificacao|senha|token|atividade suspeita/.test(texto)
+){
+    risco -= 40;
+
+    sinais.push(
+    "Cobrança legítima identificada"
+    );
+
+}
+  if(
+/canal oficial/.test(texto)
+&&
+/fatura|vencimento|boleto/.test(texto)
+){
+    risco -= 15;
+
+    sinais.push(
+    "Empresa identificada"
+    );
 }
 if(risco < 0){
     risco = 0;
