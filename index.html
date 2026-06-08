@@ -395,6 +395,14 @@ let tamanho = texto.split(" ").length;
 let risco = 0;
 let sinais = [];
 const evidencias = {
+  ajuda:false,
+premio:false,
+autoridade:false,
+acesso:false,
+dispositivo:false,
+tecnico:false,
+educacional:false,
+empresarial:false
     dinheiro:false,
     urgencia:false,
     codigo:false,
@@ -403,7 +411,6 @@ const evidencias = {
     confirmacao:false,
     link:false,
     familiar:false,
-
     ajuda:false,
     premio:false,
     autoridade:false,
@@ -449,7 +456,33 @@ const palavrasTecnicas = [
 ];
 
 const frasesGolpe = [ 
-  
+  const frasesLegitimas = [
+
+"internet caiu",
+
+"problema na rede",
+
+"roteador principal",
+
+"manutencao da internet",
+
+"atividade escolar",
+
+"cronograma do projeto",
+
+"reuniao marcada",
+
+"infraestrutura da rede",
+
+"configuracao do servidor",
+
+"professor informou",
+
+"sistema da internet",
+
+"empresa provedora"
+
+];
   /* PIX */
   
 "me manda um pix",
@@ -785,7 +818,19 @@ risco += 30;
 sinais.push("Link potencialmente suspeito");
 }
   frasesGolpe.forEach(frase=>{
+frasesLegitimas.forEach(frase=>{
 
+if(texto.includes(frase)){
+
+risco -= 25;
+
+sinais.push(
+"Frase comum em contexto legítimo"
+);
+
+}
+
+});
 if(texto.includes(frase)){
 
 risco += 6;
@@ -798,7 +843,21 @@ sinais.push(
 
 });
   /* ================= EVIDÊNCIAS ================= */
-
+if(
+/internet|wifi|roteador|fibra|dns|ip|rede|servidor|latencia|upload|download/.test(texto)
+){
+    evidencias.tecnico = true;
+}
+  if(
+/professor|atividade|escola|trabalho|projeto|cronograma|aluno|aula/.test(texto)
+){
+    evidencias.educacional = true;
+}
+  if(
+/cliente|empresa|contrato|reuniao|orcamento|suporte tecnico/.test(texto)
+){
+    evidencias.empresarial = true;
+}
 if(
 /pix|transferencia|deposito|pagamento|boleto|dinheiro/.test(texto)
 ){
@@ -876,6 +935,26 @@ if(
     evidencias.dispositivo = true;
 }
 /* ================= DETECÇÃO ================= */
+  if(
+/tentativa de acesso|atividade suspeita/.test(texto)
+&&
+/iphone|android|dispositivo|local|horario|data/.test(texto)
+){
+    risco += 70;
+
+    sinais.push(
+    "Padrão clássico de phishing bancário"
+    );
+}
+  if(
+/foi voce|reconhece esta atividade|nao reconheca esta atividade/.test(texto)
+){
+    risco += 50;
+
+    sinais.push(
+    "Tentativa de validação de acesso"
+    );
+}
 if(
 /foi voce|reconhece esta atividade|nao reconheca esta atividade|tentativa de acesso/.test(texto)
 ){
@@ -1071,7 +1150,38 @@ evidencias.link
     );
 }
 /* ================= COMBINAÇÕES ================= */
+if(
+evidencias.tecnico &&
+!evidencias.dinheiro &&
+!evidencias.codigo
+){
+    risco -= 50;
 
+    sinais.push(
+    "Contexto técnico legítimo"
+    );
+}
+  if(
+evidencias.educacional &&
+!evidencias.dinheiro &&
+!evidencias.codigo
+){
+    risco -= 50;
+
+    sinais.push(
+    "Contexto educacional legítimo"
+    );
+}
+  if(
+evidencias.empresarial &&
+!evidencias.codigo
+){
+    risco -= 30;
+
+    sinais.push(
+    "Contexto empresarial legítimo"
+    );
+}
 if(
 /pix/.test(texto) &&
 /urgente|agora/.test(texto)
@@ -1114,7 +1224,7 @@ if(
 
 if(contextoLegitimo){
 
-    risco -= 10;
+    risco -= 20;
 
     sinais.push(
     "Contexto aparentemente legítimo"
@@ -1162,6 +1272,8 @@ if(
 }
 if(
 /canal oficial|verificado/.test(texto)
+&&
+!/tentativa de acesso|atividade suspeita|conta bloqueada/.test(texto)
 ){
     risco -= 5;
 
@@ -1204,14 +1316,30 @@ if(totalEvidencias >= 6){
     );
 
 }
-if(totalEvidencias >= 8){
+if(
+totalEvidencias >= 8
+&&
+!evidencias.tecnico
+&&
+!evidencias.educacional
+){
 
     risco += 100;
-
     sinais.push(
     "Padrão extremamente perigoso"
     );
+if(
+evidencias.banco &&
+!evidencias.confirmacao &&
+!evidencias.link &&
+!evidencias.codigo
+){
+    risco -= 40;
 
+    sinais.push(
+    "Menção simples a banco"
+    );
+}
 }
 if(risco < 0){
     risco = 0;
