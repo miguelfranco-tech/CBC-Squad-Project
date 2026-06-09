@@ -849,16 +849,25 @@ if(
 risco += 30;
 sinais.push("Link potencialmente suspeito");
 }
-  frasesGolpe.forEach(frase=>{
 frasesLegitimas.forEach(frase=>{
 
 if(texto.includes(frase)){
 
 risco -= 25;
 
-sinais.push(
-"Frase comum em contexto legítimo"
-);
+sinais.push("Frase comum em contexto legítimo");
+
+}
+
+});
+
+frasesGolpe.forEach(frase=>{
+
+if(texto.includes(frase)){
+
+risco += 6;
+
+sinais.push("Frase típica de golpe: " + frase);
 
 }
 
@@ -1371,17 +1380,15 @@ if(totalEvidencias >= 6){
 
 }
 if(
-totalEvidencias >= 8
-&&
-!evidencias.tecnico
-&&
+totalEvidencias >= 8 &&
+!evidencias.tecnico &&
 !evidencias.educacional
 ){
 
     risco += 45;
-    sinais.push(
-    "Padrão extremamente perigoso"
-    );
+    sinais.push("Padrão extremamente perigoso");
+
+}
 if(
 evidencias.banco &&
 !evidencias.confirmacao &&
