@@ -972,7 +972,7 @@ if(
     evidencias.dispositivo = true;
 }
 /* ================= DETECÇÃO ================= */
-  if(
+if(
 /tentativa de acesso|atividade suspeita/.test(texto)
 &&
 /iphone|android|dispositivo|local|horario|data/.test(texto)
@@ -982,6 +982,8 @@ if(
     sinais.push(
     "Padrão clássico de phishing bancário"
     );
+}
+
 if(
 /foi voce|reconhece esta atividade|nao reconheca esta atividade|tentativa de acesso/.test(texto)
 ){
