@@ -390,7 +390,6 @@ return txt.toLowerCase()
 function analisarMensagem(texto){
 
 texto = normalizar(texto);
-let tamanho = texto.split(" ").length;
 
 let risco = 0;
 let sinais = [];
@@ -861,20 +860,6 @@ sinais.push("Frase comum em contexto legítimo");
 
 });
 
-frasesLegitimas.forEach(frase=>{
-
-if(texto.includes(frase)){
-
-risco -= 25;
-
-sinais.push(
-"Frase comum em contexto legítimo"
-);
-
-}
-
-});
-
 frasesGolpe.forEach(frase=>{
 
 if(texto.includes(frase)){
@@ -888,17 +873,7 @@ sinais.push(
 }
 
 });
-if(texto.includes(frase)){
-
-risco += 6;
-
-sinais.push(
-"Frase típica de golpe: " + frase
-);
-
-}
-
-});
+  
   /* ================= EVIDÊNCIAS ================= */
   if(
 /fatura|boleto|vencimento|desconsidere esta mensagem|canal oficial/.test(texto)
@@ -1007,8 +982,6 @@ if(
     sinais.push(
     "Padrão clássico de phishing bancário"
     );
-}
-}
 if(
 /foi voce|reconhece esta atividade|nao reconheca esta atividade|tentativa de acesso/.test(texto)
 ){
@@ -1228,12 +1201,6 @@ evidencias.educacional &&
 
     risco -= 50;
 
-    sinais.push(
-    "Contexto educacional legítimo"
-    );
-
-}
-
 if(
 evidencias.cobranca &&
 !evidencias.codigo &&
@@ -1266,21 +1233,21 @@ if(
 /pix/.test(texto) &&
 /urgente|agora/.test(texto)
 ){
-risco = 30;
+risco += 30;
 }
 
 if(
 /(codigo|senha)/.test(texto) &&
 /(envie|mande)/.test(texto)
 ){
-risco = 40;
+risco += 40;
 }
 
 if(
 /premio/.test(texto) &&
 /(clique|link)/.test(texto)
 ){
-risco = 40;
+risco += 40;
 }
 let contextoLegitimo = false;
 
