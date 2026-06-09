@@ -861,13 +861,29 @@ sinais.push("Frase comum em contexto legítimo");
 
 });
 
+frasesLegitimas.forEach(frase=>{
+
+if(texto.includes(frase)){
+
+risco -= 25;
+
+sinais.push(
+"Frase comum em contexto legítimo"
+);
+
+}
+
+});
+
 frasesGolpe.forEach(frase=>{
 
 if(texto.includes(frase)){
 
 risco += 6;
 
-sinais.push("Frase típica de golpe: " + frase);
+sinais.push(
+"Frase típica de golpe: " + frase
+);
 
 }
 
@@ -992,14 +1008,6 @@ if(
     "Padrão clássico de phishing bancário"
     );
 }
-  if(
-/foi voce|reconhece esta atividade|nao reconheca esta atividade/.test(texto)
-){
-    risco += 50;
-
-    sinais.push(
-    "Tentativa de validação de acesso"
-    );
 }
 if(
 /foi voce|reconhece esta atividade|nao reconheca esta atividade|tentativa de acesso/.test(texto)
@@ -1212,23 +1220,33 @@ evidencias.tecnico &&
     "Contexto técnico legítimo"
     );
 }
-  if(
+if(
 evidencias.educacional &&
 !evidencias.dinheiro &&
 !evidencias.codigo
 ){
+
     risco -= 50;
+
+    sinais.push(
+    "Contexto educacional legítimo"
+    );
+
+}
+
 if(
 evidencias.cobranca &&
 !evidencias.codigo &&
 !evidencias.familiar &&
 !evidencias.ajuda
 ){
+
     risco -= 50;
 
     sinais.push(
     "Cobrança aparentemente legítima"
     );
+
 }
     sinais.push(
     "Contexto educacional legítimo"
@@ -1248,21 +1266,21 @@ if(
 /pix/.test(texto) &&
 /urgente|agora/.test(texto)
 ){
-risco = 95;
+risco = 30;
 }
 
 if(
 /(codigo|senha)/.test(texto) &&
 /(envie|mande)/.test(texto)
 ){
-risco = 98;
+risco = 40;
 }
 
 if(
 /premio/.test(texto) &&
 /(clique|link)/.test(texto)
 ){
-risco = 90;
+risco = 40;
 }
 let contextoLegitimo = false;
 
