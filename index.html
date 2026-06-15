@@ -805,7 +805,15 @@ if(
 risco += 40;
 sinais.push("Possível golpe bancário");
 }
+if(
+/conta bloqueada|conta temporariamente bloqueada|atualize seus dados/.test(texto)
+){
+    risco += 50;
 
+    sinais.push(
+    "Padrão clássico de phishing bancário"
+    );
+}
 /* SMS */
 
 if(
@@ -1271,13 +1279,11 @@ if(
     contextoLegitimo = true;
 }
 
-if(contextoLegitimo){
-
-    risco -= 20;
-
-    sinais.push(
-    "Contexto aparentemente legítimo"
-    );
+if(
+contextoLegitimo &&
+risco < 30
+){
+    risco -= 10;
 }
 /* ================= REDUÇÃO ================= */
 
@@ -1382,11 +1388,7 @@ evidencias.banco &&
 !evidencias.link &&
 !evidencias.codigo
 ){
-    risco -= 40;
-
-    sinais.push(
-    "Menção simples a banco"
-    );
+    risco -= 10;
 }
   if(
 /fatura|vencimento|boleto|telecom|provedora|canal oficial/.test(texto)
@@ -1410,6 +1412,12 @@ evidencias.banco &&
     sinais.push(
     "Empresa identificada"
     );
+}
+  if(
+evidencias.banco &&
+evidencias.confirmacao
+){
+    risco = Math.max(risco,64);
 }
 if(risco < 0){
     risco = 0;
