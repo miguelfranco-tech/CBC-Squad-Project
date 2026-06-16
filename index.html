@@ -644,7 +644,6 @@ const frasesGolpe = [
 "te pago depois",
 "depois eu te pago",
 "depois eu devolvo",
-"faço o reembolso",
 "faco o reembolso",
 "assim que cair eu te pago",
 
@@ -1203,13 +1202,18 @@ evidencias.tecnico &&
     "Contexto técnico legítimo"
     );
 }
+
+/* BUG CORRIGIDO: chaves separadas corretamente */
 if(
 evidencias.educacional &&
 !evidencias.dinheiro &&
 !evidencias.codigo
 ){
-
     risco -= 50;
+    sinais.push(
+    "Contexto educacional legítimo"
+    );
+}
 
 if(
 evidencias.cobranca &&
@@ -1217,19 +1221,13 @@ evidencias.cobranca &&
 !evidencias.familiar &&
 !evidencias.ajuda
 ){
-
     risco -= 50;
-
     sinais.push(
     "Cobrança aparentemente legítima"
     );
+}
 
-}
-    sinais.push(
-    "Contexto educacional legítimo"
-    );
-}
-  if(
+if(
 evidencias.empresarial &&
 !evidencias.codigo
 ){
@@ -1477,9 +1475,9 @@ cor
 
 }
 
-/* ================= ANALISAR ================= */
+/* ================= ANALISAR — BUG CORRIGIDO: async adicionado ================= */
 
-function analisar(){
+async function analisar(){
   
 document.getElementById("resultado").innerHTML = `
 <div class="resultado-box">
@@ -1487,21 +1485,19 @@ document.getElementById("resultado").innerHTML = `
 <p>⏳ Aguarde...</p>
 </div>
 `;
-  
-  await new Promise(resolve => setTimeout(resolve, 2000));
+
+await new Promise(resolve => setTimeout(resolve, 1500));
   
 let entrada =
 document.getElementById("entrada").value;
 
-if(!entrada){
+if(!entrada.trim()){
 
 alert("Digite uma mensagem!");
 
 return;
 
 }
-
-setTimeout(()=>{
 
 let r = analisarMensagem(entrada);
 
@@ -1563,8 +1559,6 @@ r.sinais.map(s=>"• "+esc(s)).join("<br>")
 </div>
 
 `;
-  
-},1500);
   
 }
 
