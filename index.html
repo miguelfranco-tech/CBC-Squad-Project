@@ -1480,7 +1480,14 @@ cor
 /* ================= ANALISAR ================= */
 
 function analisar(){
-
+  
+document.getElementById("resultado").innerHTML = `
+<div class="resultado-box">
+<h3>🤖 IA analisando...</h3>
+<p>⏳ Aguarde...</p>
+</div>
+`;
+  
 let entrada =
 document.getElementById("entrada").value;
 
@@ -1491,6 +1498,8 @@ alert("Digite uma mensagem!");
 return;
 
 }
+
+setTimeout(()=>{
 
 let r = analisarMensagem(entrada);
 
@@ -1552,7 +1561,9 @@ r.sinais.map(s=>"• "+esc(s)).join("<br>")
 </div>
 
 `;
-
+  
+},1500);
+  
 }
 
 /* ================= GERAR ================= */
