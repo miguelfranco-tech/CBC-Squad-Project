@@ -1649,7 +1649,19 @@ alert("Selecione uma imagem.");
 return;
 
 }
+  
+document.getElementById("resultado").innerHTML = `
+<div class="resultado-box">
+<div class="status">
+📷 Lendo imagem...
+</div>
 
+<div class="info">
+Aguarde enquanto o sistema extrai o texto da imagem.
+</div>
+</div>
+`;
+  
 try{
 
 const resultadoOCR =
