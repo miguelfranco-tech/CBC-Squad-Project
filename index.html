@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -215,6 +216,108 @@ font-size:18px;
 line-height:1.6;
 }
 
+/* ================= NÍVEL ================= */
+
+.nivel-box{
+margin:18px 0 8px;
+padding:16px 20px;
+border-radius:14px;
+background:linear-gradient(135deg,#e3f2fd,#bbdefb);
+display:flex;
+align-items:center;
+gap:14px;
+}
+
+.nivel-emoji{
+font-size:36px;
+}
+
+.nivel-info{
+flex:1;
+text-align:left;
+}
+
+.nivel-titulo{
+font-size:19px;
+font-weight:bold;
+color:#0d47a1;
+}
+
+.nivel-subtitulo{
+font-size:14px;
+color:#555;
+margin-top:2px;
+}
+
+.nivel-xp-bar{
+width:100%;
+height:10px;
+background:#cce0f5;
+border-radius:20px;
+overflow:hidden;
+margin-top:8px;
+}
+
+.nivel-xp-fill{
+height:100%;
+border-radius:20px;
+background:linear-gradient(90deg,#2196f3,#0d47a1);
+transition:width 0.8s ease;
+}
+
+.nivel-xp-texto{
+font-size:13px;
+color:#555;
+margin-top:4px;
+}
+
+/* ================= STATS ================= */
+
+.stats-box{
+margin-top:35px;
+background:white;
+padding:25px;
+border-radius:18px;
+box-shadow:0 8px 25px rgba(0,0,0,0.08);
+}
+
+.stats-box h3{
+font-size:26px;
+color:#0d47a1;
+margin-bottom:18px;
+text-align:center;
+}
+
+.stats-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+gap:14px;
+}
+
+.stat-card{
+background:linear-gradient(135deg,#e3f2fd,#f5f9ff);
+border-radius:14px;
+padding:16px;
+text-align:center;
+}
+
+.stat-numero{
+font-size:32px;
+font-weight:bold;
+color:#0d47a1;
+}
+
+.stat-label{
+font-size:13px;
+color:#555;
+margin-top:4px;
+}
+
+.stat-icon{
+font-size:22px;
+margin-bottom:4px;
+}
+
 /* ================= RESPONSIVO ================= */
 
 @media(max-width:700px){
@@ -233,6 +336,15 @@ width:100%;
 
 .frase{
 font-size:19px;
+}
+
+.nivel-box{
+flex-direction:column;
+text-align:center;
+}
+
+.nivel-info{
+text-align:center;
 }
 
 }
@@ -331,7 +443,21 @@ onclick="analisarImagem()"
 </div>
 
 <div class="feedback" id="feedback"></div>
-  <p id="placar">
+
+<!-- NÍVEL -->
+<div class="nivel-box" id="nivelBox">
+  <div class="nivel-emoji" id="nivelEmoji">🥚</div>
+  <div class="nivel-info">
+    <div class="nivel-titulo" id="nivelTitulo">Iniciante</div>
+    <div class="nivel-subtitulo" id="nivelSubtitulo">Responda corretamente para evoluir!</div>
+    <div class="nivel-xp-bar">
+      <div class="nivel-xp-fill" id="nivelXpFill" style="width:0%"></div>
+    </div>
+    <div class="nivel-xp-texto" id="nivelXpTexto">0 / 5 XP para o próximo nível</div>
+  </div>
+</div>
+
+<p id="placar" style="margin-top:12px">
 🏆 Acertos: 0 | ❌ Erros: 0
 </p>
 
@@ -341,6 +467,50 @@ onclick="analisarImagem()"
 🔄 Resetar
 </button>
 
+</div>
+
+<!-- ESTATÍSTICAS -->
+<div class="stats-box">
+  <h3>📊 Suas Estatísticas</h3>
+  <div class="stats-grid">
+
+    <div class="stat-card">
+      <div class="stat-icon">🔍</div>
+      <div class="stat-numero" id="statMensagens">0</div>
+      <div class="stat-label">Mensagens analisadas</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">🎯</div>
+      <div class="stat-numero" id="statPrecisao">0%</div>
+      <div class="stat-label">Precisão no treino</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">🚨</div>
+      <div class="stat-numero" id="statGolpes">0</div>
+      <div class="stat-label">Golpes detectados</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">✅</div>
+      <div class="stat-numero" id="statSeguras">0</div>
+      <div class="stat-label">Mensagens seguras</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">🏅</div>
+      <div class="stat-numero" id="statNivelStat">1</div>
+      <div class="stat-label">Nível atual</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">⚡</div>
+      <div class="stat-numero" id="statSequencia">0</div>
+      <div class="stat-label">Sequência atual</div>
+    </div>
+
+  </div>
 </div>
 
 </div>
@@ -1501,6 +1671,15 @@ return;
 
 let r = analisarMensagem(entrada);
 
+/* ===== ESTATÍSTICAS DE ANÁLISE ===== */
+statMensagensTotal++;
+if(r.risco >= 60){
+  statGolpesDetectados++;
+}else{
+  statSeguras++;
+}
+atualizarStats();
+
 document.getElementById("resultado").innerHTML = `
 
 <div class="resultado-box">
@@ -1918,9 +2097,69 @@ e:"Mensagem normal."
 ];
 
 let atual = 0;
-  
 let acertos = 0;
 let erros = 0;
+let sequencia = 0;
+
+/* ===== ESTATÍSTICAS GLOBAIS ===== */
+let statMensagensTotal = 0;
+let statGolpesDetectados = 0;
+let statSeguras = 0;
+
+/* ===== SISTEMA DE NÍVEIS ===== */
+const niveis = [
+  { xp:0,   titulo:"Iniciante",           emoji:"🥚", sub:"Dê os primeiros passos!" },
+  { xp:5,   titulo:"Observador",          emoji:"👀", sub:"Você está começando a enxergar os sinais." },
+  { xp:12,  titulo:"Alerta",              emoji:"🔎", sub:"Seus olhos estão mais atentos!" },
+  { xp:22,  titulo:"Detector",            emoji:"🛡️", sub:"Você já pega muitos golpes." },
+  { xp:35,  titulo:"Guardião Digital",    emoji:"⚔️", sub:"Protetor experiente!" },
+  { xp:52,  titulo:"Especialista",        emoji:"🧠", sub:"Você conhece os golpes de perto." },
+  { xp:75,  titulo:"Sentinela",           emoji:"🦅", sub:"Visão aguçada contra fraudes." },
+  { xp:105, titulo:"Mestre Anti-Golpe",   emoji:"🏆", sub:"Nível máximo desbloqueado!" },
+];
+
+let xpAtual = 0;
+
+function calcularNivel(){
+  let n = 0;
+  for(let i = niveis.length - 1; i >= 0; i--){
+    if(xpAtual >= niveis[i].xp){ n = i; break; }
+  }
+  return n;
+}
+
+function atualizarNivel(){
+  const n = calcularNivel();
+  const nivel = niveis[n];
+  const proximo = niveis[n+1];
+
+  document.getElementById("nivelEmoji").innerText = nivel.emoji;
+  document.getElementById("nivelTitulo").innerText = `Nível ${n+1} — ${nivel.titulo}`;
+  document.getElementById("nivelSubtitulo").innerText = nivel.sub;
+  document.getElementById("statNivelStat").innerText = n+1;
+
+  if(proximo){
+    const xpNivel = xpAtual - nivel.xp;
+    const xpProximo = proximo.xp - nivel.xp;
+    const pct = Math.min(100, Math.round((xpNivel / xpProximo) * 100));
+    document.getElementById("nivelXpFill").style.width = pct + "%";
+    document.getElementById("nivelXpTexto").innerText =
+      `${xpNivel} / ${xpProximo} XP para o próximo nível`;
+  } else {
+    document.getElementById("nivelXpFill").style.width = "100%";
+    document.getElementById("nivelXpTexto").innerText = "🏆 Nível máximo atingido!";
+  }
+}
+
+function atualizarStats(){
+  const total = acertos + erros;
+  const precisao = total > 0 ? Math.round((acertos / total) * 100) : 0;
+  document.getElementById("statMensagens").innerText = statMensagensTotal;
+  document.getElementById("statPrecisao").innerText = precisao + "%";
+  document.getElementById("statGolpes").innerText = statGolpesDetectados;
+  document.getElementById("statSeguras").innerText = statSeguras;
+  document.getElementById("statSequencia").innerText = sequencia;
+}
 
 /* ================= MOSTRAR TREINO ================= */
 
@@ -1935,51 +2174,59 @@ treino[atual].t;
   
 function responder(resp){
 
-let fb =
-document.getElementById("feedback");
+let fb = document.getElementById("feedback");
+const nivelAntes = calcularNivel();
 
 if(resp === treino[atual].g){
 
-acertos++;
+  acertos++;
+  sequencia++;
+  const xpGanho = sequencia >= 3 ? 2 : 1; // bônus de sequência
+  xpAtual += xpGanho;
 
-fb.innerHTML = `
-<span class="correct">
-✔ Correto
-</span>
+  const bonus = sequencia >= 3
+    ? `<br><span style="color:#f57c00;font-size:15px">🔥 Sequência de ${sequencia}! +${xpGanho} XP</span>`
+    : `<span style="color:#777;font-size:14px"> +${xpGanho} XP</span>`;
+
+  fb.innerHTML = `
+<span class="correct">✔ Correto ${bonus}</span>
 <br><br>
 ${treino[atual].e}
 `;
 
 }else{
 
-erros++;
+  erros++;
+  sequencia = 0;
 
-fb.innerHTML = `
-<span class="error">
-❌ Resposta incorreta
-</span>
+  fb.innerHTML = `
+<span class="error">❌ Resposta incorreta</span>
 <br><br>
 ${treino[atual].e}
 `;
 
 }
 
+const nivelDepois = calcularNivel();
+if(nivelDepois > nivelAntes){
+  setTimeout(()=>{
+    fb.innerHTML += `<br><br><span style="font-size:20px">${niveis[nivelDepois].emoji} Você subiu para <b>Nível ${nivelDepois+1} — ${niveis[nivelDepois].titulo}</b>!</span>`;
+  }, 200);
+}
+
 document.getElementById("placar").innerHTML =
 `🏆 Acertos: ${acertos} | ❌ Erros: ${erros}`;
 
-atual++;
+atualizarNivel();
+atualizarStats();
 
-if(atual >= treino.length){
-atual = 0;
-}
+atual++;
+if(atual >= treino.length){ atual = 0; }
 
 setTimeout(function(){
-
-mostrarTreino();
-
-fb.innerHTML = "";
-
-},6000);
+  mostrarTreino();
+  fb.innerHTML = "";
+}, 6000);
 
 }
 
@@ -1989,16 +2236,21 @@ fb.innerHTML = "";
 function resetTreino(){
 
 atual = 0;
-
 acertos = 0;
 erros = 0;
+sequencia = 0;
+xpAtual = 0;
+statMensagensTotal = 0;
+statGolpesDetectados = 0;
+statSeguras = 0;
 
 mostrarTreino();
 
 document.getElementById("feedback").innerHTML = "";
+document.getElementById("placar").innerHTML = "🏆 Acertos: 0 | ❌ Erros: 0";
 
-document.getElementById("placar").innerHTML =
-"🏆 Acertos: 0 | ❌ Erros: 0";
+atualizarNivel();
+atualizarStats();
 
 }
 
@@ -2006,6 +2258,8 @@ document.getElementById("placar").innerHTML =
 /* ================= START ================= */
 
 mostrarTreino();
+atualizarNivel();
+atualizarStats();
 
 </script>
 <script src="https://unpkg.com/tesseract.js@5/dist/tesseract.min.js"></script>
