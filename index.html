@@ -1488,6 +1488,8 @@ document.getElementById("resultado").innerHTML = `
 </div>
 `;
   
+  await new Promise(resolve => setTimeout(resolve, 2000));
+  
 let entrada =
 document.getElementById("entrada").value;
 
