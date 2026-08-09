@@ -4,6 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Escudo Digital: ferramenta gratuita que analisa mensagens suspeitas, identifica golpes digitais e explica os gatilhos psicológicos usados por golpistas. Projeto da equipe Squad CBC para o HackaNAV 2026.">
 
 <title>Escudo Digital</title>
 
@@ -86,6 +87,17 @@ transition:0.25s;
 
 button:hover{
 transform:scale(1.05);
+}
+
+/* Estado desabilitado — usado enquanto uma análise está em andamento */
+button:disabled{
+opacity:0.55;
+cursor:not-allowed;
+transform:none;
+}
+
+button:disabled:hover{
+transform:none;
 }
 
 .primary{
@@ -365,6 +377,92 @@ opacity:0.9;
 .chip-ganancia { background:#f3e5f5; color:#6a1b9a; }
 .chip-confianca{ background:#e8f5e9; color:#1b5e20; }
 
+/* ================= ANÁLISE DE LINKS ================= */
+
+.links-box{
+margin-top:22px;
+padding:18px 20px;
+background:#eef5ff;
+border-radius:14px;
+border-left:5px solid #2196f3;
+}
+
+.links-titulo{
+font-size:15px;
+font-weight:bold;
+color:#0d47a1;
+margin-bottom:14px;
+}
+
+.link-item{
+background:white;
+border-radius:12px;
+padding:14px 16px;
+margin-bottom:12px;
+}
+
+.link-item:last-child{
+margin-bottom:0;
+}
+
+.link-endereco{
+font-family:monospace;
+font-size:15px;
+word-break:break-all;
+background:#f5f7fa;
+padding:8px 10px;
+border-radius:8px;
+color:#333;
+margin-bottom:10px;
+}
+
+.link-nivel{
+font-size:18px;
+font-weight:bold;
+margin-bottom:4px;
+}
+
+.link-destino{
+font-size:15px;
+color:#555;
+margin-bottom:12px;
+}
+
+.link-achado{
+border-left:3px solid #ff9800;
+background:#fff8e1;
+padding:10px 12px;
+border-radius:8px;
+margin-bottom:8px;
+}
+
+.link-achado:last-child{
+margin-bottom:0;
+}
+
+.link-achado-titulo{
+font-weight:bold;
+font-size:15px;
+color:#795548;
+margin-bottom:3px;
+}
+
+.link-achado-texto{
+font-size:15px;
+line-height:1.6;
+color:#444;
+}
+
+.link-limpo{
+border-left:3px solid #4caf50;
+background:#e8f5e9;
+padding:10px 12px;
+border-radius:8px;
+font-size:15px;
+line-height:1.6;
+color:#2e7d32;
+}
+
 /* ================= MODAL ================= */
 
 .modal-overlay{
@@ -488,16 +586,18 @@ text-align:center;
 
 <textarea
 id="entrada"
+maxlength="2000"
+aria-label="Mensagem suspeita para análise"
 placeholder="Digite ou cole uma mensagem suspeita aqui..."
 ></textarea>
 
 <div class="botoes">
 
-<button class="primary" onclick="analisar()">
+<button class="primary" id="btnAnalisar" aria-label="Analisar a mensagem digitada" onclick="analisar()">
 🔍 Analisar
 </button>
 
-<button class="secondary" onclick="gerar()">
+<button class="secondary" aria-label="Gerar uma mensagem de exemplo aleatória" onclick="gerar()">
 ✨ Gerar
 </button>
 
@@ -505,15 +605,15 @@ placeholder="Digite ou cole uma mensagem suspeita aqui..."
 
 <div class="exemplos">
 
-<button class="secondary" onclick="exemplo('banco')">
+<button class="secondary" aria-label="Carregar exemplo de golpe bancário" onclick="exemplo('banco')">
 🏦 Golpe Bancário
 </button>
 
-<button class="secondary" onclick="exemplo('premio')">
+<button class="secondary" aria-label="Carregar exemplo de golpe de prêmio" onclick="exemplo('premio')">
 🎁 Golpe de Prêmio
 </button>
 
-<button class="secondary" onclick="exemplo('fake')">
+<button class="secondary" aria-label="Carregar exemplo de fake news" onclick="exemplo('fake')">
 📰 Fake News
 </button>
 
@@ -521,7 +621,7 @@ placeholder="Digite ou cole uma mensagem suspeita aqui..."
 
 <div id="resultado"></div>
 
-<!-- COLE AQUI 👇 -->
+<!-- ================= ANÁLISE DE IMAGEM ================= -->
 
 <div class="treino">
 
@@ -535,20 +635,21 @@ placeholder="Digite ou cole uma mensagem suspeita aqui..."
 type="file"
 id="imagemInput"
 accept="image/*"
+aria-label="Selecionar imagem para análise"
 >
 
 <br><br>
 
 <button
 class="primary"
+id="btnImagem"
+aria-label="Analisar o texto da imagem selecionada"
 onclick="analisarImagem()"
 >
 📷 Analisar Imagem
 </button>
 
 </div>
-
-<!-- COLE AQUI 👆 -->
 
 <!-- ================= TREINAMENTO ================= -->
 
@@ -560,11 +661,11 @@ onclick="analisarImagem()"
 
 <div class="acoesTreino">
 
-<button onclick="responder(true)">
+<button id="btnGolpe" aria-label="Classificar esta frase como golpe" onclick="responder(true)">
 ❌ É golpe
 </button>
 
-<button onclick="responder(false)">
+<button id="btnSeguro" aria-label="Classificar esta frase como segura" onclick="responder(false)">
 ✅ É seguro
 </button>
 
@@ -591,7 +692,7 @@ onclick="analisarImagem()"
 
 <br>
 
-<button class="secondary" onclick="resetTreino()">
+<button class="secondary" aria-label="Reiniciar o treinamento" onclick="resetTreino()">
 🔄 Resetar
 </button>
 
@@ -680,14 +781,21 @@ return{
 
 function normalizar(txt){
 
+const leet = {"0":"o","1":"i","3":"e","4":"a","5":"s","7":"t"};
+
 return txt.toLowerCase()
 
-.replace(/0/g,"o")
-.replace(/1/g,"i")
-.replace(/3/g,"e")
-.replace(/4/g,"a")
-.replace(/5/g,"s")
-.replace(/7/g,"t")
+/* Leetspeak seletivo.
+   Converte o dígito apenas quando ele está dentro de uma palavra:
+   vizinho de pelo menos uma letra E fora de uma sequência numérica.
+   "URG3NTE" -> "urgente"   |   "482913" e "R$ 500" permanecem números. */
+.replace(/[013457]/g, function(d, i, s){
+  const antes  = s[i-1] || "";
+  const depois = s[i+1] || "";
+  if(/[0-9]/.test(antes) || /[0-9]/.test(depois)) return d;
+  if(/[a-zà-ÿ]/i.test(antes) || /[a-zà-ÿ]/i.test(depois)) return leet[d];
+  return d;
+})
 
 .normalize("NFD")
 
@@ -697,9 +805,394 @@ return txt.toLowerCase()
 
 }
 
-/* ================= IA ================= */
-  
+/* ==================================================================== */
+/* ==================  ANALISADOR DE LINKS  =========================== */
+/* ==================================================================== */
+
+/*  Analisa a ESTRUTURA de um endereço: nome do domínio, subdomínios,
+ *  terminação, protocolo. Roda inteiramente no navegador.
+ *
+ *  IMPORTANTE: trabalha sobre o TEXTO CRU, antes de normalizar(),
+ *  porque normalizar() troca toda pontuação por espaço — "bit.ly"
+ *  chegaria como "bit ly" e nenhum endereço seria reconhecido.
+ *
+ *  NÃO verifica se o link é comprovadamente malicioso: isso exigiria
+ *  consultar uma base externa, ou seja, enviar o link da pessoa para
+ *  um servidor. Seria o oposto da proposta do projeto.
+ */
+
+const LINK_ENCURTADORES = [
+"bit.ly","tinyurl.com","goo.gl","cutt.ly","abre.ai","is.gd","t.co",
+"ow.ly","rebrand.ly","shorturl.at","encurtador.com.br","rb.gy",
+"tiny.cc","short.io","l1nq.com","acesse.one","u.to"
+];
+
+const LINK_TLDS_SUSPEITOS = [
+"xyz","top","tk","ml","ga","cf","gq","club","online","site","icu",
+"buzz","monster","work","link","rest","fit","shop","vip","space","cyou"
+];
+
+/* marcas com 4+ letras — as curtas dariam falso positivo */
+const LINK_MARCAS = [
+"nubank","bradesco","itau","santander","caixa","bancodobrasil","inter",
+"picpay","mercadopago","pagseguro","serasa","receita","correios",
+"magalu","americanas","shopee","mercadolivre","whatsapp","instagram",
+"facebook","netflix","spotify","banco"
+];
+
+/* marcas curtas — só valem quando são um pedaço inteiro do endereço */
+const LINK_MARCAS_CURTAS = ["bb","cef","bcb","itau","caixa","inter","gov"];
+
+/* palavras que golpista usa no endereço para dar ar de oficial */
+const LINK_ISCAS = [
+"login","seguro","seguranca","verificacao","verificar","atualizar",
+"atualizacao","recadastro","recadastramento","desbloqueio","desbloquear",
+"regularizar","regularizacao","premio","sorteio","promocao","resgate",
+"beneficio","acesso","central","atendimento","suporte","cliente",
+"conta","oficial","validar","confirmar","liberacao"
+];
+
+/* segundos níveis usados no Brasil: com.br, gov.br, org.br... */
+const LINK_TLD_BR2 = [
+"com","net","org","gov","edu","mil","art","adv","eng","med","jus","leg","blog"
+];
+
+const LINK_ARQUIVOS_PERIGOSOS = /\.(apk|exe|scr|msi|bat|cmd|vbs|jar|dmg)(\?|$)/i;
+
+const LINK_TLDS_VALIDOS = [
+"br","com","net","org","gov","edu","io","me","co","info","biz","app",
+"dev","us","uk","pt","ar","ru","cn","in","de","es","fr","it","nl","se",
+"tv","ly","gl","gd","to","sh","ai","cc","one","pro","store","tech",
+"digital","email","live","news","blog","site","online","xyz","top",
+"tk","ml","ga","cf","gq","club","icu","buzz","monster","work","link",
+"rest","fit","shop","vip","space","cyou"
+];
+
+/* distância de edição: quantas letras precisam mudar para virar a outra */
+function linkDistancia(a, b){
+  const m = a.length, n = b.length;
+  if(!m) return n;
+  if(!n) return m;
+  let anterior = Array.from({length:n+1}, (_, i) => i);
+  for(let i = 1; i <= m; i++){
+    const atual = [i];
+    for(let j = 1; j <= n; j++){
+      const custo = a[i-1] === b[j-1] ? 0 : 1;
+      atual[j] = Math.min(anterior[j] + 1, atual[j-1] + 1, anterior[j-1] + custo);
+    }
+    anterior = atual;
+  }
+  return anterior[n];
+}
+
+/* devolve o domínio que realmente manda: em "bb.com.br.login.xyz" é "login.xyz" */
+function linkDominioPrincipal(host){
+  const p = host.split(".");
+  if(p.length <= 2) return host;
+  const ultimo = p[p.length-1];
+  const penultimo = p[p.length-2];
+  if(ultimo === "br" && LINK_TLD_BR2.indexOf(penultimo) > -1 && p.length >= 3){
+    return p.slice(-3).join(".");
+  }
+  return p.slice(-2).join(".");
+}
+
+function linkExtrair(texto){
+  const achados = [];
+  const vistos = {};
+
+  const reDominio = /(?:https?:\/\/)?(?:[a-z0-9._-]+@)?(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,24}(?::\d{2,5})?(?:\/[^\s<>"']*)?/gi;
+  const reIp = /(?:https?:\/\/)?(?:\d{1,3}\.){3}\d{1,3}(?::\d{2,5})?(?:\/[^\s<>"']*)?/g;
+
+  function guardar(bruto){
+    let s = bruto.trim().replace(/[.,;:!?)\]]+$/, "");
+    if(s.length < 4) return;
+    const chave = s.toLowerCase();
+    if(vistos[chave]) return;
+    vistos[chave] = true;
+    achados.push(s);
+  }
+
+  (texto.match(reIp) || []).forEach(guardar);
+
+  (texto.match(reDominio) || []).forEach(function(s){
+    const limpo = s.replace(/^https?:\/\//i, "").split("/")[0].split("@").pop();
+    const partes = limpo.split(":")[0].split(".");
+    const tld = partes[partes.length-1].toLowerCase();
+    const temPrefixo = /^https?:\/\//i.test(s) || /^www\./i.test(s);
+    if(temPrefixo || LINK_TLDS_VALIDOS.indexOf(tld) > -1) guardar(s);
+  });
+
+  return achados;
+}
+
+function linkAnalisarUm(bruto){
+  const achados = [];
+  let pontos = 0;
+
+  function marcar(titulo, texto, p){
+    achados.push({ titulo:titulo, texto:texto, pontos:p });
+    pontos += p;
+  }
+
+  let s = bruto;
+  const temProtocolo = /^https?:\/\//i.test(s);
+  const protocolo = temProtocolo ? s.slice(0, s.indexOf(":")).toLowerCase() : null;
+  let resto = s.replace(/^https?:\/\//i, "");
+
+  /* truque do @ : o navegador ignora tudo que vem antes */
+  const iArroba = resto.indexOf("@");
+  const iBarra = resto.indexOf("/");
+  if(iArroba > -1 && (iBarra === -1 || iArroba < iBarra)){
+    const disfarce = resto.slice(0, iArroba);
+    resto = resto.slice(iArroba + 1);
+    marcar(
+      "Endereço disfarçado com @",
+      "O navegador ignora tudo que vem antes do @. Quem vê o link lê \"" +
+      disfarce + "\", mas quem abre vai parar em outro site.",
+      45
+    );
+  }
+
+  const hostPorta = resto.split("/")[0];
+  const caminho = resto.slice(hostPorta.length);
+  let host = hostPorta, porta = null;
+  const mPorta = hostPorta.match(/:(\d{2,5})$/);
+  if(mPorta){ porta = mPorta[1]; host = hostPorta.slice(0, mPorta.index); }
+  host = host.toLowerCase();
+
+  const ehIp = /^(\d{1,3}\.){3}\d{1,3}$/.test(host);
+  const dp = ehIp ? host : linkDominioPrincipal(host);
+  const rotulos = host.split(".");
+  const tld = rotulos[rotulos.length-1];
+  const semPontuacao = host.replace(/[.\-_]/g, "");
+
+  if(ehIp){
+    marcar(
+      "Endereço numérico em vez de nome",
+      "Sites de empresas de verdade têm nome, não número. Um endereço assim quase sempre é um computador improvisado servindo uma página falsa.",
+      40
+    );
+  }
+
+  if(!ehIp && LINK_ENCURTADORES.indexOf(dp) > -1){
+    marcar(
+      "Encurtador de link",
+      "Encurtadores escondem o destino real. Pode ser inofensivo, mas você só descobre para onde vai depois de já ter ido.",
+      25
+    );
+  }
+
+  if(host.indexOf("xn--") > -1){
+    marcar(
+      "Endereço com letras disfarçadas",
+      "Este endereço usa caracteres de outro alfabeto que se parecem com letras normais. Serve para imitar o nome de uma empresa de forma quase invisível.",
+      30
+    );
+  }
+
+  let disfarceMarcado = false;
+
+  /* marca curta que aparece como pedaço inteiro do endereço */
+  if(!ehIp){
+    const rotulosDp = dp.split(".");
+    for(let i = 0; i < LINK_MARCAS_CURTAS.length; i++){
+      const marca = LINK_MARCAS_CURTAS[i];
+      if(rotulos.indexOf(marca) > -1 && rotulosDp.indexOf(marca) === -1){
+        marcar(
+          "Marca conhecida usada como disfarce",
+          "O nome \"" + marca + "\" aparece no endereço, mas o site que realmente vai abrir é \"" +
+          dp + "\". O nome verdadeiro de um site é sempre o pedaço logo antes da terminação — o resto é enfeite que qualquer um pode escrever.",
+          45
+        );
+        disfarceMarcado = true;
+        break;
+      }
+    }
+  }
+
+  if(!ehIp && !disfarceMarcado){
+    const dpSemPontuacao = dp.replace(/[.\-_]/g, "");
+    for(let i = 0; i < LINK_MARCAS.length; i++){
+      const marca = LINK_MARCAS[i];
+      if(semPontuacao.indexOf(marca) > -1 && dpSemPontuacao.indexOf(marca) === -1){
+        marcar(
+          "Marca conhecida usada como disfarce",
+          "O nome \"" + marca + "\" aparece no endereço, mas o site que realmente vai abrir é \"" +
+          dp + "\". O nome verdadeiro de um site é sempre o pedaço logo antes da terminação — o resto é enfeite que qualquer um pode escrever.",
+          45
+        );
+        break;
+      }
+    }
+  }
+
+  if(!ehIp){
+    const nucleo = dp.split(".")[0];
+    if(nucleo.length >= 5){
+      for(let i = 0; i < LINK_MARCAS.length; i++){
+        const marca = LINK_MARCAS[i];
+        if(marca.length < 5) continue;
+        const d = linkDistancia(nucleo, marca);
+        if(d > 0 && d <= 2){
+          marcar(
+            "Nome parecido com o de uma marca",
+            "\"" + nucleo + "\" está a " + d + (d === 1 ? " letra" : " letras") +
+            " de distância de \"" + marca + "\". Trocar ou dobrar uma letra é a forma mais comum de imitar o endereço de um banco.",
+            40
+          );
+          break;
+        }
+      }
+    }
+  }
+
+  if(!ehIp && LINK_TLDS_SUSPEITOS.indexOf(tld) > -1){
+    marcar(
+      "Terminação incomum: ." + tld,
+      "Empresas brasileiras sérias usam .com.br, .org.br ou .gov.br. Terminações como ." + tld +
+      " são baratas ou gratuitas, e por isso concentram muito golpe.",
+      20
+    );
+  }
+
+  if(!ehIp){
+    const iscas = LINK_ISCAS.filter(function(p){ return host.indexOf(p) > -1; });
+    if(iscas.length > 0){
+      marcar(
+        "Palavras de isca no endereço",
+        "O endereço contém: " + iscas.join(", ") + ". Banco de verdade não precisa escrever \"seguro\" ou \"login\" no próprio nome.",
+        15
+      );
+    }
+  }
+
+  if(!ehIp){
+    const semWww = rotulos.filter(function(r){ return r !== "www"; });
+    const quantosDp = dp.split(".").length;
+    const subdominios = semWww.length - quantosDp;
+    if(subdominios >= 2){
+      marcar(
+        "Endereço longo demais",
+        "Este endereço tem " + subdominios + " pedaços antes do nome real do site. Golpista empilha pedaços para empurrar o nome verdadeiro para longe dos olhos.",
+        15
+      );
+    }
+  }
+
+  if(!ehIp && (host.split("-").length - 1) >= 3){
+    marcar(
+      "Muitos hífens no endereço",
+      "Endereços cheios de hífen quase sempre são montados para imitar um nome oficial que já está registrado por outra pessoa.",
+      10
+    );
+  }
+
+  if(protocolo === "http"){
+    marcar(
+      "Conexão sem cadeado (http)",
+      "Sem o \"s\" no http, o que você digitar nesse site viaja aberto. Nenhum banco ou loja séria usa isso hoje.",
+      10
+    );
+  }
+
+  if(porta && porta !== "80" && porta !== "443"){
+    marcar(
+      "Porta incomum (:" + porta + ")",
+      "Sites normais não mostram esse número depois do endereço. Aparece quando alguém sobe uma página num computador improvisado.",
+      15
+    );
+  }
+
+  if(LINK_ARQUIVOS_PERIGOSOS.test(caminho)){
+    marcar(
+      "O link baixa um programa",
+      "Este endereço termina num arquivo que instala algo no aparelho. Nenhum banco pede para instalar programa por link de mensagem.",
+      35
+    );
+  }
+
+  if(pontos > 70) pontos = 70;
+
+  let nivel, cor;
+  if(pontos >= 45){ nivel = "🔴 Link muito suspeito"; cor = "#f44336"; }
+  else if(pontos >= 25){ nivel = "🟠 Link suspeito"; cor = "#ff9800"; }
+  else if(pontos > 0){ nivel = "🟡 Link com sinais de atenção"; cor = "#fbc02d"; }
+  else { nivel = "🟢 Nenhum sinal encontrado"; cor = "#4caf50"; }
+
+  return {
+    url: bruto,
+    host: host,
+    dominioPrincipal: dp,
+    achados: achados,
+    pontos: pontos,
+    nivel: nivel,
+    cor: cor
+  };
+}
+
+function analisarLinks(textoCru){
+  const brutos = linkExtrair(textoCru || "");
+  const links = brutos.map(linkAnalisarUm);
+
+  let risco = 0;
+  const sinais = [];
+
+  links.forEach(function(l){
+    risco += l.pontos;
+    l.achados.forEach(function(a){
+      sinais.push("Link — " + a.titulo);
+    });
+  });
+
+  if(risco > 70) risco = 70;
+
+  return { risco: risco, sinais: sinais, links: links, encontrou: links.length > 0 };
+}
+
+/* monta a caixa de links que aparece no resultado */
+function gerarBoxLinks(resultado){
+  if(!resultado || !resultado.encontrou) return "";
+
+  let html = '<div class="links-box">';
+  html += '<div class="links-titulo">🔗 Links encontrados nesta mensagem:</div>';
+
+  resultado.links.forEach(function(l){
+    html += '<div class="link-item">';
+    html += '<div class="link-endereco">' + esc(l.url) + '</div>';
+    html += '<div class="link-nivel" style="color:' + l.cor + '">' + l.nivel + '</div>';
+    html += '<div class="link-destino">Site que realmente abre: <b>' + esc(l.dominioPrincipal) + '</b></div>';
+
+    if(l.achados.length === 0){
+      html += '<div class="link-limpo">A estrutura deste endereço não apresenta os sinais que procuramos. Isso não garante que o site seja confiável — só que ele não está disfarçado.</div>';
+    } else {
+      l.achados.forEach(function(a){
+        html += '<div class="link-achado">';
+        html += '<div class="link-achado-titulo">' + esc(a.titulo) + '</div>';
+        html += '<div class="link-achado-texto">' + esc(a.texto) + '</div>';
+        html += '</div>';
+      });
+    }
+
+    html += '</div>';
+  });
+
+  html += '</div>';
+  return html;
+}
+
+/* ==================================================================== */
+/* ==============  FIM DO ANALISADOR DE LINKS  ======================== */
+/* ==================================================================== */
+
+
+/* ========= MOTOR DE ANÁLISE — sistema de regras em camadas ========= */
+
 function analisarMensagem(texto){
+
+/* guarda o texto original: o analisador de links precisa da pontuação,
+   que normalizar() vai apagar na linha seguinte */
+const textoCru = texto;
 
 texto = normalizar(texto);
 
@@ -905,8 +1398,7 @@ const frasesGolpe = [
 "link abaixo",
 "abra o link",
 "toque no link",
-"http://",
-"https://",
+"http",
 
 /* PRESSAO */
 
@@ -1029,11 +1521,11 @@ const frasesGolpe = [
 
 /* LINKS SUSPEITOS */
 
-"bit.ly",
+"bit ly",
 "tinyurl",
-"goo.gl",
-"cutt.ly",
-"abre.ai",
+"goo gl",
+"cutt ly",
+"abre ai",
 "encurtador",
 "link abaixo",
 "clique aqui",
@@ -1162,7 +1654,7 @@ sinais.push("Possível fake news");
 /* LINKS */
 
 if(
-/bit\.ly|tinyurl|goo\.gl|cutt\.ly|abre\.ai|encurtador|clique aqui|acesse agora|abra o link|link de verificacao|link de confirmacao/.test(texto)
+/bit ly|tinyurl|goo gl|cutt ly|abre ai|encurtador|clique aqui|acesse agora|abra o link|link de verificacao|link de confirmacao/.test(texto)
 ){
 risco += 30;
 sinais.push("Link potencialmente suspeito");
@@ -1179,7 +1671,8 @@ sinais.push("Frase comum em contexto legítimo");
 
 });
 
-frasesGolpe.forEach(frase=>{
+/* Set remove as repetições do array: cada frase distinta soma uma vez só. */
+[...new Set(frasesGolpe)].forEach(frase=>{
 
 if(texto.includes(frase)){
 
@@ -1239,13 +1732,13 @@ if(
 }
 
 if(
-/banco|conta|itau|nubank|bradesco|caixa|santander/.test(texto)
+/\bbanco\b|\bconta\b|\bcontas\b|\bitau\b|\bnubank\b|\bbradesco\b|\bcaixa\b|\bsantander\b/.test(texto)
 ){
     evidencias.banco = true;
 }
 
 if(
-/confirmar|validar|atualizar|verificar/.test(texto)
+/confirm|atualiz|verific|validar|validacao/.test(texto)
 ){
     evidencias.confirmacao = true;
 }
@@ -1256,8 +1749,20 @@ if(
     evidencias.link = true;
 }
 
+/* ===== ANÁLISE DE LINKS =====
+   Roda aqui, antes dos blocos de combinação, para que evidencias.link
+   já esteja marcada quando a camada de combinações for avaliada. */
+
+const resultadoLinks = analisarLinks(textoCru);
+
+if(resultadoLinks.encontrou){
+    evidencias.link = true;
+    risco += resultadoLinks.risco;
+    resultadoLinks.sinais.forEach(function(s){ sinais.push(s); });
+}
+
 if(
-/mae|pai|filho|filha|troquei de numero/.test(texto)
+/\bmae\b|\bpai\b|\bfilho\b|\bfilha\b|troquei de numero/.test(texto)
 ){
     evidencias.familiar = true;
 }
@@ -1274,7 +1779,7 @@ if(
 }
 
 if(
-/banco|itau|nubank|bradesco|caixa|santander|central/.test(texto)
+/\bbanco\b|\bitau\b|\bnubank\b|\bbradesco\b|\bcaixa\b|\bsantander\b|\bcentral\b/.test(texto)
 ){
     evidencias.autoridade = true;
 }
@@ -1286,7 +1791,7 @@ if(
 }
 
 if(
-/iphone|android|dispositivo|local|horario|data/.test(texto)
+/\biphone\b|\bandroid\b|\bdispositivo\b|\blocal\b|\bhorario\b|\bdata\b/.test(texto)
 ){
     evidencias.dispositivo = true;
 }
@@ -1515,7 +2020,6 @@ evidencias.tecnico &&
     );
 }
 
-/* BUG CORRIGIDO: chaves separadas corretamente */
 if(
 evidencias.educacional &&
 !evidencias.dinheiro &&
@@ -1782,39 +2286,46 @@ risco,
 nivel,
 explicacao,
 sinais,
-cor
+cor,
+links: resultadoLinks
 };
 
 }
 
-/* ================= ANALISAR — BUG CORRIGIDO: async adicionado ================= */
+/* ================= ANALISAR ================= */
 
 async function analisar(){
-  
-document.getElementById("resultado").innerHTML = `
-<div class="resultado-box">
-<h3>🔎 Fazendo análise inteligente...</h3>
-<p>⏳ Aguarde...</p>
-</div>
-`;
 
-await new Promise(resolve => setTimeout(resolve, 1500));
-  
+/* Validação ANTES de qualquer coisa aparecer na tela.
+   Antes, o loading era pintado primeiro e ficava travado com campo vazio. */
 let entrada =
 document.getElementById("entrada").value;
 
 if(!entrada.trim()){
-
-alert("Digite uma mensagem!");
-
+alert("Digite ou cole uma mensagem para analisar.");
 return;
-
 }
+
+const btn = document.getElementById("btnAnalisar");
+
+try{
+
+if(btn){ btn.disabled = true; }
+
+document.getElementById("resultado").innerHTML = `
+<div class="resultado-box">
+<h3>🔎 Analisando a mensagem...</h3>
+<p>Verificando padrões, combinações de evidências e gatilhos psicológicos.</p>
+</div>
+`;
+
+/* Pausa deliberada de interface: dá ao usuário a percepção do processo.
+   A análise em si é instantânea. */
+await new Promise(resolve => setTimeout(resolve, 1200));
 
 let r = analisarMensagem(entrada);
 
-/* ===== ESTATÍSTICAS DE ANÁLISE ===== */
-statMensagensTotal++;
+/* ===== ESTATÍSTICAS DE ANÁLISE (não contam como frase respondida) ===== */
 if(r.risco >= 60){
   statGolpesDetectados++;
 }else{
@@ -1877,12 +2388,18 @@ r.sinais.map(s=>"• "+esc(s)).join("<br>")
 
 </div>
 
+${gerarBoxLinks(r.links)}
+
 ${r.risco >= 30 ? gerarChipsPsico(entrada) : ""}
 
 </div>
 
 `;
-  
+
+}finally{
+if(btn){ btn.disabled = false; }
+}
+
 }
 
 /* ================= GERAR ================= */
@@ -1983,22 +2500,35 @@ Aguarde enquanto o sistema extrai o texto da imagem.
   
 try{
 
+if(typeof Tesseract === "undefined"){
+document.getElementById("resultado").innerHTML = "";
+alert("A leitura de imagem ainda está carregando. Tente novamente em alguns segundos.");
+return;
+}
+
 const resultadoOCR =
 await Tesseract.recognize(
 arquivo,
 "por"
 );
 
+/* Respeita o mesmo limite do textarea. */
 const texto =
-resultadoOCR.data.text;
+(resultadoOCR.data.text || "").slice(0, 2000);
 
-document.getElementById("entrada").value =
-texto;
+if(!texto.trim()){
+document.getElementById("resultado").innerHTML = "";
+alert("Não foi possível ler texto nessa imagem. Tente um print mais nítido.");
+return;
+}
+
+document.getElementById("entrada").value = texto;
 
 analisar();
 
 }catch(erro){
 
+document.getElementById("resultado").innerHTML = "";
 alert("Erro ao analisar a imagem.");
 
 }
@@ -2240,10 +2770,18 @@ e:"Mensagem normal."
 
 ];
 
+/* Embaralha as frases a cada carregamento (Fisher-Yates).
+   Sem isso, a ordem era sempre idêntica e o treino ficava decorável. */
+for(let i = treino.length - 1; i > 0; i--){
+  const j = Math.floor(Math.random() * (i + 1));
+  [treino[i], treino[j]] = [treino[j], treino[i]];
+}
+
 let atual = 0;
 let acertos = 0;
 let erros = 0;
 let sequencia = 0;
+let aguardandoProxima = false;
 
 /* ===== ESTATÍSTICAS GLOBAIS ===== */
 let statMensagensTotal = 0;
@@ -2318,6 +2856,15 @@ treino[atual].t;
   
 function responder(resp){
 
+/* Impede resposta enquanto o feedback da anterior está na tela. */
+if(aguardandoProxima){ return; }
+aguardandoProxima = true;
+
+const btnG = document.getElementById("btnGolpe");
+const btnS = document.getElementById("btnSeguro");
+if(btnG){ btnG.disabled = true; }
+if(btnS){ btnS.disabled = true; }
+
 let fb = document.getElementById("feedback");
 const nivelAntes = calcularNivel();
 
@@ -2328,12 +2875,6 @@ if(resp === treino[atual].g){
   const xpGanho = sequencia >= 3 ? 2 : 1;
   xpAtual += xpGanho;
 
-  /* conta acerto por tipo */
-  if(treino[atual].g === true){
-    statGolpesDetectados++;
-  } else {
-    statSeguras++;
-  }
   statMensagensTotal++;
 
   const bonus = sequencia >= 3
@@ -2379,6 +2920,9 @@ if(atual >= treino.length){ atual = 0; }
 setTimeout(function(){
   mostrarTreino();
   fb.innerHTML = "";
+  aguardandoProxima = false;
+  if(btnG){ btnG.disabled = false; }
+  if(btnS){ btnS.disabled = false; }
 }, 2000);
 
 }
@@ -2396,11 +2940,18 @@ xpAtual = 0;
 statMensagensTotal = 0;
 statGolpesDetectados = 0;
 statSeguras = 0;
+aguardandoProxima = false;
 
 mostrarTreino();
 
 document.getElementById("feedback").innerHTML = "";
 document.getElementById("placar").innerHTML = "🏆 Acertos: 0 | ❌ Erros: 0";
+document.getElementById("resultado").innerHTML = "";
+
+const btnG = document.getElementById("btnGolpe");
+const btnS = document.getElementById("btnSeguro");
+if(btnG){ btnG.disabled = false; }
+if(btnS){ btnS.disabled = false; }
 
 atualizarNivel();
 atualizarStats();
@@ -2474,7 +3025,7 @@ function detectarGatilhos(texto){
   if(/bloqueada|suspensa|irregular|cancelada|encerrada|bloqueio/.test(t)) encontrados.push("medo");
   if(/urgente|agora|imediatamente|hoje mesmo|ultima chance|somente hoje|rapido|nao pode esperar/.test(t)) encontrados.push("urgencia");
   if(/banco|central|receita|federal|nubank|bradesco|itau|caixa|santander|suporte|oficial|delegado|policia/.test(t)) encontrados.push("autoridade");
-  if(/mae|pai|filho|filha|irmao|irma|troquei de numero|novo numero|estou em apuros|preciso de ajuda/.test(t)) encontrados.push("amor");
+  if(/\bmae\b|\bpai\b|\bfilho\b|\bfilha\b|\birmao\b|\birma\b|troquei de numero|novo numero|estou em apuros|preciso de ajuda/.test(t)) encontrados.push("amor");
   if(/ganhou|premio|sorteado|beneficio|liberado|resgatar|oportunidade|lucro|dinheiro esquecido/.test(t)) encontrados.push("ganancia");
   if(/canal oficial|verificado|seguranca|protegido|mensagem segura|sua privacidade/.test(t)) encontrados.push("confianca");
 
