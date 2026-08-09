@@ -377,6 +377,13 @@ opacity:0.9;
 .chip-ganancia { background:#f3e5f5; color:#6a1b9a; }
 .chip-confianca{ background:#e8f5e9; color:#1b5e20; }
 
+.dica-entrada{
+margin-top:10px;
+font-size:15px;
+color:#555;
+text-align:center;
+}
+
 /* ================= ANÁLISE DE LINKS ================= */
 
 .links-box{
@@ -591,6 +598,10 @@ aria-label="Mensagem suspeita para análise"
 placeholder="Digite ou cole uma mensagem suspeita aqui..."
 ></textarea>
 
+<p class="dica-entrada">
+Cole a mensagem inteira. Se tiver link, a gente analisa ele também.
+</p>
+
 <div class="botoes">
 
 <button class="primary" id="btnAnalisar" aria-label="Analisar a mensagem digitada" onclick="analisar()">
@@ -615,6 +626,10 @@ placeholder="Digite ou cole uma mensagem suspeita aqui..."
 
 <button class="secondary" aria-label="Carregar exemplo de fake news" onclick="exemplo('fake')">
 📰 Fake News
+</button>
+
+<button class="secondary" aria-label="Carregar exemplo de mensagem com link falso" onclick="exemplo('link')">
+🔗 Link Falso
 </button>
 
 </div>
@@ -2461,6 +2476,48 @@ fake:[
 
 "Especialistas afirmam que bancos vão bloquear contas amanhã compartilhe urgente."
 
+],
+
+link:[
+
+"Sua conta será bloqueada hoje. Regularize em https://caixa.gov.br.recadastro-cliente.top/validar",
+
+"Detectamos acesso indevido. Confirme sua identidade em https://nubank.com.br.seguranca-cliente.xyz/login",
+
+"Central de segurança: acesse http://192.168.15.1/banco/login e confirme seus dados.",
+
+"Você foi sorteado! Resgate o seu prêmio aqui: https://bit.ly/premio-liberado2026",
+
+"Sua encomenda está parada na alfândega. Pague a taxa em https://tinyurl.com/correios-taxa",
+
+"Seu acesso expirou. Entre em https://nubanck.com/acesso e atualize seus dados.",
+
+"Aviso do seu banco: regularize sua situação em https://bradescco.com.br/atualizacao",
+
+"Sua senha vence hoje. Renove agora em https://santanderr.com/cliente",
+
+"Seu CPF está irregular. Consulte em https://gov.br.consulta-cpf.xyz/regularizar",
+
+"Atualize seu cadastro bancário: https://bb.com.br@central-clientes.top/login",
+
+"Baixe a nova versão do aplicativo do banco: http://seguranca-bancaria.com/atualizacao.apk",
+
+"Acesse o portal do cliente: http://187.45.201.9:8080/banco/entrar",
+
+"Seu benefício foi liberado. Solicite o saque em http://beneficio-social-gov.online/liberacao",
+
+"Recadastramento obrigatório do seu benefício: https://meu-inss-atualizacao-cadastral.site/acesso",
+
+"Rastreie sua entrega em https://correios.com.br.rastreio-objeto.icu/consulta",
+
+"Sua conta do Instagram será desativada. Recorra em https://xn--instagra-o1a.com/login",
+
+"Última chance de resgatar seu prêmio: https://sorteio-premiado.club/ganhador",
+
+"Sua compra foi aprovada. Para cancelar, acesse https://mercadolivre.com.br.pagamento-cancelar.top/acessar",
+
+"Mãe, troquei de número. Paga esse boleto pra mim: https://bit.ly/boleto-urgente"
+
 ]
 
 };
@@ -2766,6 +2823,138 @@ e:"Golpe de benefício."
 t:"Parabéns pelo seu aniversário!",
 g:false,
 e:"Mensagem normal."
+},
+
+{
+t:"Vaga de emprego aprovada! Pague a taxa de cadastro para começar.",
+g:true,
+e:"Emprego de verdade não cobra taxa do candidato."
+},
+
+{
+t:"Sou do suporte técnico do seu banco. Instale este aplicativo para eu te ajudar.",
+g:true,
+e:"Banco nunca pede para instalar programa para acessar seu aparelho."
+},
+
+{
+t:"Recebi um Pix seu por engano. Devolve pra este número aqui, por favor.",
+g:true,
+e:"Golpe do Pix devolvido: o dinheiro nunca entrou na sua conta."
+},
+
+{
+t:"Boleto atualizado em anexo. O código de barras mudou, use o novo.",
+g:true,
+e:"Troca de código de barras é a forma clássica de desviar um pagamento."
+},
+
+{
+t:"Multa de trânsito não paga. Regularize hoje para evitar bloqueio da CNH.",
+g:true,
+e:"Medo e prazo curto juntos: quase sempre golpe."
+},
+
+{
+t:"Sua conta do Instagram será desativada. Confirme seu login pelo link.",
+g:true,
+e:"Rede social não pede login por link de mensagem."
+},
+
+{
+t:"Ganhe 500 reais por dia investindo. Vagas limitadas, comece hoje.",
+g:true,
+e:"Lucro garantido não existe. Promessa alta é isca."
+},
+
+{
+t:"Aluguel confirmado! Faça o depósito antes da visita para garantir o imóvel.",
+g:true,
+e:"Pagar antes de ver o imóvel é a marca do golpe do aluguel."
+},
+
+{
+t:"Aqui é seu chefe. Compre cartões-presente e me manda os códigos, estou em reunião.",
+g:true,
+e:"Golpe do falso chefe: usa autoridade e pressa para você não conferir."
+},
+
+{
+t:"Sua entrega falhou. Reagende pagando uma pequena taxa.",
+g:true,
+e:"Transportadora não cobra taxa por mensagem para reentregar."
+},
+
+{
+t:"A consulta com o dentista está marcada para terça às 9h.",
+g:false,
+e:"Lembrete comum de consulta."
+},
+
+{
+t:"Chegou sua encomenda na portaria, pode descer.",
+g:false,
+e:"Aviso normal do porteiro."
+},
+
+{
+t:"Reunião de condomínio no salão de festas domingo às 10h.",
+g:false,
+e:"Comunicado comum de condomínio."
+},
+
+{
+t:"Pai, esqueci meu casaco na escola, você pode buscar?",
+g:false,
+e:"Fala de família sem pedido de dinheiro. Nem toda mensagem com 'pai' é golpe."
+},
+
+{
+t:"O pagamento da mensalidade foi confirmado, obrigado.",
+g:false,
+e:"Confirmação de pagamento já feito, sem pedir nada."
+},
+
+{
+t:"Alguém tem carona pro treino amanhã?",
+g:false,
+e:"Conversa comum de grupo."
+},
+
+{
+t:"A prova de matemática foi adiada para sexta.",
+g:false,
+e:"Aviso escolar comum."
+},
+
+{
+t:"Feliz Natal! Que o ano novo seja abençoado.",
+g:false,
+e:"Mensagem de felicitação."
+},
+
+{
+t:"Vou passar aí depois do almoço pra pegar o livro.",
+g:false,
+e:"Combinação comum entre conhecidos."
+},
+
+{
+t:"O médico pediu exame de sangue, marquei para segunda.",
+g:false,
+e:"Mensagem pessoal do dia a dia."
+},
+
+{
+t:"Bom dia, time. Lembrando que hoje tem apresentação às 14h.",
+g:false,
+e:"Aviso comum de trabalho."
+},
+
+{
+t:"Comprei o ingresso, te encontro na entrada do cinema.",
+g:false,
+e:"Combinação comum entre amigos."
 }
 
 ];
