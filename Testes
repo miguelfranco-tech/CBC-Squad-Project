@@ -659,10 +659,6 @@ Cole a mensagem inteira. Se tiver link, a gente analisa ele também.
 🔗 Link Falso
 </button>
 
-<button class="secondary" aria-label="Carregar exemplo de mensagem comum e legítima" onclick="exemplo('normal')">
-✅ Mensagem Comum
-</button>
-
 </div>
 
 <div id="resultado"></div>
@@ -2750,24 +2746,6 @@ link:[
 "Sua compra foi aprovada. Para cancelar, acesse https://mercadolivre.com.br.pagamento-cancelar.top/acessar",
 
 "Mãe, troquei de número. Paga esse boleto pra mim: https://bit.ly/boleto-urgente"
-
-],
-
-normal:[
-
-"Prezado cliente, a fatura da sua internet vence em 5 dias. Caso já tenha feito o pagamento, desconsidere esta mensagem.",
-
-"Bom dia! A reunião de amanhã foi remarcada para 14h30 e o orçamento ficou em R$ 1.500,00.",
-
-"Mãe, esqueci meu casaco na escola. Você pode buscar quando puder?",
-
-"Vou confirmar com você e entrar em contato ainda hoje.",
-
-"Fui no INSS hoje e resolvi a aposentadoria da minha avó.",
-
-"A professora avisou que o prazo final do trabalho é sexta-feira.",
-
-"Oi! Confirmando nossa consulta de terça às 9h na clínica."
 
 ]
 
