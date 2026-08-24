@@ -1,0 +1,3616 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Escudo Digital: ferramenta gratuita que analisa mensagens suspeitas, identifica golpes digitais e explica os gatilhos psicológicos usados por golpistas. Projeto da equipe Squad CBC para o HackaNAV 2026.">
+
+<title>Escudo Digital</title>
+
+<style>
+
+/* ================= RESET ================= */
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+/* ================= BODY ================= */
+
+body{
+font-family:Arial,sans-serif;
+background:linear-gradient(135deg,#e3f2fd,#ffffff);
+display:flex;
+justify-content:center;
+min-height:100vh;
+padding:20px;
+}
+
+/* ================= CONTAINER ================= */
+
+.container{
+width:100%;
+max-width:950px;
+}
+
+/* ================= TÍTULO ================= */
+
+h2{
+text-align:center;
+font-size:42px;
+margin-bottom:25px;
+color:#0d47a1;
+}
+
+/* ================= TEXTAREA ================= */
+
+textarea{
+width:100%;
+height:150px;
+padding:16px;
+border-radius:14px;
+border:2px solid #bbdefb;
+font-size:17px;
+resize:none;
+outline:none;
+transition:0.3s;
+background:white;
+}
+
+textarea:focus{
+border-color:#2196f3;
+box-shadow:0 0 10px rgba(33,150,243,0.3);
+}
+
+/* ================= BOTÕES ================= */
+
+.botoes{
+display:flex;
+justify-content:center;
+gap:14px;
+margin-top:20px;
+flex-wrap:wrap;
+}
+
+button{
+padding:14px 22px;
+border:none;
+border-radius:14px;
+font-size:16px;
+font-weight:bold;
+cursor:pointer;
+transition:0.25s;
+}
+
+button:hover{
+transform:scale(1.05);
+}
+
+/* Estado desabilitado — usado enquanto uma análise está em andamento */
+button:disabled{
+opacity:0.55;
+cursor:not-allowed;
+transform:none;
+}
+
+button:disabled:hover{
+transform:none;
+}
+
+.primary{
+background:#2196f3;
+color:white;
+}
+
+.secondary{
+background:#eef5ff;
+color:#0d47a1;
+}
+
+/* ================= EXEMPLOS ================= */
+
+.exemplos{
+display:flex;
+justify-content:center;
+gap:14px;
+margin-top:20px;
+flex-wrap:wrap;
+}
+
+/* ================= RESULTADO ================= */
+
+#resultado{
+margin-top:25px;
+}
+
+.resultado-box{
+background:white;
+padding:25px;
+border-radius:18px;
+box-shadow:0 8px 25px rgba(0,0,0,0.08);
+animation:fade .4s ease;
+}
+
+@keyframes fade{
+from{
+opacity:0;
+transform:translateY(10px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+/* ================= BARRA ================= */
+
+.risk-bar{
+width:100%;
+height:14px;
+background:#eceff1;
+border-radius:20px;
+overflow:hidden;
+margin:18px 0;
+}
+
+.risk-fill{
+height:100%;
+border-radius:20px;
+transition:1s;
+}
+
+/* ================= STATUS ================= */
+
+.status{
+font-size:30px;
+font-weight:bold;
+margin-bottom:15px;
+}
+
+/* ================= INFO ================= */
+
+.info{
+margin-top:10px;
+line-height:1.7;
+font-size:17px;
+}
+
+/* ================= TREINO ================= */
+
+.treino{
+margin-top:35px;
+background:white;
+padding:25px;
+border-radius:18px;
+box-shadow:0 8px 25px rgba(0,0,0,0.08);
+text-align:center;
+}
+
+.treino h3{
+font-size:30px;
+margin-bottom:18px;
+color:#0d47a1;
+}
+
+.frase{
+font-size:22px;
+margin:20px 0;
+font-weight:bold;
+}
+
+.acoesTreino{
+display:flex;
+justify-content:center;
+gap:16px;
+flex-wrap:wrap;
+margin-top:15px;
+}
+
+.correct{
+color:#2e7d32;
+font-weight:bold;
+font-size:18px;
+}
+
+.error{
+color:#c62828;
+font-weight:bold;
+font-size:18px;
+}
+
+.feedback{
+margin-top:18px;
+font-size:18px;
+line-height:1.6;
+}
+
+/* ================= NÍVEL ================= */
+
+.nivel-box{
+margin:18px 0 8px;
+padding:16px 20px;
+border-radius:14px;
+background:linear-gradient(135deg,#e3f2fd,#bbdefb);
+display:flex;
+align-items:center;
+gap:14px;
+}
+
+.nivel-emoji{
+font-size:36px;
+}
+
+.nivel-info{
+flex:1;
+text-align:left;
+}
+
+.nivel-titulo{
+font-size:19px;
+font-weight:bold;
+color:#0d47a1;
+}
+
+.nivel-subtitulo{
+font-size:14px;
+color:#555;
+margin-top:2px;
+}
+
+.nivel-xp-bar{
+width:100%;
+height:10px;
+background:#cce0f5;
+border-radius:20px;
+overflow:hidden;
+margin-top:8px;
+}
+
+.nivel-xp-fill{
+height:100%;
+border-radius:20px;
+background:linear-gradient(90deg,#2196f3,#0d47a1);
+transition:width 0.8s ease;
+}
+
+.nivel-xp-texto{
+font-size:13px;
+color:#555;
+margin-top:4px;
+}
+
+/* ================= STATS ================= */
+
+.stats-box{
+margin-top:35px;
+background:white;
+padding:25px;
+border-radius:18px;
+box-shadow:0 8px 25px rgba(0,0,0,0.08);
+}
+
+.stats-box h3{
+font-size:26px;
+color:#0d47a1;
+margin-bottom:18px;
+text-align:center;
+}
+
+.stats-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+gap:14px;
+}
+
+.stat-card{
+background:linear-gradient(135deg,#e3f2fd,#f5f9ff);
+border-radius:14px;
+padding:16px;
+text-align:center;
+}
+
+.stat-numero{
+font-size:32px;
+font-weight:bold;
+color:#0d47a1;
+}
+
+.stat-label{
+font-size:13px;
+color:#555;
+margin-top:4px;
+}
+
+.stat-icon{
+font-size:22px;
+margin-bottom:4px;
+}
+
+/* ================= IMPRESSÃO PSICOLÓGICA ================= */
+
+.psico-box{
+margin-top:22px;
+padding:18px 20px;
+background:#fff8e1;
+border-radius:14px;
+border-left:5px solid #fbc02d;
+}
+
+.psico-titulo{
+font-size:15px;
+font-weight:bold;
+color:#795548;
+margin-bottom:12px;
+}
+
+.psico-chips{
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+}
+
+.chip{
+padding:10px 16px;
+border-radius:30px;
+font-size:15px;
+font-weight:bold;
+cursor:pointer;
+border:none;
+transition:0.2s;
+display:flex;
+align-items:center;
+gap:6px;
+}
+
+.chip:hover{
+transform:scale(1.07);
+opacity:0.9;
+}
+
+.chip-medo     { background:#ffcdd2; color:#b71c1c; }
+.chip-urgencia { background:#ffe0b2; color:#e65100; }
+.chip-autoridade{ background:#e3f2fd; color:#0d47a1; }
+.chip-amor     { background:#fce4ec; color:#880e4f; }
+.chip-ganancia { background:#f3e5f5; color:#6a1b9a; }
+.chip-confianca{ background:#e8f5e9; color:#1b5e20; }
+
+/* ================= OCR ================= */
+
+.ocr-barra{
+width:100%;
+height:14px;
+background:#eceff1;
+border-radius:20px;
+overflow:hidden;
+margin:18px 0;
+}
+
+.ocr-barra-fill{
+height:100%;
+border-radius:20px;
+background:linear-gradient(90deg,#2196f3,#0d47a1);
+transition:width 0.3s ease;
+}
+
+.ocr-nota{
+margin-top:12px;
+padding:10px 14px;
+background:#eef5ff;
+border-radius:10px;
+font-size:15px;
+color:#0d47a1;
+}
+
+.dica-entrada{
+margin-top:10px;
+font-size:15px;
+color:#555;
+text-align:center;
+}
+
+/* ================= ANÁLISE DE LINKS ================= */
+
+.links-box{
+margin-top:22px;
+padding:18px 20px;
+background:#eef5ff;
+border-radius:14px;
+border-left:5px solid #2196f3;
+}
+
+.links-titulo{
+font-size:15px;
+font-weight:bold;
+color:#0d47a1;
+margin-bottom:14px;
+}
+
+.link-item{
+background:white;
+border-radius:12px;
+padding:14px 16px;
+margin-bottom:12px;
+}
+
+.link-item:last-child{
+margin-bottom:0;
+}
+
+.link-endereco{
+font-family:monospace;
+font-size:15px;
+word-break:break-all;
+background:#f5f7fa;
+padding:8px 10px;
+border-radius:8px;
+color:#333;
+margin-bottom:10px;
+}
+
+.link-nivel{
+font-size:18px;
+font-weight:bold;
+margin-bottom:4px;
+}
+
+.link-destino{
+font-size:15px;
+color:#555;
+margin-bottom:12px;
+}
+
+.link-achado{
+border-left:3px solid #ff9800;
+background:#fff8e1;
+padding:10px 12px;
+border-radius:8px;
+margin-bottom:8px;
+}
+
+.link-achado:last-child{
+margin-bottom:0;
+}
+
+.link-achado-titulo{
+font-weight:bold;
+font-size:15px;
+color:#795548;
+margin-bottom:3px;
+}
+
+.link-achado-texto{
+font-size:15px;
+line-height:1.6;
+color:#444;
+}
+
+.link-limpo{
+border-left:3px solid #4caf50;
+background:#e8f5e9;
+padding:10px 12px;
+border-radius:8px;
+font-size:15px;
+line-height:1.6;
+color:#2e7d32;
+}
+
+/* ================= MODAL ================= */
+
+.modal-overlay{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.45);
+z-index:999;
+justify-content:center;
+align-items:center;
+padding:20px;
+}
+
+.modal-overlay.aberto{
+display:flex;
+}
+
+.modal{
+background:white;
+border-radius:20px;
+padding:30px;
+max-width:420px;
+width:100%;
+box-shadow:0 20px 60px rgba(0,0,0,0.2);
+animation:fade .3s ease;
+text-align:center;
+position:relative;
+}
+
+.modal-emoji{
+font-size:52px;
+margin-bottom:10px;
+}
+
+.modal-titulo{
+font-size:22px;
+font-weight:bold;
+margin-bottom:10px;
+}
+
+.modal-texto{
+font-size:16px;
+line-height:1.7;
+color:#333;
+margin-bottom:10px;
+}
+
+.modal-exemplo{
+font-size:14px;
+background:#f5f5f5;
+border-radius:10px;
+padding:10px 14px;
+color:#555;
+margin-bottom:18px;
+font-style:italic;
+}
+
+.modal-dica{
+font-size:14px;
+background:#e8f5e9;
+border-radius:10px;
+padding:10px 14px;
+color:#2e7d32;
+margin-bottom:20px;
+}
+
+.modal-fechar{
+background:#2196f3;
+color:white;
+border:none;
+border-radius:12px;
+padding:12px 28px;
+font-size:16px;
+font-weight:bold;
+cursor:pointer;
+}
+
+.modal-fechar:hover{
+background:#1976d2;
+}
+
+/* ================= RESPONSIVO ================= */
+
+@media(max-width:700px){
+
+h2{
+font-size:30px;
+}
+
+textarea{
+height:130px;
+}
+
+button{
+width:100%;
+}
+
+.frase{
+font-size:19px;
+}
+
+.nivel-box{
+flex-direction:column;
+text-align:center;
+}
+
+.nivel-info{
+text-align:center;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>🛡️ Escudo Digital</h2>
+
+<textarea
+id="entrada"
+maxlength="2000"
+aria-label="Mensagem suspeita para análise"
+placeholder="Digite ou cole uma mensagem suspeita aqui..."
+></textarea>
+
+<p class="dica-entrada">
+Cole a mensagem inteira. Se tiver link, a gente analisa ele também.
+</p>
+
+<div class="botoes">
+
+<button class="primary" id="btnAnalisar" aria-label="Analisar a mensagem digitada" onclick="analisar()">
+🔍 Analisar
+</button>
+
+<button class="secondary" aria-label="Gerar uma mensagem de exemplo aleatória" onclick="gerar()">
+✨ Gerar
+</button>
+
+</div>
+
+<div class="exemplos">
+
+<button class="secondary" aria-label="Carregar exemplo de golpe bancário" onclick="exemplo('banco')">
+🏦 Golpe Bancário
+</button>
+
+<button class="secondary" aria-label="Carregar exemplo de golpe de prêmio" onclick="exemplo('premio')">
+🎁 Golpe de Prêmio
+</button>
+
+<button class="secondary" aria-label="Carregar exemplo de fake news" onclick="exemplo('fake')">
+📰 Fake News
+</button>
+
+<button class="secondary" aria-label="Carregar exemplo de mensagem com link falso" onclick="exemplo('link')">
+🔗 Link Falso
+</button>
+
+<button class="secondary" aria-label="Carregar exemplo de mensagem comum e legítima" onclick="exemplo('normal')">
+✅ Mensagem Comum
+</button>
+
+</div>
+
+<div id="resultado"></div>
+
+<!-- ================= ANÁLISE DE IMAGEM ================= -->
+
+<div class="treino">
+
+<h3>📷 Análise de Imagem</h3>
+
+<p>Envie um print. O texto lido aparece no campo lá em cima para você conferir antes de analisar.</p>
+
+<br>
+
+<input
+type="file"
+id="imagemInput"
+accept="image/*"
+aria-label="Selecionar imagem para análise"
+>
+
+<br><br>
+
+<button
+class="primary"
+id="btnImagem"
+aria-label="Analisar o texto da imagem selecionada"
+onclick="analisarImagem()"
+>
+📷 Analisar Imagem
+</button>
+
+</div>
+
+<!-- ================= TREINAMENTO ================= -->
+
+<div class="treino">
+
+<h3>🎓 Treinamento Inteligente</h3>
+
+<p class="frase" id="fraseTreino"></p>
+
+<div class="acoesTreino">
+
+<button id="btnGolpe" aria-label="Classificar esta frase como golpe" onclick="responder(true)">
+❌ É golpe
+</button>
+
+<button id="btnSeguro" aria-label="Classificar esta frase como segura" onclick="responder(false)">
+✅ É seguro
+</button>
+
+</div>
+
+<div class="feedback" id="feedback"></div>
+
+<!-- NÍVEL -->
+<div class="nivel-box" id="nivelBox">
+  <div class="nivel-emoji" id="nivelEmoji">🥚</div>
+  <div class="nivel-info">
+    <div class="nivel-titulo" id="nivelTitulo">Iniciante</div>
+    <div class="nivel-subtitulo" id="nivelSubtitulo">Responda corretamente para evoluir!</div>
+    <div class="nivel-xp-bar">
+      <div class="nivel-xp-fill" id="nivelXpFill" style="width:0%"></div>
+    </div>
+    <div class="nivel-xp-texto" id="nivelXpTexto">0 / 5 XP para o próximo nível</div>
+  </div>
+</div>
+
+<p id="placar" style="margin-top:12px">
+🏆 Acertos: 0 | ❌ Erros: 0
+</p>
+
+<br>
+
+<button class="secondary" aria-label="Reiniciar o treinamento" onclick="resetTreino()">
+🔄 Resetar
+</button>
+
+</div>
+
+<!-- MODAL PSICOLÓGICO -->
+<div class="modal-overlay" id="modalOverlay" onclick="fecharModal(event)">
+  <div class="modal" id="modalConteudo">
+    <div class="modal-emoji" id="modalEmoji"></div>
+    <div class="modal-titulo" id="modalTitulo"></div>
+    <div class="modal-texto" id="modalTexto"></div>
+    <div class="modal-exemplo" id="modalExemplo"></div>
+    <div class="modal-dica" id="modalDica"></div>
+    <button class="modal-fechar" onclick="document.getElementById('modalOverlay').classList.remove('aberto')">
+      ✅ Entendi!
+    </button>
+  </div>
+</div>
+
+<!-- ESTATÍSTICAS -->
+<div class="stats-box">
+  <h3>📊 Suas Estatísticas</h3>
+  <div class="stats-grid">
+
+    <div class="stat-card">
+      <div class="stat-icon">🔍</div>
+      <div class="stat-numero" id="statMensagens">0</div>
+      <div class="stat-label">Frases respondidas</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">🎯</div>
+      <div class="stat-numero" id="statPrecisao">0%</div>
+      <div class="stat-label">Precisão no treino</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">🚨</div>
+      <div class="stat-numero" id="statGolpes">0</div>
+      <div class="stat-label">Golpes identificados</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">✅</div>
+      <div class="stat-numero" id="statSeguras">0</div>
+      <div class="stat-label">Mensagens seguras identificadas</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">🏅</div>
+      <div class="stat-numero" id="statNivelStat">1</div>
+      <div class="stat-label">Nível atual</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">⚡</div>
+      <div class="stat-numero" id="statSequencia">0</div>
+      <div class="stat-label">Sequência atual</div>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<script>
+
+/* ================= SANITIZAR ================= */
+
+function esc(str){
+
+return str.replace(/[<>&"]/g,function(c){
+
+return{
+"<":"&lt;",
+">":"&gt;",
+"&":"&amp;",
+'"':"&quot;"
+}[c];
+
+});
+
+}
+
+/* ================= NORMALIZAR ================= */
+
+function normalizar(txt){
+
+const leet = {"0":"o","1":"i","3":"e","4":"a","5":"s","7":"t"};
+
+return txt.toLowerCase()
+
+/* Leetspeak seletivo.
+   Converte o dígito apenas quando ele está dentro de uma palavra:
+   vizinho de pelo menos uma letra E fora de uma sequência numérica.
+   "URG3NTE" -> "urgente"   |   "482913" e "R$ 500" permanecem números. */
+.replace(/[013457]/g, function(d, i, s){
+  const antes  = s[i-1] || "";
+  const depois = s[i+1] || "";
+  if(/[0-9]/.test(antes) || /[0-9]/.test(depois)) return d;
+  if(/[a-zà-ÿ]/i.test(antes) || /[a-zà-ÿ]/i.test(depois)) return leet[d];
+  return d;
+})
+
+.normalize("NFD")
+
+.replace(/[\u0300-\u036f]/g,"")
+
+.replace(/[^\w\s]/g," ");
+
+}
+
+/* ==================================================================== */
+/* ==================  ANALISADOR DE LINKS  =========================== */
+/* ==================================================================== */
+
+/*  Analisa a ESTRUTURA de um endereço: nome do domínio, subdomínios,
+ *  terminação, protocolo. Roda inteiramente no navegador.
+ *
+ *  IMPORTANTE: trabalha sobre o TEXTO CRU, antes de normalizar(),
+ *  porque normalizar() troca toda pontuação por espaço — "bit.ly"
+ *  chegaria como "bit ly" e nenhum endereço seria reconhecido.
+ *
+ *  NÃO verifica se o link é comprovadamente malicioso: isso exigiria
+ *  consultar uma base externa, ou seja, enviar o link da pessoa para
+ *  um servidor. Seria o oposto da proposta do projeto.
+ */
+
+const LINK_ENCURTADORES = [
+"bit.ly","tinyurl.com","goo.gl","cutt.ly","abre.ai","is.gd","t.co",
+"ow.ly","rebrand.ly","shorturl.at","encurtador.com.br","rb.gy",
+"tiny.cc","short.io","l1nq.com","acesse.one","u.to"
+];
+
+const LINK_TLDS_SUSPEITOS = [
+"xyz","top","tk","ml","ga","cf","gq","club","online","site","icu",
+"buzz","monster","work","link","rest","fit","shop","vip","space","cyou"
+];
+
+/* marcas com 4+ letras — as curtas dariam falso positivo */
+const LINK_MARCAS = [
+"nubank","bradesco","itau","santander","caixa","bancodobrasil","inter",
+"picpay","mercadopago","pagseguro","serasa","receita","correios",
+"magalu","americanas","shopee","mercadolivre","whatsapp","instagram",
+"facebook","netflix","spotify","banco",
+"govbr","gov","inss","meuinss","receitafederal","detran","fgts"
+];
+
+/* marcas curtas — só valem quando são um pedaço inteiro do endereço */
+const LINK_MARCAS_CURTAS = ["bb","cef","bcb","itau","caixa","inter","gov"];
+
+/* palavras que golpista usa no endereço para dar ar de oficial */
+const LINK_ISCAS = [
+"login","seguro","seguranca","verificacao","verificar","atualizar",
+"atualizacao","recadastro","recadastramento","desbloqueio","desbloquear",
+"regularizar","regularizacao","premio","sorteio","promocao","resgate",
+"beneficio","acesso","central","atendimento","suporte","cliente",
+"conta","oficial","validar","confirmar","liberacao",
+"pendencia","pendencias","provadevida","recadastramento","renovacao","renove"
+];
+
+/* segundos níveis usados no Brasil: com.br, gov.br, org.br... */
+const LINK_TLD_BR2 = [
+"com","net","org","gov","edu","mil","art","adv","eng","med","jus","leg","blog"
+];
+
+const LINK_ARQUIVOS_PERIGOSOS = /\.(apk|exe|scr|msi|bat|cmd|vbs|jar|dmg)(\?|$)/i;
+
+const LINK_TLDS_VALIDOS = [
+"br","com","net","org","gov","edu","io","me","co","info","biz","app",
+"dev","us","uk","pt","ar","ru","cn","in","de","es","fr","it","nl","se",
+"tv","ly","gl","gd","to","sh","ai","cc","one","pro","store","tech",
+"digital","email","live","news","blog","site","online","xyz","top",
+"tk","ml","ga","cf","gq","club","icu","buzz","monster","work","link",
+"rest","fit","shop","vip","space","cyou"
+];
+
+/* distância de edição: quantas letras precisam mudar para virar a outra */
+function linkDistancia(a, b){
+  const m = a.length, n = b.length;
+  if(!m) return n;
+  if(!n) return m;
+  let anterior = Array.from({length:n+1}, (_, i) => i);
+  for(let i = 1; i <= m; i++){
+    const atual = [i];
+    for(let j = 1; j <= n; j++){
+      const custo = a[i-1] === b[j-1] ? 0 : 1;
+      atual[j] = Math.min(anterior[j] + 1, atual[j-1] + 1, anterior[j-1] + custo);
+    }
+    anterior = atual;
+  }
+  return anterior[n];
+}
+
+/* devolve o domínio que realmente manda: em "bb.com.br.login.xyz" é "login.xyz" */
+function linkDominioPrincipal(host){
+  const p = host.split(".");
+  if(p.length <= 2) return host;
+  const ultimo = p[p.length-1];
+  const penultimo = p[p.length-2];
+  if(ultimo === "br" && LINK_TLD_BR2.indexOf(penultimo) > -1 && p.length >= 3){
+    return p.slice(-3).join(".");
+  }
+  return p.slice(-2).join(".");
+}
+
+function linkExtrair(texto){
+  const achados = [];
+  const vistos = {};
+
+  const reDominio = /(?:https?:\/\/)?(?:[a-z0-9._-]+@)?(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,24}(?::\d{2,5})?(?:\/[^\s<>"']*)?/gi;
+  const reIp = /(?:https?:\/\/)?(?:\d{1,3}\.){3}\d{1,3}(?::\d{2,5})?(?:\/[^\s<>"']*)?/g;
+
+  function guardar(bruto){
+    let s = bruto.trim().replace(/[.,;:!?)\]]+$/, "");
+    if(s.length < 4) return;
+    const chave = s.toLowerCase();
+    if(vistos[chave]) return;
+    vistos[chave] = true;
+    achados.push(s);
+  }
+
+  (texto.match(reIp) || []).forEach(guardar);
+
+  (texto.match(reDominio) || []).forEach(function(s){
+    const limpo = s.replace(/^https?:\/\//i, "").split("/")[0].split("@").pop();
+    const partes = limpo.split(":")[0].split(".");
+    const tld = partes[partes.length-1].toLowerCase();
+    const temPrefixo = /^https?:\/\//i.test(s) || /^www\./i.test(s);
+    if(temPrefixo || LINK_TLDS_VALIDOS.indexOf(tld) > -1) guardar(s);
+  });
+
+  return achados;
+}
+
+function linkAnalisarUm(bruto){
+  const achados = [];
+  let pontos = 0;
+
+  function marcar(titulo, texto, p){
+    achados.push({ titulo:titulo, texto:texto, pontos:p });
+    pontos += p;
+  }
+
+  let s = bruto;
+  const temProtocolo = /^https?:\/\//i.test(s);
+  const protocolo = temProtocolo ? s.slice(0, s.indexOf(":")).toLowerCase() : null;
+  let resto = s.replace(/^https?:\/\//i, "");
+
+  /* truque do @ : o navegador ignora tudo que vem antes */
+  const iArroba = resto.indexOf("@");
+  const iBarra = resto.indexOf("/");
+  if(iArroba > -1 && (iBarra === -1 || iArroba < iBarra)){
+    const disfarce = resto.slice(0, iArroba);
+    resto = resto.slice(iArroba + 1);
+    marcar(
+      "Endereço disfarçado com @",
+      "O navegador ignora tudo que vem antes do @. Quem vê o link lê \"" +
+      disfarce + "\", mas quem abre vai parar em outro site.",
+      45
+    );
+  }
+
+  const hostPorta = resto.split("/")[0];
+  const caminho = resto.slice(hostPorta.length);
+  let host = hostPorta, porta = null;
+  const mPorta = hostPorta.match(/:(\d{2,5})$/);
+  if(mPorta){ porta = mPorta[1]; host = hostPorta.slice(0, mPorta.index); }
+  host = host.toLowerCase();
+
+  const ehIp = /^(\d{1,3}\.){3}\d{1,3}$/.test(host);
+  const dp = ehIp ? host : linkDominioPrincipal(host);
+  const rotulos = host.split(".");
+  const tld = rotulos[rotulos.length-1];
+  const semPontuacao = host.replace(/[.\-_]/g, "");
+
+  if(ehIp){
+    marcar(
+      "Endereço numérico em vez de nome",
+      "Sites de empresas de verdade têm nome, não número. Um endereço assim quase sempre é um computador improvisado servindo uma página falsa.",
+      40
+    );
+  }
+
+  if(!ehIp && LINK_ENCURTADORES.indexOf(dp) > -1){
+    marcar(
+      "Encurtador de link",
+      "Encurtadores escondem o destino real. Pode ser inofensivo, mas você só descobre para onde vai depois de já ter ido.",
+      25
+    );
+  }
+
+  if(host.indexOf("xn--") > -1){
+    marcar(
+      "Endereço com letras disfarçadas",
+      "Este endereço usa caracteres de outro alfabeto que se parecem com letras normais. Serve para imitar o nome de uma empresa de forma quase invisível.",
+      30
+    );
+  }
+
+  let disfarceMarcado = false;
+
+  /* marca curta que aparece como pedaço inteiro do endereço */
+  if(!ehIp){
+    const rotulosDp = dp.split(".");
+    for(let i = 0; i < LINK_MARCAS_CURTAS.length; i++){
+      const marca = LINK_MARCAS_CURTAS[i];
+      if(rotulos.indexOf(marca) > -1 && rotulosDp.indexOf(marca) === -1){
+        marcar(
+          "Marca conhecida usada como disfarce",
+          "O nome \"" + marca + "\" aparece no endereço, mas o site que realmente vai abrir é \"" +
+          dp + "\". O nome verdadeiro de um site é sempre o pedaço logo antes da terminação — o resto é enfeite que qualquer um pode escrever.",
+          45
+        );
+        disfarceMarcado = true;
+        break;
+      }
+    }
+  }
+
+  if(!ehIp && !disfarceMarcado){
+    const dpSemPontuacao = dp.replace(/[.\-_]/g, "");
+    for(let i = 0; i < LINK_MARCAS.length; i++){
+      const marca = LINK_MARCAS[i];
+      if(semPontuacao.indexOf(marca) > -1 && dpSemPontuacao.indexOf(marca) === -1){
+        marcar(
+          "Marca conhecida usada como disfarce",
+          "O nome \"" + marca + "\" aparece no endereço, mas o site que realmente vai abrir é \"" +
+          dp + "\". O nome verdadeiro de um site é sempre o pedaço logo antes da terminação — o resto é enfeite que qualquer um pode escrever.",
+          45
+        );
+        break;
+      }
+    }
+  }
+
+  if(!ehIp){
+    const nucleo = dp.split(".")[0];
+    if(nucleo.length >= 5){
+      for(let i = 0; i < LINK_MARCAS.length; i++){
+        const marca = LINK_MARCAS[i];
+        if(marca.length < 5) continue;
+        const d = linkDistancia(nucleo, marca);
+        if(d > 0 && d <= 2){
+          marcar(
+            "Nome parecido com o de uma marca",
+            "\"" + nucleo + "\" está a " + d + (d === 1 ? " letra" : " letras") +
+            " de distância de \"" + marca + "\". Trocar ou dobrar uma letra é a forma mais comum de imitar o endereço de um banco.",
+            40
+          );
+          break;
+        }
+      }
+    }
+  }
+
+  if(!ehIp && LINK_TLDS_SUSPEITOS.indexOf(tld) > -1){
+    marcar(
+      "Terminação incomum: ." + tld,
+      "Empresas brasileiras sérias usam .com.br, .org.br ou .gov.br. Terminações como ." + tld +
+      " são baratas ou gratuitas, e por isso concentram muito golpe.",
+      20
+    );
+  }
+
+  if(!ehIp){
+    const iscas = LINK_ISCAS.filter(function(p){ return host.indexOf(p) > -1; });
+    if(iscas.length > 0){
+      marcar(
+        "Palavras de isca no endereço",
+        "O endereço contém: " + iscas.join(", ") + ". Banco de verdade não precisa escrever \"seguro\" ou \"login\" no próprio nome.",
+        15
+      );
+    }
+  }
+
+  if(!ehIp){
+    const semWww = rotulos.filter(function(r){ return r !== "www"; });
+    const quantosDp = dp.split(".").length;
+    const subdominios = semWww.length - quantosDp;
+    if(subdominios >= 2){
+      marcar(
+        "Endereço longo demais",
+        "Este endereço tem " + subdominios + " pedaços antes do nome real do site. Golpista empilha pedaços para empurrar o nome verdadeiro para longe dos olhos.",
+        15
+      );
+    }
+  }
+
+  if(!ehIp && (host.split("-").length - 1) >= 3){
+    marcar(
+      "Muitos hífens no endereço",
+      "Endereços cheios de hífen quase sempre são montados para imitar um nome oficial que já está registrado por outra pessoa.",
+      10
+    );
+  }
+
+  if(protocolo === "http"){
+    marcar(
+      "Conexão sem cadeado (http)",
+      "Sem o \"s\" no http, o que você digitar nesse site viaja aberto. Nenhum banco ou loja séria usa isso hoje.",
+      10
+    );
+  }
+
+  if(porta && porta !== "80" && porta !== "443"){
+    marcar(
+      "Porta incomum (:" + porta + ")",
+      "Sites normais não mostram esse número depois do endereço. Aparece quando alguém sobe uma página num computador improvisado.",
+      15
+    );
+  }
+
+  if(LINK_ARQUIVOS_PERIGOSOS.test(caminho)){
+    marcar(
+      "O link baixa um programa",
+      "Este endereço termina num arquivo que instala algo no aparelho. Nenhum banco pede para instalar programa por link de mensagem.",
+      35
+    );
+  }
+
+  if(pontos > 70) pontos = 70;
+
+  let nivel, cor;
+  if(pontos >= 45){ nivel = "🔴 Link muito suspeito"; cor = "#f44336"; }
+  else if(pontos >= 25){ nivel = "🟠 Link suspeito"; cor = "#ff9800"; }
+  else if(pontos > 0){ nivel = "🟡 Link com sinais de atenção"; cor = "#fbc02d"; }
+  else { nivel = "🟢 Nenhum sinal encontrado"; cor = "#4caf50"; }
+
+  return {
+    url: bruto,
+    host: host,
+    dominioPrincipal: dp,
+    achados: achados,
+    pontos: pontos,
+    nivel: nivel,
+    cor: cor
+  };
+}
+
+function analisarLinks(textoCru){
+  const brutos = linkExtrair(textoCru || "");
+  const links = brutos.map(linkAnalisarUm);
+
+  let risco = 0;
+  const sinais = [];
+
+  links.forEach(function(l){
+    risco += l.pontos;
+    l.achados.forEach(function(a){
+      sinais.push("Link — " + a.titulo);
+    });
+  });
+
+  if(risco > 70) risco = 70;
+
+  return { risco: risco, sinais: sinais, links: links, encontrou: links.length > 0 };
+}
+
+/* monta a caixa de links que aparece no resultado */
+function gerarBoxLinks(resultado){
+  if(!resultado || !resultado.encontrou) return "";
+
+  let html = '<div class="links-box">';
+  html += '<div class="links-titulo">🔗 Links encontrados nesta mensagem:</div>';
+
+  resultado.links.forEach(function(l){
+    html += '<div class="link-item">';
+    html += '<div class="link-endereco">' + esc(l.url) + '</div>';
+    html += '<div class="link-nivel" style="color:' + l.cor + '">' + l.nivel + '</div>';
+    html += '<div class="link-destino">Site que realmente abre: <b>' + esc(l.dominioPrincipal) + '</b></div>';
+
+    if(l.achados.length === 0){
+      html += '<div class="link-limpo">A estrutura deste endereço não apresenta os sinais que procuramos. Isso não garante que o site seja confiável — só que ele não está disfarçado.</div>';
+    } else {
+      l.achados.forEach(function(a){
+        html += '<div class="link-achado">';
+        html += '<div class="link-achado-titulo">' + esc(a.titulo) + '</div>';
+        html += '<div class="link-achado-texto">' + esc(a.texto) + '</div>';
+        html += '</div>';
+      });
+    }
+
+    html += '</div>';
+  });
+
+  html += '</div>';
+  return html;
+}
+
+/* ==================================================================== */
+/* ==============  FIM DO ANALISADOR DE LINKS  ======================== */
+/* ==================================================================== */
+
+
+/* ========= MOTOR DE ANÁLISE — sistema de regras em camadas ========= */
+
+function analisarMensagem(texto){
+
+/* guarda o texto original: o analisador de links precisa da pontuação,
+   que normalizar() vai apagar na linha seguinte */
+const textoCru = texto;
+
+texto = normalizar(texto);
+
+let risco = 0;
+let sinais = [];
+const evidencias = {
+
+dinheiro:false,
+urgencia:false,
+codigo:false,
+sms:false,
+banco:false,
+confirmacao:false,
+link:false,
+familiar:false,
+
+ajuda:false,
+premio:false,
+autoridade:false,
+acesso:false,
+dispositivo:false,
+cobranca:false,
+  
+tecnico:false,
+educacional:false,
+empresarial:false,
+
+};
+/* ================= BANCO DE FRASES ================= */
+const palavrasTecnicas = [
+
+"internet",
+"wifi",
+"roteador",
+"modem",
+"fibra",
+"rede",
+"servidor",
+"dns",
+"ip",
+"provedor",
+"latencia",
+"upload",
+"download",
+"conectividade",
+
+"professor",
+"escola",
+"aula",
+"aluno",
+"atividade",
+"projeto",
+"cronograma",
+"trabalho",
+
+"engenharia",
+"sistema",
+"tecnico",
+"tecnologia",
+"infraestrutura",
+"configuracao",
+"manutencao",
+
+"fatura",
+"boleto",
+"cliente",
+"contrato",
+"atendimento",
+"suporte",
+"allrede",
+"provedora"
+
+];
+
+const frasesLegitimas = [
+
+"internet caiu",
+"problema na rede",
+"roteador principal",
+"manutencao da internet",
+"atividade escolar",
+"cronograma do projeto",
+"reuniao marcada",
+"infraestrutura da rede",
+"configuracao do servidor",
+"professor informou",
+"sistema da internet",
+"empresa provedora",
+
+"fatura segue em anexo",
+"caso ja tenha feito o pagamento",
+"desconsidere esta mensagem",
+"canal oficial",
+"codigo do boleto",
+"codigo pix",
+"vencimento da fatura",
+"pagamento da fatura",
+"cliente",
+"contrato",
+"suporte tecnico",
+"ordem de servico",
+"atendimento",
+"provedor de internet",
+"manutencao programada",
+
+"cobranca referente",
+"mensalidade",
+"segunda via",
+"segunda via da fatura",
+"aguardamos seu pagamento",
+"pagamento identificado",
+"pagamento confirmado",
+"fatura do mes",
+"empresa de internet",
+"instalacao tecnica",
+"visita tecnica",
+"chamado tecnico",
+"suporte ao cliente"
+
+];
+
+const frasesGolpe = [
+
+/* PIX */
+
+"me manda um pix",
+"faz um pix",
+"preciso de um pix",
+"me empresta um dinheiro",
+
+"consegue fazer uma transferencia",
+
+"estou sem acesso ao banco",
+"ultrapassei meu limite",
+"excedeu meu limite diario",
+
+"depois eu te devolvo",
+"te devolvo ainda hoje",
+"te retorno ainda hoje",
+
+"preciso urgente",
+"estou com um problema",
+"preciso de um favor",
+
+/* FALSO FILHO */
+
+"mae troquei de numero",
+"pai troquei de numero",
+"salva meu novo numero",
+"esse e meu novo whatsapp",
+"quebrei meu celular",
+"estou usando outro numero",
+"nao consigo acessar o banco",
+"preciso pagar uma conta",
+
+/* BANCO */
+
+"sua conta sera bloqueada",
+"detectamos atividade suspeita",
+"confirme seus dados",
+"confirme seu cpf",
+"confirme sua senha",
+"envie o codigo recebido",
+"validacao de seguranca",
+"atualize seus dados",
+"acesso suspenso",
+"acesso temporariamente bloqueado",
+
+/* SMS */
+
+"codigo recebido por sms",
+"envie o codigo",
+"mande o codigo",
+"informe o codigo",
+"codigo de verificacao",
+"codigo de seguranca",
+
+/* PREMIO */
+
+"voce ganhou",
+"parabens voce foi sorteado",
+"premio exclusivo",
+"premio liberado",
+"resgate seu premio",
+"clique para receber",
+"beneficio aprovado",
+"beneficio liberado",
+"sorteio exclusivo",
+
+/* GOVERNO */
+
+"auxilio liberado",
+"beneficio do governo",
+"cadastro aprovado",
+"valor disponivel para saque",
+"dinheiro esquecido",
+"saque imediato",
+
+/* LINKS */
+
+"clique aqui",
+"acesse agora",
+"link abaixo",
+"abra o link",
+"toque no link",
+"http",
+
+/* PRESSAO */
+
+"ultima chance",
+"somente hoje",
+"agora mesmo",
+"nao perca",
+"urgente",
+"imediatamente",
+"acao necessaria",
+"responda agora",
+
+/* EMOCIONAL */
+
+"estou desesperado",
+"socorro",
+"me ajuda",
+"nao sei o que fazer",
+"estou sem dinheiro",
+"estou passando necessidade",
+"preciso muito da sua ajuda",
+
+/* COMPRAS */
+
+"pagamento recusado",
+"compra aprovada",
+"compra suspeita",
+"cancelar compra",
+"estorno imediato",
+
+/* CRIPTO */
+
+"ganhos garantidos",
+"lucro garantido",
+"investimento sem risco",
+"retorno imediato",
+"renda facil",
+/* DEVOLUÇÃO DE DINHEIRO */
+
+"te devolvo",
+"te devolvo hoje",
+"te devolvo amanha",
+"devolvo amanha",
+"retorno hoje",
+"retorno amanha",
+"pago depois",
+"te pago depois",
+"depois eu te pago",
+"depois eu devolvo",
+"faco o reembolso",
+"assim que cair eu te pago",
+
+/* PEDIDO DE AJUDA */
+
+"quebra esse galho",
+"me salva",
+"preciso muito da sua ajuda",
+"preciso de um favor",
+"sera que voce consegue me ajudar",
+"preciso resolver isso urgente",
+
+/* FALSO FILHO */
+
+"troquei de numero",
+"salva meu novo numero",
+"esse e meu novo whatsapp",
+"novo contato",
+"estou usando outro numero",
+"quebrei meu celular",
+"perdi meu chip",
+
+/* JUSTIFICATIVA FINANCEIRA */
+
+"estou apertado",
+"estou sem dinheiro",
+"estou com problema financeiro",
+"preciso pagar uma conta",
+"nao consigo acessar o banco",
+"ultrapassei meu limite",
+"excedeu meu limite diario",
+"meu pix nao esta funcionando",
+"minha conta foi bloqueada",
+"estou sem acesso ao aplicativo",
+"estou sem acesso ao banco",
+"estou com dificuldade financeira",
+"preciso resolver isso hoje",
+"estou numa emergencia",
+"preciso de ajuda urgente",
+
+/* PRESSÃO */
+
+"nao pode esperar",
+"urgente",
+"agora mesmo",
+"imediatamente",
+"somente hoje",
+"ultima chance",
+"responda agora",
+"acao necessaria",
+"o mais rapido possivel",
+"hoje mesmo",
+"prazo final",
+"evite bloqueio",
+"evite cancelamento",
+"nao perca essa oportunidade",
+"resolva agora",
+
+/* FAKE NEWS */
+
+"todos precisam saber",
+"repasse para seus contatos",
+"compartilhe com todos",
+"espalhe essa mensagem",
+"divulgue para todos",
+"isso nao aparece na tv",
+"a midia nao quer divulgar",
+"informacao censurada",
+"estao escondendo isso",
+"verdade que nao querem mostrar",
+
+/* LINKS SUSPEITOS */
+
+"bit ly",
+"tinyurl",
+"goo gl",
+"cutt ly",
+"abre ai",
+"encurtador",
+"link abaixo",
+"clique aqui",
+"clique no link",
+"acesse agora",
+"acesse o link",
+"abra o link",
+"toque no link",
+"link de confirmacao",
+"link de verificacao",
+"link seguro",
+"confirme aqui",
+"validar cadastro",
+"validar conta",
+"atualizar cadastro",
+"atualizar conta",
+"confirmar identidade",
+"confirmar dados",
+"verifique sua conta",
+"regularize sua conta",
+];
+  /* ================= PADRÕES AVANÇADOS ================= */
+
+/* DEVOLUÇÃO DE DINHEIRO */
+
+if(
+/devolvo|retorno|reembolso|pago depois|te pago depois|depois eu pago|depois eu devolvo/.test(texto)
+){
+risco += 30;
+sinais.push("Promessa de devolução de dinheiro");
+}
+
+/* PEDIDO DE FAVOR */
+
+if(
+/favor|me ajuda|preciso da sua ajuda|quebra esse galho|preciso de um favor/.test(texto)
+){
+risco += 20;
+sinais.push("Pedido de ajuda suspeito");
+}
+
+/* FALSO FILHO */
+
+if(
+/troquei de numero|novo numero|novo whatsapp|novo contato|quebrei meu celular|perdi meu chip|estou usando outro numero/.test(texto)
+){
+risco += 45;
+sinais.push("Possível golpe do falso familiar");
+}
+
+/* PROBLEMA FINANCEIRO */
+
+if(
+/estou sem dinheiro|estou apertado|estou com problema|nao consigo acessar o banco|limite diario|ultrapassei meu limite|excedeu meu limite/.test(texto)
+){
+risco += 30;
+sinais.push("Justificativa financeira suspeita");
+}
+
+/* PRESSÃO */
+
+if(
+/urgente|agora|imediatamente|hoje mesmo|o mais rapido possivel|nao pode esperar|ultimo aviso|aviso final|prazo final|ultima chance/.test(texto)
+){
+risco += 25;
+sinais.push("Pressão para agir rapidamente");
+}
+
+/* BANCO */
+
+if(
+(
+/atividade suspeita|conta bloqueada|conta suspensa|acesso bloqueado|confirme seus dados|confirme seu cpf|atualize seus dados/.test(texto)
+)
+&&
+!(
+/internet|wifi|roteador|rede|fibra|servidor|dns|ip|provedor/.test(texto)
+)
+){
+risco += 70;
+sinais.push("Possível golpe bancário");
+}
+if(
+/conta bloqueada|conta temporariamente bloqueada|atualize seus dados/.test(texto)
+){
+    risco += 50;
+
+    sinais.push(
+    "Padrão clássico de phishing bancário"
+    );
+}
+/* ENTREGA / PACOTE RETIDO */
+
+if(
+/pacote|encomenda|entrega|alfandega|correios|remessa|rastreio/.test(texto)
+&&
+/taxa|tarifa|retid|parad|pendente|liberar|liberacao|pagar|pagamento|reagendar/.test(texto)
+){
+risco += 62;
+sinais.push("Possível golpe de entrega");
+}
+
+/* FALSO EMPREGO */
+
+if(
+/vaga|emprego|contratacao|entrevista|curriculo|trabalho remoto|home office|recrutamento/.test(texto)
+&&
+/taxa|deposito|pagar|pagamento|cadastro|exame admissional|uniforme|material/.test(texto)
+){
+risco += 62;
+sinais.push("Possível golpe de falso emprego");
+}
+
+/* FALSO SUPORTE TÉCNICO */
+
+if(
+/suporte|tecnico|assistencia|central de atendimento|equipe de seguranca/.test(texto)
+&&
+/instale|instalar|baixe|baixar|acesso remoto|anydesk|teamviewer|permitir acesso|compartilhar tela/.test(texto)
+){
+risco += 85;
+sinais.push("Pedido para instalar programa ou dar acesso ao aparelho");
+}
+
+/* BOLETO ADULTERADO */
+
+if(
+/boleto|codigo de barras|segunda via|fatura/.test(texto)
+&&
+/atualizad|mudou|novo codigo|codigo novo|corrigid|substitu|use o novo/.test(texto)
+){
+risco += 60;
+sinais.push("Possível troca de boleto");
+}
+
+/* FALSO CHEFE / CARTÃO-PRESENTE */
+
+if(
+/chefe|diretor|gerente|coordenador|patrao|reuniao/.test(texto)
+&&
+/cart(ao|oes) presente|gift card|vale presente|codigos dos cartoes|compre os cartoes/.test(texto)
+){
+risco += 70;
+sinais.push("Possível golpe do falso chefe");
+}
+
+if(/cart(ao|oes) presente|gift card|vale presente/.test(texto)){
+risco += 35;
+sinais.push("Pedido envolvendo cartão-presente");
+}
+
+/* MULTA / ÓRGÃO DE TRÂNSITO */
+
+if(
+/multa|cnh|detran|infracao|habilitacao|ipva|licenciamento/.test(texto)
+&&
+/regulariz|bloque|suspens|pague|pagamento|prazo|vencid|pendente/.test(texto)
+){
+risco += 60;
+sinais.push("Possível golpe de multa ou órgão de trânsito");
+}
+
+/* TAXA ANTECIPADA / EMPRÉSTIMO */
+
+if(
+/emprestimo|credito|financiamento|limite aprovado|dinheiro liberado/.test(texto)
+&&
+/taxa|deposito|antecipad|liberacao|pagar para receber|pequeno valor/.test(texto)
+){
+risco += 68;
+sinais.push("Pedido de pagamento antecipado para liberar dinheiro");
+}
+
+/* ALUGUEL / IMÓVEL */
+
+if(
+/aluguel|imovel|apartamento|casa para alugar|contrato de locacao|kitnet/.test(texto)
+&&
+/deposito|sinal|caucao|antes da visita|garantir|reservar|transferir/.test(texto)
+){
+risco += 58;
+sinais.push("Pagamento pedido antes de ver o imóvel");
+}
+
+/* GOLPE AMOROSO */
+
+if(
+/meu amor|meu bem|querida|querido|minha vida|te amo|nosso futuro/.test(texto)
+&&
+/dinheiro|pix|transferencia|deposito|passagem|alfandega|preso|hospital|emergencia/.test(texto)
+){
+risco += 62;
+sinais.push("Pedido financeiro com apelo amoroso");
+}
+
+/* LEILÃO FALSO */
+
+if(
+/leilao|arremat|lance|hasta publica/.test(texto)
+&&
+/receita federal|policia federal|banco central|abaixo do mercado|apreendid|a partir de/.test(texto)
+){
+risco += 58;
+sinais.push("Possível leilão falso");
+}
+
+/* CORTE DE SERVIÇO ESSENCIAL */
+
+if(
+/energia|luz|agua|gas|internet sera|telefone sera/.test(texto)
+&&
+/cort|suspens|desligad|interromp|debito|inadimpl/.test(texto)
+&&
+/hoje|agora|imediat|urgente|prazo|ate as/.test(texto)
+){
+risco += 58;
+sinais.push("Ameaça de corte de serviço com urgência");
+}
+
+/* COMPRA FALSA / OFERTA IRREAL */
+
+let ofertaSinais = 0;
+
+[
+"liquidacao","promocao","relampago","ultimas unidades","ultimas pecas",
+"so hoje","queima de estoque","imperdivel","frete gratis","garanta o seu",
+"ultimas horas","estoque limitado","corra"
+].forEach(function(p){
+  if(texto.indexOf(p) > -1){ ofertaSinais++; }
+});
+
+if(ofertaSinais >= 2){
+risco += 45;
+sinais.push("Oferta com pressão para comprar rápido");
+}
+
+if(
+/liquidacao|promocao|oferta|desconto|ultimas unidades|so hoje/.test(texto)
+&&
+/clique|acesse|link|compre agora|garanta o seu/.test(texto)
+){
+risco += 30;
+sinais.push("Oferta com link para compra imediata");
+}
+
+/* INVESTIMENTO — reforço */
+
+if(
+/investimento|invest|renda extra|criptomoeda|bitcoin|trader|day trade/.test(texto)
+&&
+/lucro garantido|ganhos garantidos|sem risco|retorno imediato|renda facil|multiplique|dobre/.test(texto)
+){
+risco += 55;
+sinais.push("Promessa de retorno financeiro irreal");
+}
+
+/* FAKE NEWS — reforço */
+
+if(
+/compartilhe|repasse|espalhe|divulgue|encaminhe/.test(texto)
+&&
+/todos|todo mundo|seus contatos|grupos|antes que|apaguem|tirem do ar/.test(texto)
+){
+risco += 35;
+sinais.push("Pedido de disseminação em massa");
+}
+
+/* GOVERNO / BENEFÍCIO */
+
+if(
+/aposentadoria|prova de vida|inss|auxilio|bolsa familia|restituicao|beneficio|previdencia|fgts|seguro desemprego/.test(texto)
+&&
+/suspend|bloquead|bloqueio|cancelad|renove|renovar|regulariz|atualiz|recadastr|ultimo aviso|aviso final|prazo final|para continuar recebendo/.test(texto)
+){
+risco += 65;
+sinais.push("Possível golpe de benefício ou aposentadoria");
+}
+
+/* ÓRGÃO OFICIAL FORA DO DOMÍNIO */
+
+if(
+/govbr|gov br|inss|receita federal|detran|caixa economica/.test(texto)
+&&
+/suspend|bloquead|cancelad|renove|regulariz|atualiz|recadastr|pendencia|multa|divida/.test(texto)
+){
+risco += 45;
+sinais.push("Mensagem se passando por órgão oficial");
+}
+
+/* SMS */
+
+if(
+/codigo de verificacao|codigo recebido|codigo sms|codigo de seguranca|codigo de autenticacao/.test(texto)
+){
+risco += 50;
+sinais.push("Tentativa de roubo de código");
+}
+
+/* PRÊMIO */
+
+if(
+/voce ganhou|foi sorteado|premio liberado|premio exclusivo|resgate seu premio|beneficio aprovado/.test(texto)
+){
+risco += 35;
+sinais.push("Possível golpe de prêmio");
+}
+
+/* FAKE NEWS */
+
+if(
+/compartilhe|repasse|espalhe|divulgue para todos|todos precisam saber/.test(texto)
+){
+risco += 25;
+sinais.push("Compartilhamento em massa");
+}
+
+if(
+/midia nao quer divulgar|isso nao aparece na tv|informacao censurada|estao escondendo isso/.test(texto)
+){
+risco += 40;
+sinais.push("Possível fake news");
+}
+
+/* LINKS */
+
+if(
+/bit ly|tinyurl|goo gl|cutt ly|abre ai|encurtador|clique aqui|acesse agora|abra o link|link de verificacao|link de confirmacao/.test(texto)
+){
+risco += 30;
+sinais.push("Link potencialmente suspeito");
+}
+frasesLegitimas.forEach(frase=>{
+
+if(texto.includes(frase)){
+
+risco -= 25;
+
+sinais.push("Frase comum em contexto legítimo");
+
+}
+
+});
+
+/* Set remove as repetições do array: cada frase distinta soma uma vez só. */
+[...new Set(frasesGolpe)].forEach(frase=>{
+
+if(texto.includes(frase)){
+
+risco += 6;
+
+sinais.push(
+"Frase típica de golpe: " + frase
+);
+
+}
+
+});
+  
+  /* ================= EVIDÊNCIAS ================= */
+  if(
+/fatura|boleto|vencimento|desconsidere esta mensagem|canal oficial/.test(texto)
+){
+    evidencias.cobranca = true;
+}
+if(
+/\binternet\b|\bwifi\b|\broteador\b|\bfibra\b|\bdns\b|\bip\b|\brede\b|\bservidor\b|\blatencia\b|\bupload\b|\bdownload\b/.test(texto)
+){
+    evidencias.tecnico = true;
+}
+  if(
+/professor|atividade|escola|trabalho|projeto|cronograma|aluno|aula/.test(texto)
+){
+    evidencias.educacional = true;
+}
+  if(
+/cliente|empresa|contrato|reuniao|orcamento|suporte tecnico/.test(texto)
+){
+    evidencias.empresarial = true;
+}
+if(
+/pix|transferencia|deposito|dinheiro/.test(texto)
+){
+    evidencias.dinheiro = true;
+}
+
+if(
+/urgente|agora|imediatamente|hoje mesmo|nao pode esperar/.test(texto)
+){
+    evidencias.urgencia = true;
+}
+
+if(
+/codigo|token|verificacao|autenticacao/.test(texto)
+){
+    evidencias.codigo = true;
+}
+
+if(
+/sms|mensagem de texto/.test(texto)
+){
+    evidencias.sms = true;
+}
+
+if(
+/\bbanco\b|\bconta\b|\bcontas\b|\bitau\b|\bnubank\b|\bbradesco\b|\bcaixa\b|\bsantander\b/.test(texto)
+){
+    evidencias.banco = true;
+}
+
+if(
+/confirm|atualiz|verific|validar|validacao/.test(texto)
+){
+    evidencias.confirmacao = true;
+}
+
+if(
+/http|https|clique|acesse|link/.test(texto)
+){
+    evidencias.link = true;
+}
+
+/* ===== ANÁLISE DE LINKS =====
+   Roda aqui, antes dos blocos de combinação, para que evidencias.link
+   já esteja marcada quando a camada de combinações for avaliada. */
+
+const resultadoLinks = analisarLinks(textoCru);
+
+if(resultadoLinks.encontrou){
+    evidencias.link = true;
+    risco += resultadoLinks.risco;
+    resultadoLinks.sinais.forEach(function(s){ sinais.push(s); });
+}
+
+if(
+/\bmae\b|\bpai\b|\bfilho\b|\bfilha\b|troquei de numero/.test(texto)
+){
+    evidencias.familiar = true;
+}
+  if(
+/favor|ajuda|socorro|quebra esse galho|me ajuda/.test(texto)
+){
+    evidencias.ajuda = true;
+}
+
+if(
+/ganhou|premio|sorteado|beneficio/.test(texto)
+){
+    evidencias.premio = true;
+}
+
+if(
+/\bbanco\b|\bitau\b|\bnubank\b|\bbradesco\b|\bcaixa\b|\bsantander\b|\bcentral\b/.test(texto)
+){
+    evidencias.autoridade = true;
+}
+
+if(
+/tentativa de acesso|novo acesso|atividade suspeita|login/.test(texto)
+){
+    evidencias.acesso = true;
+}
+
+if(
+/\biphone\b|\bandroid\b|\bdispositivo\b|\blocal\b|\bhorario\b|\bdata\b/.test(texto)
+){
+    evidencias.dispositivo = true;
+}
+/* ================= DETECÇÃO ================= */
+if(
+/tentativa de acesso|atividade suspeita/.test(texto)
+&&
+/iphone|android|dispositivo|local|horario|data/.test(texto)
+){
+    risco += 70;
+
+    sinais.push(
+    "Padrão clássico de phishing bancário"
+    );
+}
+
+if(
+/foi voce|reconhece esta atividade|nao reconheca esta atividade|tentativa de acesso/.test(texto)
+){
+    risco += 50;
+
+    sinais.push(
+    "Alerta de acesso suspeito"
+    );
+}
+if(/\b(urgente|agora|imediatamente|rapido|ja)\b/.test(texto)){
+risco += 25;
+sinais.push("Mensagem com urgência");
+}
+
+if(/\b(pix|dinheiro|transferencia|deposito)\b/.test(texto)){
+risco += 15;
+sinais.push("Pedido financeiro");
+}
+
+if(
+/(codigo de verificacao|codigo sms|token|autenticacao|senha|cpf)/.test(texto)
+){
+    risco += 44;
+
+    sinais.push(
+    "Solicitação de informação sensível"
+    );
+}
+
+if(/\b(clique|acesse|link|http)\b/.test(texto)){
+risco += 20;
+sinais.push("Tentativa de redirecionamento");
+}
+
+if(/\b(premio|beneficio|ganhou|sorteio)\b/.test(texto)){
+risco += 20;
+sinais.push("Promessa de prêmio");
+}
+
+if(
+/\b(banco|central|suporte)\b/.test(texto)
+&&
+!(/internet|wifi|roteador|rede|fibra/.test(texto))
+){
+risco += 15;
+sinais.push("Uso de autoridade");
+}
+  if(
+/data|horario|local|iphone|android|dispositivo/.test(texto)
+&&
+/tentativa de acesso|atividade suspeita|login/.test(texto)
+){
+    risco += 60;
+
+    sinais.push(
+    "Padrão clássico de golpe bancário"
+    );
+}
+if(/\b(me ajuda|socorro|mae)\b/.test(texto)){
+risco += 15;
+sinais.push("Pressão emocional");
+}
+  
+if(
+/(pix|transferencia|deposito|pagamento)/.test(texto) &&
+/(favor|ajuda|problema|urgente)/.test(texto)
+){
+risco += 35;
+sinais.push("Pedido financeiro suspeito");
+}
+  
+if(
+/(troquei de numero|novo whatsapp)/.test(texto)
+){
+risco += 45;
+sinais.push("Possível golpe do falso familiar");
+}
+
+if(
+/codigo/.test(texto) &&
+/(sms|verificacao)/.test(texto)
+){
+risco += 50;
+}
+
+if(
+/(ganhou|premio|sorteado)/.test(texto) &&
+/(clique|link)/.test(texto)
+){
+    risco += 50;
+    sinais.push("Golpe de prêmio");
+}
+  /* PIX + URGÊNCIA */
+
+if(
+evidencias.dinheiro &&
+evidencias.urgencia
+){
+    risco += 60;
+
+    sinais.push(
+    "Pedido financeiro urgente"
+    );
+}
+
+/* CÓDIGO + SMS */
+
+if(
+evidencias.codigo &&
+evidencias.sms
+){
+    risco += 80;
+
+    sinais.push(
+    "Tentativa de obter código"
+    );
+}
+
+/* BANCO + CONFIRMAÇÃO */
+
+if(
+evidencias.banco &&
+evidencias.confirmacao
+){
+    risco += 70;
+
+    sinais.push(
+    "Solicitação bancária suspeita"
+    );
+}
+
+/* LINK + BANCO */
+
+if(
+evidencias.link &&
+evidencias.banco
+){
+    risco += 60;
+
+    sinais.push(
+    "Link envolvendo instituição financeira"
+    );
+}
+
+/* FALSO FAMILIAR */
+
+if(
+evidencias.familiar &&
+evidencias.dinheiro
+){
+    risco += 90;
+
+    sinais.push(
+    "Possível golpe do falso familiar"
+    );
+}
+  if(
+evidencias.dinheiro &&
+evidencias.ajuda
+){
+    risco += 50;
+
+    sinais.push(
+    "Pedido financeiro emocional"
+    );
+}
+
+if(
+evidencias.acesso &&
+evidencias.confirmacao
+){
+    risco += 60;
+
+    sinais.push(
+    "Alerta de acesso suspeito"
+    );
+}
+
+if(
+evidencias.acesso &&
+evidencias.dispositivo
+){
+    risco += 50;
+
+    sinais.push(
+    "Tentativa de gerar credibilidade"
+    );
+}
+
+if(
+evidencias.premio &&
+evidencias.link
+){
+    risco += 80;
+
+    sinais.push(
+    "Golpe de prêmio"
+    );
+}
+/* ================= COMBINAÇÕES ================= */
+if(
+evidencias.tecnico &&
+!evidencias.dinheiro &&
+!evidencias.codigo
+){
+    risco -= 50;
+
+    sinais.push(
+    "Contexto técnico legítimo"
+    );
+}
+
+if(
+evidencias.educacional &&
+!evidencias.dinheiro &&
+!evidencias.codigo
+){
+    risco -= 50;
+    sinais.push(
+    "Contexto educacional legítimo"
+    );
+}
+
+if(
+evidencias.cobranca &&
+!evidencias.codigo &&
+!evidencias.familiar &&
+!evidencias.ajuda &&
+!/codigo de barras|novo codigo|codigo novo|use o novo|boleto atualizado/.test(texto)
+){
+    risco -= 50;
+    sinais.push(
+    "Cobrança aparentemente legítima"
+    );
+}
+
+if(
+evidencias.empresarial &&
+!evidencias.codigo &&
+!/instale|instalar|baixe|baixar|acesso remoto|anydesk|teamviewer|permitir acesso|compartilhar tela/.test(texto)
+){
+    risco -= 30;
+
+    sinais.push(
+    "Contexto empresarial legítimo"
+    );
+}
+if(
+/pix/.test(texto) &&
+/urgente|agora/.test(texto)
+){
+risco += 30;
+}
+
+if(
+/(codigo|senha)/.test(texto) &&
+/(envie|mande)/.test(texto)
+){
+risco += 40;
+}
+
+if(
+/premio/.test(texto) &&
+/(clique|link)/.test(texto)
+){
+risco += 40;
+}
+let contextoLegitimo = false;
+
+if(
+/internet|wifi|roteador|fibra|provedor/.test(texto)
+){
+    contextoLegitimo = true;
+}
+
+if(
+/professor|atividade|escola|trabalho|projeto|aula/.test(texto)
+){
+    contextoLegitimo = true;
+}
+
+if(
+/fatura|contrato|cliente|empresa|suporte tecnico|canal oficial|vencimento|provedora|telecom/.test(texto)
+){
+    contextoLegitimo = true;
+}
+
+if(
+contextoLegitimo &&
+risco < 30
+){
+    risco -= 10;
+}
+/* ================= REDUÇÃO ================= */
+
+if(
+/bom dia|boa tarde|reuniao|obrigado|ate mais/.test(texto)
+){
+risco -= 20;
+}
+/* CONTEXTO TÉCNICO */
+
+let tecnicasEncontradas = 0;
+
+palavrasTecnicas.forEach(p => {
+
+if(texto.includes(p)){
+tecnicasEncontradas++;
+}
+
+});
+
+if(tecnicasEncontradas >= 3){
+
+risco -= 27;
+
+sinais.push(
+"Texto técnico identificado"
+);
+
+}
+/* CONTEXTO EDUCACIONAL */
+
+if(
+/professor|atividade|trabalho|projeto|escola|aula|aluno|cronograma/.test(texto)
+){
+
+    risco -= 20;
+
+    sinais.push(
+    "Contexto educacional"
+    );
+
+}
+if(
+/canal oficial|verificado/.test(texto)
+&&
+!/tentativa de acesso|atividade suspeita|conta bloqueada/.test(texto)
+){
+    risco -= 5;
+
+    sinais.push(
+    "Perfil aparentemente oficial"
+    );
+}
+
+let totalEvidencias = 0;
+
+if(evidencias.dinheiro) totalEvidencias++;
+if(evidencias.urgencia) totalEvidencias++;
+if(evidencias.codigo) totalEvidencias++;
+if(evidencias.sms) totalEvidencias++;
+if(evidencias.banco) totalEvidencias++;
+if(evidencias.confirmacao) totalEvidencias++;
+if(evidencias.link) totalEvidencias++;
+if(evidencias.familiar) totalEvidencias++;
+if(evidencias.ajuda) totalEvidencias++;
+if(evidencias.premio) totalEvidencias++;
+if(evidencias.autoridade) totalEvidencias++;
+if(evidencias.acesso) totalEvidencias++;
+if(evidencias.dispositivo) totalEvidencias++;
+if(totalEvidencias >= 4){
+
+    risco += 20;
+
+    sinais.push(
+    "Muitos sinais suspeitos combinados"
+    );
+
+}
+
+if(totalEvidencias >= 6){
+
+    risco += 35;
+
+    sinais.push(
+    "Grande quantidade de sinais suspeitos"
+    );
+
+}
+if(
+totalEvidencias >= 8 &&
+!evidencias.tecnico &&
+!evidencias.educacional
+){
+
+    risco += 45;
+    sinais.push("Padrão extremamente perigoso");
+
+}
+if(
+evidencias.banco &&
+!evidencias.confirmacao &&
+!evidencias.link &&
+!evidencias.codigo
+){
+    risco -= 10;
+}
+  if(
+/fatura|vencimento|boleto|telecom|provedora|canal oficial/.test(texto)
+&&
+!/codigo de verificacao|senha|token|atividade suspeita|codigo de barras|novo codigo|codigo novo|use o novo|boleto atualizado/.test(texto)
+){
+    risco -= 40;
+
+    sinais.push(
+    "Cobrança legítima identificada"
+    );
+
+}
+  if(
+/canal oficial/.test(texto)
+&&
+/fatura|vencimento|boleto/.test(texto)
+){
+    risco -= 15;
+
+    sinais.push(
+    "Empresa identificada"
+    );
+}
+  if(
+evidencias.banco &&
+evidencias.confirmacao
+){
+    risco = Math.max(risco,64);
+}
+if(risco < 0){
+    risco = 0;
+}
+
+if(risco > 100){
+    risco = 100;
+}
+
+/* ================= NÍVEL ================= */
+
+let nivel = "";
+let explicacao = "";
+let cor = "";
+
+if(risco >= 90){
+
+nivel = "🔴 Alto risco";
+cor = "#f44336";
+
+explicacao =
+"Essa mensagem apresenta fortes sinais de golpe digital, incluindo pressão, urgência ou solicitação sensível.";
+
+}else if(risco >= 60){
+
+nivel = "🟠 Muito suspeito";
+cor = "#ff9800";
+
+explicacao =
+"A mensagem contém padrões frequentemente utilizados em golpes e exige atenção.";
+
+}else if(risco >= 30){
+
+nivel = "🟡 Atenção";
+cor = "#fbc02d";
+
+explicacao =
+"Existem sinais suspeitos que merecem verificação antes de qualquer ação.";
+
+}else{
+
+nivel = "🟢 Seguro";
+cor = "#4caf50";
+
+explicacao =
+"Aparentemente a mensagem não possui sinais fortes de golpe.";
+
+}
+
+return{
+risco,
+nivel,
+explicacao,
+sinais,
+cor,
+links: resultadoLinks
+};
+
+}
+
+/* ================= ANALISAR ================= */
+
+async function analisar(){
+
+/* Validação ANTES de qualquer coisa aparecer na tela.
+   Antes, o loading era pintado primeiro e ficava travado com campo vazio. */
+let entrada =
+document.getElementById("entrada").value;
+
+if(!entrada.trim()){
+alert("Digite ou cole uma mensagem para analisar.");
+return;
+}
+
+const btn = document.getElementById("btnAnalisar");
+
+try{
+
+if(btn){ btn.disabled = true; }
+
+document.getElementById("resultado").innerHTML = `
+<div class="resultado-box">
+<h3>🔎 Analisando a mensagem...</h3>
+<p>Verificando padrões, combinações de evidências e gatilhos psicológicos.</p>
+</div>
+`;
+
+/* Pausa deliberada de interface: dá ao usuário a percepção do processo.
+   A análise em si é instantânea. */
+await new Promise(resolve => setTimeout(resolve, 1200));
+
+let r = analisarMensagem(entrada);
+
+/* ===== ESTATÍSTICAS DE ANÁLISE (não contam como frase respondida) ===== */
+if(r.risco >= 60){
+  statGolpesDetectados++;
+}else{
+  statSeguras++;
+}
+atualizarStats();
+
+document.getElementById("resultado").innerHTML = `
+
+<div class="resultado-box">
+
+<div class="status">
+${r.nivel}
+</div>
+
+<div class="risk-bar">
+
+<div
+class="risk-fill"
+style="width:${r.risco}%;background:${r.cor}"
+></div>
+
+</div>
+
+<div class="info">
+
+<p>
+<b>Risco:</b> ${r.risco}%
+</p>
+
+<br>
+
+<p>
+<b>Explicação:</b><br>
+${esc(r.explicacao)}
+</p>
+
+<br>
+
+<p>
+<b>Sinais detectados:</b><br>
+${
+r.sinais.length
+?
+r.sinais.map(s=>"• "+esc(s)).join("<br>")
+:
+"Nenhum sinal forte identificado."
+}
+</p>
+
+<br>
+
+<p>
+<b>Como se proteger:</b><br>
+• Não envie dinheiro imediatamente<br>
+• Nunca compartilhe códigos ou senhas<br>
+• Confirme informações por outro canal<br>
+• Desconfie de pressão emocional
+</p>
+
+</div>
+
+${gerarBoxLinks(r.links)}
+
+${r.risco >= 30 ? gerarChipsPsico(entrada) : ""}
+
+</div>
+
+`;
+
+}finally{
+if(btn){ btn.disabled = false; }
+}
+
+}
+
+/* ================= GERAR ================= */
+
+function gerar(){
+
+const gerados = [
+
+"URGENTE! Detectamos uma movimentação suspeita na sua conta. Confirme seu código imediatamente.",
+
+"Parabéns! Você ganhou um prêmio exclusivo hoje. Clique no link para liberar o benefício.",
+
+"Mãe, troquei de número. Me manda um PIX urgente porque estou sem acesso ao banco.",
+
+"Seu CPF será bloqueado ainda hoje caso você não confirme seus dados agora.",
+
+"Seu acesso bancário expirou. Faça a atualização imediatamente para evitar bloqueio.",
+
+"Última chance para resgatar seu benefício liberado pelo governo hoje."
+
+];
+
+document.getElementById("entrada").value =
+gerados[Math.floor(Math.random()*gerados.length)];
+
+}
+
+/* ================= EXEMPLOS ================= */
+
+function exemplo(tipo){
+
+const ex={
+
+banco:[
+
+"Detectamos acesso suspeito na sua conta. Envie o código recebido por SMS.",
+
+"Seu banco identificou atividade incomum. Confirme imediatamente seu CPF.",
+
+"Conta temporariamente bloqueada. Atualize seus dados para continuar usando."
+
+],
+
+premio:[
+
+"Parabéns! Você ganhou um prêmio exclusivo. Clique para resgatar agora.",
+
+"Seu benefício foi aprovado hoje. Faça a confirmação imediatamente.",
+
+"Você foi sorteado em nossa promoção. Envie seus dados para liberar o prêmio."
+
+],
+
+fake:[
+
+"Nova lei libera dinheiro para toda população ainda hoje compartilhe rápido.",
+
+"Governo aprovou benefício secreto e a mídia não quer divulgar compartilhe.",
+
+"Especialistas afirmam que bancos vão bloquear contas amanhã compartilhe urgente."
+
+],
+
+link:[
+
+"Sua conta será bloqueada hoje. Regularize em https://caixa.gov.br.recadastro-cliente.top/validar",
+
+"Detectamos acesso indevido. Confirme sua identidade em https://nubank.com.br.seguranca-cliente.xyz/login",
+
+"Central de segurança: acesse http://192.168.15.1/banco/login e confirme seus dados.",
+
+"Você foi sorteado! Resgate o seu prêmio aqui: https://bit.ly/premio-liberado2026",
+
+"Sua encomenda está parada na alfândega. Pague a taxa em https://tinyurl.com/correios-taxa",
+
+"Seu acesso expirou. Entre em https://nubanck.com/acesso e atualize seus dados.",
+
+"Aviso do seu banco: regularize sua situação em https://bradescco.com.br/atualizacao",
+
+"Sua senha vence hoje. Renove agora em https://santanderr.com/cliente",
+
+"Seu CPF está irregular. Consulte em https://gov.br.consulta-cpf.xyz/regularizar",
+
+"Atualize seu cadastro bancário: https://bb.com.br@central-clientes.top/login",
+
+"Baixe a nova versão do aplicativo do banco: http://seguranca-bancaria.com/atualizacao.apk",
+
+"Acesse o portal do cliente: http://187.45.201.9:8080/banco/entrar",
+
+"Seu benefício foi liberado. Solicite o saque em http://beneficio-social-gov.online/liberacao",
+
+"Recadastramento obrigatório do seu benefício: https://meu-inss-atualizacao-cadastral.site/acesso",
+
+"Rastreie sua entrega em https://correios.com.br.rastreio-objeto.icu/consulta",
+
+"Sua conta do Instagram será desativada. Recorra em https://xn--instagra-o1a.com/login",
+
+"Última chance de resgatar seu prêmio: https://sorteio-premiado.club/ganhador",
+
+"Sua compra foi aprovada. Para cancelar, acesse https://mercadolivre.com.br.pagamento-cancelar.top/acessar",
+
+"Mãe, troquei de número. Paga esse boleto pra mim: https://bit.ly/boleto-urgente"
+
+],
+
+normal:[
+
+"Prezado cliente, a fatura da sua internet vence em 5 dias. Caso já tenha feito o pagamento, desconsidere esta mensagem.",
+
+"Bom dia! A reunião de amanhã foi remarcada para 14h30 e o orçamento ficou em R$ 1.500,00.",
+
+"Mãe, esqueci meu casaco na escola. Você pode buscar quando puder?",
+
+"Vou confirmar com você e entrar em contato ainda hoje.",
+
+"Fui no INSS hoje e resolvi a aposentadoria da minha avó.",
+
+"A professora avisou que o prazo final do trabalho é sexta-feira.",
+
+"Oi! Confirmando nossa consulta de terça às 9h na clínica."
+
+]
+
+};
+
+let l = ex[tipo];
+
+document.getElementById("entrada").value =
+l[Math.floor(Math.random()*l.length)];
+
+}
+/* ================= OCR ================= */
+
+/* ---------- limpeza do print ----------
+   Print de conversa não traz só a mensagem: traz horário, "online",
+   marcas de visto e separadores de dia. Isso tudo entrava no motor
+   e virava sinal. Aqui a gente tira só as linhas que são EXCLUSIVAMENTE
+   esse tipo de coisa — nunca pedaços de mensagem. */
+
+function limparTextoDePrint(texto){
+
+  const linhas = String(texto || "").split("\n");
+
+  const mantidas = linhas.filter(function(l){
+    const s = l.trim();
+
+    if(s === "") return false;
+    if(s.length <= 1) return false;
+
+    /* linha que é só um horário: 14:32, 9:05 PM */
+    if(/^\d{1,2}[:.]\d{2}\s*(am|pm)?$/i.test(s)) return false;
+
+    /* separadores de dia */
+    if(/^(hoje|ontem|anteontem|hoje\.|ontem\.)$/i.test(s)) return false;
+
+    /* status do aplicativo */
+    if(/^(online|digitando\.{0,3}|gravando áudio\.{0,3}|visto por último.*|visualizado.*|entregue)$/i.test(s)) return false;
+
+    /* linha só com símbolos — tiques de entrega, setas, ícones mal lidos */
+    if(/^[^\p{L}\p{N}]+$/u.test(s)) return false;
+
+    return true;
+  });
+
+  return mantidas.join("\n").trim();
+}
+
+
+/* mostra o progresso enquanto o Tesseract trabalha */
+function mostrarProgressoOCR(pct, mensagem){
+  const p = Math.max(0, Math.min(100, pct || 0));
+  document.getElementById("resultado").innerHTML = `
+<div class="resultado-box">
+
+<div class="status" style="font-size:24px;color:#0d47a1">
+📷 Lendo a imagem...
+</div>
+
+<div class="ocr-barra">
+<div class="ocr-barra-fill" style="width:${p}%"></div>
+</div>
+
+<div class="info">
+${esc(mensagem)} — ${p}%
+</div>
+
+</div>
+`;
+}
+
+
+/* pede conferência antes de analisar */
+function mostrarConfirmacaoOCR(quantasRemovidas){
+  document.getElementById("resultado").innerHTML = `
+<div class="resultado-box">
+
+<div class="status" style="font-size:24px;color:#0d47a1">
+📷 Texto lido da imagem
+</div>
+
+<div class="info">
+<p>O texto apareceu no campo lá em cima. <b>Dê uma conferida antes de analisar</b> — se o leitor errou alguma palavra, você pode corrigir na mão.</p>
+${
+quantasRemovidas > 0
+? `<p class="ocr-nota">Tiramos ${quantasRemovidas} linha${quantasRemovidas > 1 ? "s" : ""} que ${quantasRemovidas > 1 ? "eram" : "era"} só horário, status ou marca de visto — coisa do print, não da mensagem.</p>`
+: ""
+}
+</div>
+
+<button class="primary" style="margin-top:16px" onclick="analisar()">
+🔍 Analisar este texto
+</button>
+
+</div>
+`;
+
+  const campo = document.getElementById("entrada");
+  if(campo && campo.scrollIntoView){
+    campo.scrollIntoView({ behavior:"smooth", block:"center" });
+  }
+}
+
+
+async function analisarImagem(){
+
+const arquivo =
+document.getElementById("imagemInput").files[0];
+
+if(!arquivo){
+alert("Selecione uma imagem.");
+return;
+}
+
+const btn = document.getElementById("btnImagem");
+
+try{
+
+if(btn){ btn.disabled = true; }
+
+if(typeof Tesseract === "undefined"){
+document.getElementById("resultado").innerHTML = "";
+alert("A leitura de imagem ainda está carregando. Tente novamente em alguns segundos.");
+return;
+}
+
+mostrarProgressoOCR(0, "Preparando o leitor");
+
+const resultadoOCR = await Tesseract.recognize(
+arquivo,
+"por",
+{
+  logger: function(m){
+    const pct = Math.round((m.progress || 0) * 100);
+    if(m.status === "recognizing text"){
+      mostrarProgressoOCR(pct, "Reconhecendo o texto");
+    } else if(m.status && m.status.indexOf("loading") > -1){
+      mostrarProgressoOCR(pct, "Carregando o leitor");
+    }
+  }
+}
+);
+
+const bruto = resultadoOCR.data.text || "";
+const limpo = limparTextoDePrint(bruto).slice(0, 2000);
+
+if(!limpo.trim()){
+document.getElementById("resultado").innerHTML = "";
+alert("Não foi possível ler texto nessa imagem. Tente um print mais nítido, com a tela bem iluminada.");
+return;
+}
+
+const removidas =
+  bruto.split("\n").filter(function(l){ return l.trim() !== ""; }).length -
+  limpo.split("\n").filter(function(l){ return l.trim() !== ""; }).length;
+
+document.getElementById("entrada").value = limpo;
+
+/* NÃO analisa sozinho: a pessoa confere primeiro.
+   Antes, se o leitor errasse uma palavra, o resultado era sobre
+   um texto diferente do que a pessoa mandou — e ninguém percebia. */
+mostrarConfirmacaoOCR(removidas > 0 ? removidas : 0);
+
+}catch(erro){
+
+document.getElementById("resultado").innerHTML = "";
+alert("Erro ao ler a imagem. Tente outro print.");
+
+}finally{
+
+if(btn){ btn.disabled = false; }
+
+}
+
+}
+
+
+/* ================= TREINO ================= */
+  
+let treino = [
+
+{
+t:"URGENTE! Me manda um PIX agora porque perdi meu cartão.",
+g:true,
+e:"Golpe: pressão + urgência + dinheiro."
+},
+
+{
+t:"Bom dia, nossa reunião será amanhã às 14h.",
+g:false,
+e:"Mensagem comum."
+},
+
+{
+t:"Envie o código recebido no SMS imediatamente.",
+g:true,
+e:"Nunca compartilhe códigos."
+},
+
+{
+t:"Parabéns! Você ganhou um prêmio. Clique no link.",
+g:true,
+e:"Prêmios com links são comuns em golpes."
+},
+
+{
+t:"Tudo bem? Depois me chama quando puder.",
+g:false,
+e:"Mensagem comum."
+},
+
+{
+t:"Mãe, troquei de número. Faz um PIX pra mim.",
+g:true,
+e:"Golpe do falso familiar."
+},
+
+{
+t:"Seu CPF será bloqueado hoje. Confirme seus dados.",
+g:true,
+e:"Tentativa de roubo de dados."
+},
+
+{
+t:"Obrigado pela ajuda de ontem.",
+g:false,
+e:"Mensagem normal."
+},
+
+{
+t:"Sua conta foi bloqueada. Clique no link para desbloquear.",
+g:true,
+e:"Golpe bancário."
+},
+
+{
+t:"Vamos jogar futebol sábado às 15h?",
+g:false,
+e:"Mensagem normal."
+},
+
+{
+t:"Seu pacote está retido. Pague a taxa agora.",
+g:true,
+e:"Golpe de entrega."
+},
+
+{
+t:"Boa noite, cheguei em casa.",
+g:false,
+e:"Mensagem comum."
+},
+
+{
+t:"Você foi sorteado e ganhou um celular novo.",
+g:true,
+e:"Promessa de prêmio."
+},
+
+{
+t:"Seu acesso será cancelado em 24 horas.",
+g:true,
+e:"Pressão para agir rápido."
+},
+
+{
+t:"Qual é a matéria da prova amanhã?",
+g:false,
+e:"Mensagem escolar comum."
+},
+
+{
+t:"Confirme sua senha para evitar bloqueio.",
+g:true,
+e:"Solicitação de informação sensível."
+},
+
+{
+t:"Vamos ao cinema no final de semana?",
+g:false,
+e:"Mensagem normal."
+},
+
+{
+t:"Recebi um PIX errado. Me devolva imediatamente.",
+g:true,
+e:"Golpe comum envolvendo PIX."
+},
+
+{
+t:"A aula começará às 7h30.",
+g:false,
+e:"Aviso comum."
+},
+
+{
+t:"Clique aqui para receber seu benefício liberado.",
+g:true,
+e:"Link suspeito."
+},
+
+{
+t:"Seu banco detectou atividade suspeita.",
+g:true,
+e:"Golpe bancário frequente."
+},
+
+{
+t:"Você viu o jogo ontem?",
+g:false,
+e:"Conversa normal."
+},
+
+{
+t:"Estou sem acesso ao banco. Faz um PIX pra mim.",
+g:true,
+e:"Pedido financeiro suspeito."
+},
+
+{
+t:"Te encontro na praça às 18h.",
+g:false,
+e:"Mensagem comum."
+},
+
+{
+t:"Seu código de verificação é 482913. Me envie.",
+g:true,
+e:"Tentativa de roubo de conta."
+},
+
+{
+t:"Obrigado por participar da reunião.",
+g:false,
+e:"Mensagem profissional comum."
+},
+
+{
+t:"Última chance para resgatar seu prêmio.",
+g:true,
+e:"Pressão psicológica."
+},
+
+{
+t:"A professora mudou a data da entrega.",
+g:false,
+e:"Mensagem normal."
+},
+
+{
+t:"Seu cadastro está desatualizado. Atualize agora.",
+g:true,
+e:"Possível phishing."
+},
+
+{
+t:"Boa tarde! Como você está?",
+g:false,
+e:"Mensagem amigável."
+},
+
+{
+t:"Estamos oferecendo investimento com lucro garantido.",
+g:true,
+e:"Promessa financeira irreal."
+},
+
+{
+t:"Vamos fazer o trabalho em grupo amanhã?",
+g:false,
+e:"Mensagem escolar."
+},
+
+{
+t:"Repasse essa mensagem para todos os seus contatos.",
+g:true,
+e:"Característica comum de fake news."
+},
+
+{
+t:"O treino de vôlei foi cancelado.",
+g:false,
+e:"Aviso normal."
+},
+
+{
+t:"A mídia não quer que você saiba disso.",
+g:true,
+e:"Sinal clássico de fake news."
+},
+
+{
+t:"Cheguei ao mercado. Precisa de alguma coisa?",
+g:false,
+e:"Mensagem comum."
+},
+
+{
+t:"Seu benefício foi aprovado. Clique para liberar.",
+g:true,
+e:"Golpe de benefício."
+},
+
+{
+t:"Parabéns pelo seu aniversário!",
+g:false,
+e:"Mensagem normal."
+},
+
+{
+t:"Vaga de emprego aprovada! Pague a taxa de cadastro para começar.",
+g:true,
+e:"Emprego de verdade não cobra taxa do candidato."
+},
+
+{
+t:"Sou do suporte técnico do seu banco. Instale este aplicativo para eu te ajudar.",
+g:true,
+e:"Banco nunca pede para instalar programa para acessar seu aparelho."
+},
+
+{
+t:"Recebi um Pix seu por engano. Devolve pra este número aqui, por favor.",
+g:true,
+e:"Golpe do Pix devolvido: o dinheiro nunca entrou na sua conta."
+},
+
+{
+t:"Boleto atualizado em anexo. O código de barras mudou, use o novo.",
+g:true,
+e:"Troca de código de barras é a forma clássica de desviar um pagamento."
+},
+
+{
+t:"Multa de trânsito não paga. Regularize hoje para evitar bloqueio da CNH.",
+g:true,
+e:"Medo e prazo curto juntos: quase sempre golpe."
+},
+
+{
+t:"Sua conta do Instagram será desativada. Confirme seu login pelo link.",
+g:true,
+e:"Rede social não pede login por link de mensagem."
+},
+
+{
+t:"Ganhe 500 reais por dia investindo. Vagas limitadas, comece hoje.",
+g:true,
+e:"Lucro garantido não existe. Promessa alta é isca."
+},
+
+{
+t:"Aluguel confirmado! Faça o depósito antes da visita para garantir o imóvel.",
+g:true,
+e:"Pagar antes de ver o imóvel é a marca do golpe do aluguel."
+},
+
+{
+t:"Aqui é seu chefe. Compre cartões-presente e me manda os códigos, estou em reunião.",
+g:true,
+e:"Golpe do falso chefe: usa autoridade e pressa para você não conferir."
+},
+
+{
+t:"Sua entrega falhou. Reagende pagando uma pequena taxa.",
+g:true,
+e:"Transportadora não cobra taxa por mensagem para reentregar."
+},
+
+{
+t:"A consulta com o dentista está marcada para terça às 9h.",
+g:false,
+e:"Lembrete comum de consulta."
+},
+
+{
+t:"Chegou sua encomenda na portaria, pode descer.",
+g:false,
+e:"Aviso normal do porteiro."
+},
+
+{
+t:"Reunião de condomínio no salão de festas domingo às 10h.",
+g:false,
+e:"Comunicado comum de condomínio."
+},
+
+{
+t:"Pai, esqueci meu casaco na escola, você pode buscar?",
+g:false,
+e:"Fala de família sem pedido de dinheiro. Nem toda mensagem com 'pai' é golpe."
+},
+
+{
+t:"O pagamento da mensalidade foi confirmado, obrigado.",
+g:false,
+e:"Confirmação de pagamento já feito, sem pedir nada."
+},
+
+{
+t:"Alguém tem carona pro treino amanhã?",
+g:false,
+e:"Conversa comum de grupo."
+},
+
+{
+t:"A prova de matemática foi adiada para sexta.",
+g:false,
+e:"Aviso escolar comum."
+},
+
+{
+t:"Feliz Natal! Que o ano novo seja abençoado.",
+g:false,
+e:"Mensagem de felicitação."
+},
+
+{
+t:"Vou passar aí depois do almoço pra pegar o livro.",
+g:false,
+e:"Combinação comum entre conhecidos."
+},
+
+{
+t:"O médico pediu exame de sangue, marquei para segunda.",
+g:false,
+e:"Mensagem pessoal do dia a dia."
+},
+
+{
+t:"Bom dia, time. Lembrando que hoje tem apresentação às 14h.",
+g:false,
+e:"Aviso comum de trabalho."
+},
+
+{
+t:"Comprei o ingresso, te encontro na entrada do cinema.",
+g:false,
+e:"Combinação comum entre amigos."
+}
+
+];
+
+/* Embaralha as frases a cada carregamento (Fisher-Yates).
+   Sem isso, a ordem era sempre idêntica e o treino ficava decorável. */
+for(let i = treino.length - 1; i > 0; i--){
+  const j = Math.floor(Math.random() * (i + 1));
+  [treino[i], treino[j]] = [treino[j], treino[i]];
+}
+
+let atual = 0;
+let acertos = 0;
+let erros = 0;
+let sequencia = 0;
+let aguardandoProxima = false;
+
+/* ===== ESTATÍSTICAS GLOBAIS ===== */
+let statMensagensTotal = 0;
+let statGolpesDetectados = 0;
+let statSeguras = 0;
+
+/* ===== SISTEMA DE NÍVEIS ===== */
+const niveis = [
+  { xp:0,   titulo:"Iniciante",           emoji:"🥚", sub:"Dê os primeiros passos!" },
+  { xp:5,   titulo:"Observador",          emoji:"👀", sub:"Você está começando a enxergar os sinais." },
+  { xp:12,  titulo:"Alerta",              emoji:"🔎", sub:"Seus olhos estão mais atentos!" },
+  { xp:22,  titulo:"Detector",            emoji:"🛡️", sub:"Você já pega muitos golpes." },
+  { xp:35,  titulo:"Guardião Digital",    emoji:"⚔️", sub:"Protetor experiente!" },
+  { xp:52,  titulo:"Especialista",        emoji:"🧠", sub:"Você conhece os golpes de perto." },
+  { xp:75,  titulo:"Sentinela",           emoji:"🦅", sub:"Visão aguçada contra fraudes." },
+  { xp:105, titulo:"Mestre Anti-Golpe",   emoji:"🏆", sub:"Nível máximo desbloqueado!" },
+];
+
+let xpAtual = 0;
+
+function calcularNivel(){
+  let n = 0;
+  for(let i = niveis.length - 1; i >= 0; i--){
+    if(xpAtual >= niveis[i].xp){ n = i; break; }
+  }
+  return n;
+}
+
+function atualizarNivel(){
+  const n = calcularNivel();
+  const nivel = niveis[n];
+  const proximo = niveis[n+1];
+
+  document.getElementById("nivelEmoji").innerText = nivel.emoji;
+  document.getElementById("nivelTitulo").innerText = `Nível ${n+1} — ${nivel.titulo}`;
+  document.getElementById("nivelSubtitulo").innerText = nivel.sub;
+  document.getElementById("statNivelStat").innerText = n+1;
+
+  if(proximo){
+    const xpNivel = xpAtual - nivel.xp;
+    const xpProximo = proximo.xp - nivel.xp;
+    const pct = Math.min(100, Math.round((xpNivel / xpProximo) * 100));
+    document.getElementById("nivelXpFill").style.width = pct + "%";
+    document.getElementById("nivelXpTexto").innerText =
+      `${xpNivel} / ${xpProximo} XP para o próximo nível`;
+  } else {
+    document.getElementById("nivelXpFill").style.width = "100%";
+    document.getElementById("nivelXpTexto").innerText = "🏆 Nível máximo atingido!";
+  }
+}
+
+function atualizarStats(){
+  const total = acertos + erros;
+  const precisao = total > 0 ? Math.round((acertos / total) * 100) : 0;
+  document.getElementById("statMensagens").innerText = statMensagensTotal;
+  document.getElementById("statPrecisao").innerText = precisao + "%";
+  document.getElementById("statGolpes").innerText = statGolpesDetectados;
+  document.getElementById("statSeguras").innerText = statSeguras;
+  document.getElementById("statSequencia").innerText = sequencia;
+}
+
+/* ================= MOSTRAR TREINO ================= */
+
+function mostrarTreino(){
+
+document.getElementById("fraseTreino").innerText =
+treino[atual].t;
+
+}
+
+/* ================= RESPOSTA ================= */
+  
+function responder(resp){
+
+/* Impede resposta enquanto o feedback da anterior está na tela. */
+if(aguardandoProxima){ return; }
+aguardandoProxima = true;
+
+const btnG = document.getElementById("btnGolpe");
+const btnS = document.getElementById("btnSeguro");
+if(btnG){ btnG.disabled = true; }
+if(btnS){ btnS.disabled = true; }
+
+let fb = document.getElementById("feedback");
+const nivelAntes = calcularNivel();
+
+if(resp === treino[atual].g){
+
+  acertos++;
+  sequencia++;
+  const xpGanho = sequencia >= 3 ? 2 : 1;
+  xpAtual += xpGanho;
+
+  statMensagensTotal++;
+
+  const bonus = sequencia >= 3
+    ? `<br><span style="color:#f57c00;font-size:15px">🔥 Sequência de ${sequencia}! +${xpGanho} XP</span>`
+    : `<span style="color:#777;font-size:14px"> +${xpGanho} XP</span>`;
+
+  fb.innerHTML = `
+<span class="correct">✔ Correto ${bonus}</span>
+<br><br>
+${treino[atual].e}
+`;
+
+}else{
+
+  erros++;
+  sequencia = 0;
+  statMensagensTotal++;
+
+  fb.innerHTML = `
+<span class="error">❌ Resposta incorreta</span>
+<br><br>
+${treino[atual].e}
+`;
+
+}
+
+const nivelDepois = calcularNivel();
+if(nivelDepois > nivelAntes){
+  setTimeout(()=>{
+    fb.innerHTML += `<br><br><span style="font-size:20px">${niveis[nivelDepois].emoji} Você subiu para <b>Nível ${nivelDepois+1} — ${niveis[nivelDepois].titulo}</b>!</span>`;
+  }, 200);
+}
+
+document.getElementById("placar").innerHTML =
+`🏆 Acertos: ${acertos} | ❌ Erros: ${erros}`;
+
+atualizarNivel();
+atualizarStats();
+
+atual++;
+if(atual >= treino.length){ atual = 0; }
+
+setTimeout(function(){
+  mostrarTreino();
+  fb.innerHTML = "";
+  aguardandoProxima = false;
+  if(btnG){ btnG.disabled = false; }
+  if(btnS){ btnS.disabled = false; }
+}, 2000);
+
+}
+
+
+/* ================= RESET ================= */
+  
+function resetTreino(){
+
+atual = 0;
+acertos = 0;
+erros = 0;
+sequencia = 0;
+xpAtual = 0;
+statMensagensTotal = 0;
+statGolpesDetectados = 0;
+statSeguras = 0;
+aguardandoProxima = false;
+
+mostrarTreino();
+
+document.getElementById("feedback").innerHTML = "";
+document.getElementById("placar").innerHTML = "🏆 Acertos: 0 | ❌ Erros: 0";
+document.getElementById("resultado").innerHTML = "";
+
+const btnG = document.getElementById("btnGolpe");
+const btnS = document.getElementById("btnSeguro");
+if(btnG){ btnG.disabled = false; }
+if(btnS){ btnS.disabled = false; }
+
+atualizarNivel();
+atualizarStats();
+
+}
+
+
+/* ================= IMPRESSÃO PSICOLÓGICA ================= */
+
+const gatilhos = {
+  medo:{
+    emoji:"😱",
+    label:"Medo",
+    classe:"chip-medo",
+    titulo:"Gatilho do Medo",
+    texto:"O golpista quer que você entre em pânico para agir sem pensar. Quando estamos com medo, tomamos decisões erradas muito mais rápido.",
+    exemplo:"\"Sua conta será bloqueada\", \"Seu CPF está irregular\", \"Ação urgente necessária\"",
+    dica:"💡 Respire fundo. Nenhuma instituição séria toma decisões tão rápidas. Você sempre tem tempo para verificar."
+  },
+  urgencia:{
+    emoji:"⏰",
+    label:"Urgência",
+    classe:"chip-urgencia",
+    titulo:"Gatilho da Urgência",
+    texto:"O golpista não quer te dar tempo de ligar para alguém de confiança ou pensar com calma. A pressa é a arma dele.",
+    exemplo:"\"Somente hoje\", \"Agora mesmo\", \"Última chance\", \"Imediatamente\"",
+    dica:"💡 Sempre que alguém pressionar por rapidez, desconfie. Golpistas odeiam quando você para para pensar."
+  },
+  autoridade:{
+    emoji:"🎭",
+    label:"Autoridade",
+    classe:"chip-autoridade",
+    titulo:"Gatilho da Autoridade",
+    texto:"O golpista finge ser alguém importante — banco, governo, polícia — para você obedecer sem questionar.",
+    exemplo:"\"Banco Central\", \"Receita Federal\", \"Nubank informa\", \"Suporte oficial\"",
+    dica:"💡 Ligue diretamente para o número oficial da instituição. Nunca use o número que veio na mensagem suspeita."
+  },
+  amor:{
+    emoji:"💔",
+    label:"Amor",
+    classe:"chip-amor",
+    titulo:"Gatilho do Amor",
+    texto:"O golpista usa o amor que você sente pela sua família contra você. É o golpe mais cruel porque explora o que há de melhor em você.",
+    exemplo:"\"Mãe, troquei de número\", \"Pai, estou em apuros\", \"Preciso de ajuda urgente\"",
+    dica:"💡 Sempre ligue para o número antigo do familiar antes de qualquer ação. Se não atender, ligue para outro parente."
+  },
+  ganancia:{
+    emoji:"🎁",
+    label:"Ganância",
+    classe:"chip-ganancia",
+    titulo:"Gatilho da Ganância",
+    texto:"O golpista faz você sonhar com algo bom — prêmio, dinheiro, benefício — para baixar sua guarda. Ninguém dá nada de graça.",
+    exemplo:"\"Você ganhou\", \"Benefício liberado\", \"Prêmio exclusivo\", \"Sorteado\"",
+    dica:"💡 Se você não participou de nenhum sorteio, não ganhou nada. Simples assim."
+  },
+  confianca:{
+    emoji:"🤝",
+    label:"Confiança Falsa",
+    classe:"chip-confianca",
+    titulo:"Gatilho da Confiança Falsa",
+    texto:"O golpista imita a linguagem de empresas sérias para parecer legítimo. Usa palavras como \"oficial\", \"verificado\" e \"seguro\" justamente para enganar.",
+    exemplo:"\"Canal oficial\", \"Mensagem verificada\", \"Sua segurança é nossa prioridade\"",
+    dica:"💡 Qualquer um pode escrever \"oficial\". Verifique sempre pelo site ou telefone real da empresa."
+  }
+};
+
+function detectarGatilhos(texto){
+  const t = normalizar(texto);
+  const encontrados = [];
+
+  if(/bloqueada|suspensa|irregular|cancelada|encerrada|bloqueio/.test(t)) encontrados.push("medo");
+  if(/urgente|agora|imediatamente|hoje mesmo|ultima chance|somente hoje|rapido|nao pode esperar/.test(t)) encontrados.push("urgencia");
+  if(/banco|central|receita|federal|nubank|bradesco|itau|caixa|santander|suporte|oficial|delegado|policia/.test(t)) encontrados.push("autoridade");
+  if(/\bmae\b|\bpai\b|\bfilho\b|\bfilha\b|\birmao\b|\birma\b|troquei de numero|novo numero|estou em apuros|preciso de ajuda/.test(t)) encontrados.push("amor");
+  if(/ganhou|premio|sorteado|beneficio|liberado|resgatar|oportunidade|lucro|dinheiro esquecido/.test(t)) encontrados.push("ganancia");
+  if(/canal oficial|verificado|seguranca|protegido|mensagem segura|sua privacidade/.test(t)) encontrados.push("confianca");
+
+  return encontrados;
+}
+
+function abrirModal(chave){
+  const g = gatilhos[chave];
+  document.getElementById("modalEmoji").innerText = g.emoji;
+  document.getElementById("modalTitulo").innerText = g.titulo;
+  document.getElementById("modalTexto").innerText = g.texto;
+  document.getElementById("modalExemplo").innerText = "Exemplos: " + g.exemplo;
+  document.getElementById("modalDica").innerText = g.dica;
+  document.getElementById("modalOverlay").classList.add("aberto");
+}
+
+function fecharModal(e){
+  if(e.target === document.getElementById("modalOverlay")){
+    document.getElementById("modalOverlay").classList.remove("aberto");
+  }
+}
+
+function gerarChipsPsico(texto){
+  const encontrados = detectarGatilhos(texto);
+  if(encontrados.length === 0) return "";
+
+  const chips = encontrados.map(chave => {
+    const g = gatilhos[chave];
+    return `<button class="chip ${g.classe}" onclick="abrirModal('${chave}')">${g.emoji} ${g.label}</button>`;
+  }).join("");
+
+  return `
+<div class="psico-box">
+  <div class="psico-titulo">🧠 Como tentaram te manipular — toque para entender:</div>
+  <div class="psico-chips">${chips}</div>
+</div>`;
+}
+
+/* ================= START ================= */
+
+mostrarTreino();
+atualizarNivel();
+atualizarStats();
+
+</script>
+<script src="https://unpkg.com/tesseract.js@5/dist/tesseract.min.js"></script>
+</body>
+</html>
